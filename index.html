@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mind Map Pro</title>
+    <title>Mind Map</title>
     <style>
         * {
             margin: 0;
@@ -116,30 +116,9 @@
             --danger: #c62828;
         }
 
-        body { background: var(--bg); position: relative; }
+        body { background: var(--bg); }
 
-        /* Sidebar Toggle Button */
-        .sidebar-toggle-btn {
-            position: absolute;
-            top: 15px;
-            left: 270px;
-            z-index: 101;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--sidebar-bg);
-            border: 1px solid var(--sidebar-border);
-            color: var(--text);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 8px var(--node-shadow);
-            transition: left 0.3s, transform 0.2s;
-        }
-        .sidebar-toggle-btn:hover { transform: scale(1.1); }
-
-        /* Sidebar Container */
+        /* Sidebar */
         .sidebar {
             width: 260px;
             background: var(--sidebar-bg);
@@ -149,15 +128,6 @@
             z-index: 100;
             flex-shrink: 0;
             overflow-y: auto;
-            transition: transform 0.3s ease, margin-left 0.3s ease;
-        }
-
-        .sidebar.collapsed {
-            margin-left: -260px;
-        }
-
-        .sidebar.collapsed + .sidebar-toggle-btn {
-            left: 10px;
         }
 
         .sidebar-header {
@@ -192,17 +162,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .sidebar-section .section-content {
-            transition: max-height 0.3s ease;
-            overflow: hidden;
-        }
-
-        .sidebar-section.collapsed .section-content {
-            display: none;
         }
 
         .action-btn {
@@ -280,35 +239,6 @@
 
         .color-swatch.active {
             border-color: var(--text);
-        }
-
-        /* Color Controls Box */
-        .color-controls {
-            margin-top: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            font-size: 12px;
-            color: var(--text-sub);
-        }
-
-        .color-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .color-row input[type="color"] {
-            border: none;
-            width: 28px;
-            height: 28px;
-            border-radius: 4px;
-            cursor: pointer;
-            background: none;
-        }
-
-        .color-row input[type="range"] {
-            width: 100px;
         }
 
         .theme-grid {
@@ -487,7 +417,6 @@
 
         #canvas-area:active { cursor: grabbing; }
         #canvas-area.link-cursor { cursor: crosshair; }
-        #canvas-area.box-select-cursor { cursor: default; }
 
         #tree-canvas {
             position: absolute;
@@ -507,50 +436,22 @@
             pointer-events: none;
         }
 
-        /* Selection Box Overlay */
-        #selection-box {
-            position: absolute;
-            border: 1px dashed var(--accent);
-            background: rgba(66, 133, 244, 0.15);
-            pointer-events: none;
-            display: none;
-            z-index: 90;
-        }
-
         .branch-line { stroke-width: 2.5; fill: none; opacity: 0.5; }
         .cross-link { stroke-width: 2; fill: none; opacity: 0.7; stroke-dasharray: 6 4; }
 
-        /* Cross link foreignObject HTML text box */
-        .link-text-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-sizing: border-box;
-        }
-
-        .link-text-box {
-            background: var(--sidebar-bg);
-            color: var(--text);
-            border: 1px solid var(--accent);
-            border-radius: 8px;
-            padding: 6px 10px;
-            box-shadow: 0 2px 8px var(--node-shadow);
+        /* Cross link text style */
+        .link-text {
+            font-size: 12px;
+            font-weight: 600;
+            fill: var(--text);
+            text-anchor: middle;
+            paint-order: stroke;
+            stroke: var(--bg);
+            stroke-width: 4px;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            pointer-events: auto;
             cursor: pointer;
-            white-space: pre-wrap;
-            word-break: break-word;
-            text-align: center;
-            line-height: 1.3;
-            transition: transform 0.15s, box-shadow 0.15s;
-            max-width: 100%;
-            max-height: 100%;
-            overflow: hidden;
-        }
-
-        .link-text-box:hover {
-            transform: scale(1.03);
-            box-shadow: 0 4px 12px var(--node-shadow);
         }
 
         .node {
@@ -573,11 +474,7 @@
             transform: scale(1.02);
         }
 
-        .node.multi-selected {
-            box-shadow: 0 0 0 3px #ff9800, 0 8px 25px rgba(255,152,0,0.3);
-        }
-
-        .node:not(.selected):not(.multi-selected):hover { box-shadow: 0 4px 20px var(--node-shadow); }
+        .node:not(.selected):hover { box-shadow: 0 4px 20px var(--node-shadow); }
         .node.link-hover { box-shadow: 0 0 0 3px #00f2fe; transform: scale(1.05); }
 
         .link-banner {
@@ -624,113 +521,13 @@
             padding: 2px 0;
         }
 
-        /* Link/Document Editor Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(2px);
-            z-index: 1000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-card {
-            background: var(--sidebar-bg);
-            border: 1px solid var(--sidebar-border);
-            border-radius: 12px;
-            width: 480px;
-            max-width: 90vw;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            position: absolute;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 600;
-            color: var(--text);
-            font-size: 15px;
-        }
-
-        .modal-close {
-            cursor: pointer;
-            background: none;
-            border: none;
-            font-size: 18px;
-            color: var(--text-muted);
-        }
-
-        .modal-textarea {
-            width: 100%;
-            height: 140px;
-            background: var(--input-bg);
-            border: 1px solid var(--input-border);
-            border-radius: 8px;
-            padding: 10px;
-            color: var(--text);
-            font-size: 14px;
-            outline: none;
-            resize: vertical;
-            font-family: inherit;
-        }
-
-        .modal-textarea:focus {
-            border-color: var(--input-focus);
-        }
-
-        .modal-controls {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            font-size: 13px;
-            color: var(--text-sub);
-        }
-
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-            margin-top: 5px;
-        }
-
-        .btn-secondary {
-            padding: 6px 14px;
-            background: var(--btn-bg);
-            border: 1px solid var(--btn-border);
-            border-radius: 6px;
-            color: var(--text);
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            padding: 6px 14px;
-            background: var(--accent);
-            border: none;
-            border-radius: 6px;
-            color: #fff;
-            cursor: pointer;
-        }
-
         @media (max-width: 768px) {
             .sidebar { width: 210px; }
-            .sidebar.collapsed { margin-left: -210px; }
-            .sidebar-toggle-btn { left: 220px; }
         }
     </style>
 </head>
 <body class="theme-light">
-
-    <!-- Sidebar Toggle Button -->
-    <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" title="展開/收合選單" onclick="toggleSidebar()">◀</button>
-
-    <div class="sidebar" id="sidebar">
+    <div class="sidebar">
         <div class="sidebar-header">
             <h1>🌿 Mind Map</h1>
             <p>撳節點選取 → 左邊操作</p>
@@ -750,118 +547,88 @@
             </button>
         </div>
 
-        <div class="sidebar-section" id="sec-ops">
-            <h3 onclick="toggleSection('sec-ops')">操作 <span>▼</span></h3>
-            <div class="section-content">
-                <button class="action-btn" onclick="addChildToSelected()">
-                    <span class="icon green">＋</span> 加子節點
+        <div class="sidebar-section">
+            <h3>操作</h3>
+            <button class="action-btn" onclick="addChildToSelected()">
+                <span class="icon green">＋</span> 加子節點
+            </button>
+            <button class="action-btn" onclick="addSibling()">
+                <span class="icon blue">↔</span> 加同級節點
+            </button>
+            <button class="action-btn" onclick="deleteSelected()">
+                <span class="icon red">✕</span> 刪除節點
+            </button>
+            <div style="display: flex; gap: 6px; margin-top: 6px;">
+                <button class="action-btn" onclick="undo()" style="margin-bottom:0;">
+                    <span class="icon purple">⟲</span> Undo (Ctrl+Z)
                 </button>
-                <button class="action-btn" onclick="addSibling()">
-                    <span class="icon blue">↔</span> 加同級節點
+                <button class="action-btn" onclick="redo()" style="margin-bottom:0;">
+                    <span class="icon orange">⟳</span> Redo
                 </button>
-                <button class="action-btn" onclick="deleteSelected()">
-                    <span class="icon red">✕</span> 刪除節點
-                </button>
-                <div style="display: flex; gap: 6px; margin-top: 6px;">
-                    <button class="action-btn" onclick="undo()" style="margin-bottom:0;">
-                        <span class="icon purple">⟲</span> Undo (Ctrl+Z)
-                    </button>
-                    <button class="action-btn" onclick="redo()" style="margin-bottom:0;">
-                        <span class="icon orange">⟳</span> Redo
-                    </button>
-                </div>
             </div>
         </div>
 
         <!-- Structure / Outline Section -->
-        <div class="sidebar-section" id="sec-outline">
-            <h3 onclick="toggleSection('sec-outline')">
+        <div class="sidebar-section">
+            <h3>
                 結構
                 <div>
-                    <button class="outline-mini-btn" onclick="event.stopPropagation(); expandAllOutline();">展開</button>
-                    <button class="outline-mini-btn" onclick="event.stopPropagation(); collapseAllOutline();">收合</button>
+                    <button class="outline-mini-btn" onclick="expandAllOutline()">展開</button>
+                    <button class="outline-mini-btn" onclick="collapseAllOutline()">收合</button>
                 </div>
             </h3>
-            <div class="section-content">
-                <div class="outline-panel" id="outline-panel"></div>
-            </div>
+            <div class="outline-panel" id="outline-panel"></div>
         </div>
 
         <!-- Cross Links Section -->
-        <div class="sidebar-section" id="sec-links">
-            <h3 onclick="toggleSection('sec-links')">
+        <div class="sidebar-section">
+            <h3>
                 連結 <span id="link-count-title">(0)</span>
-                <button class="outline-mini-btn" id="link-mode-btn" onclick="event.stopPropagation(); toggleLinkMode();">🔗 Link</button>
+                <button class="outline-mini-btn" id="link-mode-btn" onclick="toggleLinkMode()">🔗 Link</button>
             </h3>
-            <div class="section-content">
-                <button class="action-btn" onclick="quickConnectFromSelected()">
-                    <span class="icon blue">⚡</span> 快速轉接/連線 (Shift+L)
-                </button>
-                <div class="link-list" id="link-list">
-                    <div style="font-size:11px; color:var(--text-muted); text-align:center; padding:6px 0;">撳 Link → 選兩個節點建立連結</div>
-                </div>
+            <button class="action-btn" onclick="quickConnectFromSelected()">
+                <span class="icon blue">⚡</span> 快速轉接/連線 (Shift+L)
+            </button>
+            <div class="link-list" id="link-list">
+                <div style="font-size:11px; color:var(--text-muted); text-align:center; padding:6px 0;">撳 Link → 選兩個節點建立連結</div>
             </div>
         </div>
 
-        <div class="sidebar-section" id="sec-theme">
-            <h3 onclick="toggleSection('sec-theme')">主題色 <span>▼</span></h3>
-            <div class="section-content">
-                <div class="theme-grid" style="margin-bottom: 10px;">
-                    <div class="theme-swatch active" style="background: linear-gradient(135deg, #f5f5f5, #fff);" onclick="setTheme('light', this)" data-label="白"></div>
-                    <div class="theme-swatch" style="background: linear-gradient(135deg, #0f0f1a, #16162a);" onclick="setTheme('dark', this)" data-label="黑"></div>
-                    <div class="theme-swatch" style="background: linear-gradient(135deg, #fef9f3, #f0dcc8);" onclick="setTheme('warm', this)" data-label="暖"></div>
-                    <div class="theme-swatch" style="background: linear-gradient(135deg, #f0f7fa, #c8e3ed);" onclick="setTheme('ocean', this)" data-label="海"></div>
-                    <div class="theme-swatch" style="background: linear-gradient(135deg, #f2f7f2, #c8ddc8);" onclick="setTheme('forest', this)" data-label="林"></div>
-                </div>
+        <div class="sidebar-section">
+            <h3>主題色</h3>
+            <div class="theme-grid" style="margin-bottom: 20px;">
+                <div class="theme-swatch active" style="background: linear-gradient(135deg, #f5f5f5, #fff);" onclick="setTheme('light', this)" data-label="白"></div>
+                <div class="theme-swatch" style="background: linear-gradient(135deg, #0f0f1a, #16162a);" onclick="setTheme('dark', this)" data-label="黑"></div>
+                <div class="theme-swatch" style="background: linear-gradient(135deg, #fef9f3, #f0dcc8);" onclick="setTheme('warm', this)" data-label="暖"></div>
+                <div class="theme-swatch" style="background: linear-gradient(135deg, #f0f7fa, #c8e3ed);" onclick="setTheme('ocean', this)" data-label="海"></div>
+                <div class="theme-swatch" style="background: linear-gradient(135deg, #f2f7f2, #c8ddc8);" onclick="setTheme('forest', this)" data-label="林"></div>
             </div>
         </div>
 
-        <div class="sidebar-section" id="sec-color">
-            <h3 onclick="toggleSection('sec-color')">節點顏色與調色盤 <span>▼</span></h3>
-            <div class="section-content">
-                <div class="color-grid">
-                    <div class="color-swatch" style="background: #2e7d32;" onclick="setNodeColor('#2e7d32','#43a047')"></div>
-                    <div class="color-swatch" style="background: #1565c0;" onclick="setNodeColor('#1565c0','#1e88e5')"></div>
-                    <div class="color-swatch" style="background: #6a1b9a;" onclick="setNodeColor('#6a1b9a','#8e24aa')"></div>
-                    <div class="color-swatch" style="background: #e65100;" onclick="setNodeColor('#e65100','#f4511e')"></div>
-                    <div class="color-swatch" style="background: #c62828;" onclick="setNodeColor('#c62828','#e53935')"></div>
-                    <div class="color-swatch" style="background: #00838f;" onclick="setNodeColor('#00838f','#00acc1')"></div>
-                    <div class="color-swatch" style="background: #4527a0;" onclick="setNodeColor('#4527a0','#5e35b1')"></div>
-                    <div class="color-swatch" style="background: #ef6c00;" onclick="setNodeColor('#ef6c00','#fb8c00')"></div>
-                    <div class="color-swatch" style="background: #37474f;" onclick="setNodeColor('#37474f','#546e7a')"></div>
-                    <div class="color-swatch" style="background: #d81b60;" onclick="setNodeColor('#d81b60','#e91e63')"></div>
-                </div>
-
-                <div class="color-controls">
-                    <div class="color-row">
-                        <span>自訂背景色:</span>
-                        <input type="color" id="custom-bg-picker" value="#37474f" onchange="applyCustomColor()">
-                    </div>
-                    <div class="color-row">
-                        <span>漸變次色:</span>
-                        <input type="color" id="custom-bg2-picker" value="#546e7a" onchange="applyCustomColor()">
-                    </div>
-                    <div class="color-row">
-                        <span>漸變角度:</span>
-                        <input type="range" id="custom-gradient-deg" min="0" max="360" value="135" oninput="applyCustomColor()">
-                    </div>
-                    <button class="action-btn" onclick="autoColorizeNodes()" style="margin-top:8px;">
-                        <span class="icon purple">🎨</span> 根據分支自動配色
-                    </button>
-                </div>
+        <div class="sidebar-section">
+            <h3>節點顏色</h3>
+            <div class="color-grid">
+                <div class="color-swatch" style="background: #2e7d32;" onclick="setNodeColor('#2e7d32','#43a047')"></div>
+                <div class="color-swatch" style="background: #1565c0;" onclick="setNodeColor('#1565c0','#1e88e5')"></div>
+                <div class="color-swatch" style="background: #6a1b9a;" onclick="setNodeColor('#6a1b9a','#8e24aa')"></div>
+                <div class="color-swatch" style="background: #e65100;" onclick="setNodeColor('#e65100','#f4511e')"></div>
+                <div class="color-swatch" style="background: #c62828;" onclick="setNodeColor('#c62828','#e53935')"></div>
+                <div class="color-swatch" style="background: #00838f;" onclick="setNodeColor('#00838f','#00acc1')"></div>
+                <div class="color-swatch" style="background: #4527a0;" onclick="setNodeColor('#4527a0','#5e35b1')"></div>
+                <div class="color-swatch" style="background: #ef6c00;" onclick="setNodeColor('#ef6c00','#fb8c00')"></div>
+                <div class="color-swatch" style="background: #37474f;" onclick="setNodeColor('#37474f','#546e7a')"></div>
+                <div class="color-swatch" style="background: #d81b60;" onclick="setNodeColor('#d81b60','#e91e63')"></div>
             </div>
         </div>
 
-        <div class="sidebar-section" id="sec-files">
-            <h3 onclick="toggleSection('sec-files')">檔案 <span>▼</span></h3>
-            <div class="section-content">
-                <button class="action-btn" onclick="exportJSON()">
-                    <span class="icon purple">↓</span> 匯出 JSON
-                </button>
-                <button class="action-btn" onclick="importJSON()">
-                    <span class="icon orange">↑</span> 匯入 JSON
-                </button>
-            </div>
+        <div class="sidebar-section">
+            <h3>檔案</h3>
+            <button class="action-btn" onclick="exportJSON()">
+                <span class="icon purple">↓</span> 匯出 JSON
+            </button>
+            <button class="action-btn" onclick="importJSON()">
+                <span class="icon orange">↑</span> 匯入 JSON
+            </button>
         </div>
 
         <div class="node-count">
@@ -871,7 +638,6 @@
     </div>
 
     <div id="canvas-area">
-        <div id="selection-box"></div>
         <div id="tree-canvas">
             <svg id="lines-svg"></svg>
         </div>
@@ -887,52 +653,22 @@
         </div>
     </div>
 
-    <!-- Document Modal Editor for Links -->
-    <div class="modal-overlay" id="link-modal-overlay">
-        <div class="modal-card" id="link-modal-card">
-            <div class="modal-header">
-                <span>編輯連結說明 (Document Modal)</span>
-                <button class="modal-close" onclick="closeLinkModal()">✕</button>
-            </div>
-            <textarea class="modal-textarea" id="modal-link-text" placeholder="輸入詳細說明，支援分行 Enter..."></textarea>
-            <div class="modal-controls">
-                <label>字體大小: 
-                    <input type="number" id="modal-link-fontsize" value="13" min="10" max="32" style="width: 50px; padding: 2px 4px;"> px
-                </label>
-                <label>Box 寬度: 
-                    <input type="number" id="modal-link-width" value="160" min="80" max="500" style="width: 60px; padding: 2px 4px;"> px
-                </label>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeLinkModal()">取消</button>
-                <button class="btn-primary" onclick="saveLinkModal()">儲存變更</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         let nodes = [];
         let crossLinks = [];
         let nextId = 0;
         let nextLinkId = 0;
         let selectedId = null;
-        let selectedIds = new Set(); // 多選 Support
         let scale = 1;
         let tx = 0, ty = 0;
         let isPanning = false;
         let panStartX, panStartY;
         let dragNode = null;
         let dragOffsetX, dragOffsetY;
-        let dragGroupPositions = []; // 批量拖拉存儲相對位置
         let animating = false;
         let linkMode = false, linkFromId = null;
         let reparentMode = false;
         let collapsedNodes = new Set();
-        let editingLinkId = null;
-
-        // Box Selection (框選)
-        let isBoxSelecting = false;
-        let boxStartX = 0, boxStartY = 0;
 
         // Undo / Redo Stacks
         let undoStack = [];
@@ -946,31 +682,17 @@
         const canvasArea = document.getElementById('canvas-area');
         const treeCanvas = document.getElementById('tree-canvas');
         const svg = document.getElementById('lines-svg');
-        const selectionBox = document.getElementById('selection-box');
         const nameInput = document.getElementById('node-name-input');
         const parentSelect = document.getElementById('parent-node-select');
         const selectedInfo = document.getElementById('selected-info');
         const outlinePanel = document.getElementById('outline-panel');
         const linkBanner = document.getElementById('link-banner');
         const micBtnNode = document.getElementById('mic-btn-node');
-        const sidebar = document.getElementById('sidebar');
 
         function setTheme(theme, el) {
             document.body.className = 'theme-' + theme;
             document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
             if (el) el.classList.add('active');
-        }
-
-        // ====== SIDEBAR MENU TOGGLE & SECTIONS ======
-        function toggleSidebar() {
-            sidebar.classList.toggle('collapsed');
-            const btn = document.getElementById('sidebar-toggle-btn');
-            btn.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
-        }
-
-        function toggleSection(secId) {
-            const sec = document.getElementById(secId);
-            if (sec) sec.classList.toggle('collapsed');
         }
 
         // ====== UNDO / REDO HISTORY SYSTEM ======
@@ -1026,7 +748,12 @@
             renderLinkList();
             updateCount();
 
-            clearSelection();
+            if (selectedId !== null && !nodes.some(n => n.id === selectedId)) {
+                selectedId = null;
+                selectedInfo.style.display = 'none';
+            } else if (selectedId !== null) {
+                selectNode(selectedId);
+            }
         }
 
         function init() {
@@ -1116,31 +843,15 @@
             el.style.background = node.bg;
             el.style.border = `2px solid ${node.border}`;
 
-            // Mousedown: 處理拖拽與多選批量拖拉
+            // Mousedown: 喺 Link 或 Reparent 模式下停用拖拽，保證 click 順利觸發
             el.addEventListener('mousedown', (e) => {
                 if (linkMode || reparentMode) return;
                 e.stopPropagation();
-
-                // 如果被點擊的節點不在多選集合中，且沒有按 Shift，則單選
-                if (!selectedIds.has(node.id) && !e.shiftKey) {
-                    selectNode(node.id);
-                } else if (e.shiftKey) {
-                    toggleMultiSelectNode(node.id);
-                }
-
+                selectNode(node.id);
                 dragNode = node;
                 const rect = canvasArea.getBoundingClientRect();
-                dragOffsetX = (e.clientX - rect.left - tx) / scale;
-                dragOffsetY = (e.clientY - rect.top - ty) / scale;
-
-                // 記錄所有被選中節點的相對起始位置，方便整體搬移
-                dragGroupPositions = [];
-                selectedIds.forEach(id => {
-                    const n = nodes.find(item => item.id === id);
-                    if (n) {
-                        dragGroupPositions.push({ node: n, startX: n.x, startY: n.y });
-                    }
-                });
+                dragOffsetX = (e.clientX - rect.left - tx) / scale - node.x;
+                dragOffsetY = (e.clientY - rect.top - ty) / scale - node.y;
             });
 
             // Click: 優先處理 Reparent，再處理 Link
@@ -1170,13 +881,13 @@
         }
 
         function selectNode(id) {
-            clearSelection();
+            if (selectedId !== null) {
+                const prev = document.getElementById(`node-${selectedId}`);
+                if (prev) prev.classList.remove('selected');
+            }
             selectedId = id;
-            selectedIds.add(id);
-
             const el = document.getElementById(`node-${id}`);
             if (el) el.classList.add('selected');
-
             const node = nodes.find(n => n.id === id);
             if (node) {
                 selectedInfo.style.display = 'block';
@@ -1184,42 +895,6 @@
                 updateParentSelectOptions(node);
             }
             renderOutline();
-        }
-
-        function toggleMultiSelectNode(id) {
-            if (selectedIds.has(id)) {
-                selectedIds.delete(id);
-                const el = document.getElementById(`node-${id}`);
-                if (el) {
-                    el.classList.remove('selected');
-                    el.classList.remove('multi-selected');
-                }
-            } else {
-                selectedIds.add(id);
-                const el = document.getElementById(`node-${id}`);
-                if (el) el.classList.add('multi-selected');
-            }
-
-            if (selectedIds.size === 1) {
-                selectedId = Array.from(selectedIds)[0];
-                selectNode(selectedId);
-            } else {
-                selectedId = null;
-                selectedInfo.style.display = 'none';
-            }
-        }
-
-        function clearSelection() {
-            selectedIds.forEach(id => {
-                const el = document.getElementById(`node-${id}`);
-                if (el) {
-                    el.classList.remove('selected');
-                    el.classList.remove('multi-selected');
-                }
-            });
-            selectedIds.clear();
-            selectedId = null;
-            selectedInfo.style.display = 'none';
         }
 
         // ====== CHANGE PARENT NODE (RE-PARENTING) ======
@@ -1310,22 +985,22 @@
         }
 
         function deleteSelected() {
-            if (selectedIds.size === 0) return;
+            if (selectedId === null) return;
             saveState();
-            const toDelete = new Set();
+            const toDelete = [];
             function gather(id) {
-                toDelete.add(id);
+                toDelete.push(id);
                 nodes.filter(n => n.parentId === id).forEach(c => gather(c.id));
             }
-            selectedIds.forEach(id => gather(id));
-
+            gather(selectedId);
             toDelete.forEach(id => {
                 const el = document.getElementById(`node-${id}`);
                 if (el) el.remove();
             });
-            nodes = nodes.filter(n => !toDelete.has(n.id));
-            crossLinks = crossLinks.filter(l => !toDelete.has(l.fromId) && !toDelete.has(l.toId));
-            clearSelection();
+            nodes = nodes.filter(n => !toDelete.includes(n.id));
+            crossLinks = crossLinks.filter(l => !toDelete.includes(l.fromId) && !toDelete.includes(l.toId));
+            selectedId = null;
+            selectedInfo.style.display = 'none';
             drawLines();
             renderOutline();
             renderLinkList();
@@ -1333,77 +1008,19 @@
         }
 
         function setNodeColor(bg, border) {
-            if (selectedIds.size === 0) return;
+            if (selectedId === null) return;
+            const node = nodes.find(n => n.id === selectedId);
+            if (!node) return;
             saveState();
-            selectedIds.forEach(id => {
-                const node = nodes.find(n => n.id === id);
-                if (node) {
-                    node.bg = bg;
-                    node.border = border;
-                    const el = document.getElementById(`node-${id}`);
-                    if (el) {
-                        el.style.background = bg;
-                        el.style.border = `2px solid ${border}`;
-                    }
-                }
-            });
-            drawLines();
-            renderOutline();
-        }
-
-        // Custom Adobe-like Color Mixer
-        function applyCustomColor() {
-            const bg1 = document.getElementById('custom-bg-picker').value;
-            const bg2 = document.getElementById('custom-bg2-picker').value;
-            const deg = document.getElementById('custom-gradient-deg').value;
-            const bgGradient = `linear-gradient(${deg}deg, ${bg1}, ${bg2})`;
-
-            setNodeColor(bgGradient, bg1);
-        }
-
-        // Automatic Branch Coloring
-        function autoColorizeNodes() {
-            saveState();
-            const palette = [
-                { bg: '#2e7d32', border: '#43a047' },
-                { bg: '#1565c0', border: '#1e88e5' },
-                { bg: '#6a1b9a', border: '#8e24aa' },
-                { bg: '#e65100', border: '#f4511e' },
-                { bg: '#c62828', border: '#e53935' },
-                { bg: '#00838f', border: '#00acc1' },
-                { bg: '#4527a0', border: '#5e35b1' },
-                { bg: '#d81b60', border: '#e91e63' }
-            ];
-
-            const roots = nodes.filter(n => n.parentId === null);
-            roots.forEach(r => {
-                r.bg = '#37474f';
-                r.border = '#546e7a';
-                const mainBranches = nodes.filter(n => n.parentId === r.id);
-                mainBranches.forEach((b, idx) => {
-                    const color = palette[idx % palette.length];
-                    assignColorSubtree(b.id, color.bg, color.border);
-                });
-            });
-
-            nodes.forEach(n => {
-                const el = document.getElementById(`node-${n.id}`);
-                if (el) {
-                    el.style.background = n.bg;
-                    el.style.border = `2px solid ${n.border}`;
-                }
-            });
-            drawLines();
-            renderOutline();
-        }
-
-        function assignColorSubtree(id, bg, border) {
-            const node = nodes.find(n => n.id === id);
-            if (node) {
-                node.bg = bg;
-                node.border = border;
-                nodes.filter(n => n.parentId === id).forEach(child => assignColorSubtree(child.id, bg, border));
+            node.bg = bg;
+            node.border = border;
+            const el = document.getElementById(`node-${selectedId}`);
+            if (el) {
+                el.style.background = bg;
+                el.style.border = `2px solid ${border}`;
             }
+            drawLines();
+            renderOutline();
         }
 
         // ====== QUICK CONNECT FROM SELECTED (快速連線) ======
@@ -1433,7 +1050,7 @@
             );
 
             if (!exists) {
-                crossLinks.push({ id: nextLinkId++, fromId: sourceNode.id, toId: targetNode.id, label: '', fontSize: 13, boxWidth: 160 });
+                crossLinks.push({ id: nextLinkId++, fromId: sourceNode.id, toId: targetNode.id, label: '' });
                 drawLines();
                 renderLinkList();
                 updateCount();
@@ -1493,7 +1110,7 @@
             canvasArea.classList.toggle('link-cursor', linkMode);
         }
 
-        // ====== LINK MODE & DOCUMENT MODAL EDITOR ======
+        // ====== LINK MODE ======
         function toggleLinkMode() {
             linkMode = !linkMode;
             linkFromId = null;
@@ -1526,12 +1143,11 @@
                 );
                 if (!exists) {
                     saveState();
-                    const newLink = { id: nextLinkId++, fromId: linkFromId, toId: nodeId, label: '', fontSize: 13, boxWidth: 160 };
-                    crossLinks.push(newLink);
+                    const label = prompt('請輸入連結描述文字 (可留空):', '') || '';
+                    crossLinks.push({ id: nextLinkId++, fromId: linkFromId, toId: nodeId, label });
                     drawLines();
                     renderLinkList();
                     updateCount();
-                    openLinkModal(newLink.id);
                 }
                 const el = document.getElementById(`node-${linkFromId}`);
                 if (el) el.classList.remove('link-hover');
@@ -1543,61 +1159,16 @@
             }
         }
 
-        function openLinkModal(linkId, mouseX, mouseY) {
+        function editLinkDescription(linkId) {
             const link = crossLinks.find(l => l.id === linkId);
             if (!link) return;
-
-            editingLinkId = linkId;
-            document.getElementById('modal-link-text').value = link.label || '';
-            document.getElementById('modal-link-fontsize').value = link.fontSize || 13;
-            document.getElementById('modal-link-width').value = link.boxWidth || 160;
-
-            const overlay = document.getElementById('link-modal-overlay');
-            const card = document.getElementById('link-modal-card');
-            overlay.style.display = 'flex';
-
-            // 將 Modal 彈出在點擊對象附近（如果有座標）
-            if (mouseX !== undefined && mouseY !== undefined) {
-                const cardWidth = 480;
-                let left = mouseX + 15;
-                let top = mouseY + 15;
-
-                if (left + cardWidth > window.innerWidth) left = window.innerWidth - cardWidth - 20;
-                if (top + 250 > window.innerHeight) top = window.innerHeight - 270;
-
-                card.style.left = Math.max(20, left) + 'px';
-                card.style.top = Math.max(20, top) + 'px';
-            } else {
-                card.style.left = '50%';
-                card.style.top = '50%';
-                card.style.transform = 'translate(-50%, -50%)';
-            }
-        }
-
-        function closeLinkModal() {
-            document.getElementById('link-modal-overlay').style.display = 'none';
-            document.getElementById('link-modal-card').style.transform = '';
-            editingLinkId = null;
-        }
-
-        function saveLinkModal() {
-            if (editingLinkId === null) return;
-            const link = crossLinks.find(l => l.id === editingLinkId);
-            if (link) {
+            const newDesc = prompt('修改連結描述文字:', link.label || '');
+            if (newDesc !== null) {
                 saveState();
-                link.label = document.getElementById('modal-link-text').value;
-                link.fontSize = parseInt(document.getElementById('modal-link-fontsize').value, 10) || 13;
-                link.boxWidth = parseInt(document.getElementById('modal-link-width').value, 10) || 160;
+                link.label = newDesc;
                 drawLines();
                 renderLinkList();
             }
-            closeLinkModal();
-        }
-
-        function editLinkDescription(linkId, e) {
-            const posX = e ? e.clientX : undefined;
-            const posY = e ? e.clientY : undefined;
-            openLinkModal(linkId, posX, posY);
         }
 
         function deleteCrossLink(linkId) {
@@ -1654,41 +1225,48 @@
                 const cpx = (fx + toX) / 2 + nx * curve;
                 const cpy = (fy + toY) / 2 + ny * curve;
 
+                const pathId = `cross-link-path-${link.id}`;
+
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('id', pathId);
                 path.setAttribute('d', `M${fx},${fy} Q${cpx},${cpy} ${toX},${toY}`);
                 path.setAttribute('class', 'cross-link');
                 path.setAttribute('stroke', '#00f2fe');
                 svg.appendChild(path);
 
                 if (link.label) {
+                    const angle = Math.atan2(Math.abs(toY - fy), Math.abs(toX - fx)) * 180 / Math.PI;
+                    const isVertical = angle > 50;
+
                     const midX = (fx + toX) / 2 + nx * (curve * 0.5);
                     const midY = (fy + toY) / 2 + ny * (curve * 0.5);
 
-                    const boxW = link.boxWidth || 160;
-                    const boxH = 100; // 容器上限高度
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('class', 'link-text');
+                    text.setAttribute('x', midX);
+                    text.setAttribute('y', midY);
 
-                    const foreignObj = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-                    foreignObj.setAttribute('x', midX - boxW / 2);
-                    foreignObj.setAttribute('y', midY - 20);
-                    foreignObj.setAttribute('width', boxW);
-                    foreignObj.setAttribute('height', boxH);
+                    if (isVertical) {
+                        text.setAttribute('writing-mode', 'tb');
+                        text.setAttribute('glyph-orientation-vertical', '0');
+                        text.setAttribute('dx', '12');
+                        text.setAttribute('dy', '0');
+                        text.setAttribute('text-anchor', 'middle');
+                        text.setAttribute('dominant-baseline', 'central');
+                    } else {
+                        text.setAttribute('dy', '-10');
+                        text.setAttribute('text-anchor', 'middle');
+                        text.setAttribute('dominant-baseline', 'auto');
+                    }
 
-                    const container = document.createElement('div');
-                    container.className = 'link-text-container';
+                    text.textContent = link.label;
 
-                    const textBox = document.createElement('div');
-                    textBox.className = 'link-text-box';
-                    textBox.style.fontSize = (link.fontSize || 13) + 'px';
-                    textBox.textContent = link.label;
-
-                    textBox.addEventListener('click', (e) => {
+                    text.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        editLinkDescription(link.id, e);
+                        editLinkDescription(link.id);
                     });
 
-                    container.appendChild(textBox);
-                    foreignObj.appendChild(container);
-                    svg.appendChild(foreignObj);
+                    svg.appendChild(text);
                 }
             });
         }
@@ -1783,7 +1361,7 @@
                 if (link.label) {
                     const descSpan = document.createElement('span');
                     descSpan.className = 'link-desc';
-                    descSpan.textContent = `(${link.label.replace(/\n/g, ' ')})`;
+                    descSpan.textContent = `(${link.label})`;
                     item.appendChild(descSpan);
                 }
 
@@ -1794,7 +1372,7 @@
                 editBtn.className = 'link-action-btn edit-link';
                 editBtn.textContent = '✎';
                 editBtn.title = '編輯文字';
-                editBtn.addEventListener('click', (e) => { e.stopPropagation(); editLinkDescription(link.id, e); });
+                editBtn.addEventListener('click', (e) => { e.stopPropagation(); editLinkDescription(link.id); });
 
                 const delBtn = document.createElement('button');
                 delBtn.className = 'link-action-btn del-link';
@@ -1815,7 +1393,7 @@
             });
         }
 
-        // ====== PAN, ZOOM & BOX SELECTION ======
+        // ====== PAN & ZOOM ANIMATION ======
         function panToNode(node) {
             const el = document.getElementById(`node-${node.id}`);
             if (!el) return;
@@ -1851,114 +1429,28 @@
             animateTo(targetTx, targetTy, 1, 400);
         }
 
-        // Mousedown on Canvas: 分流「拖拉平移 Canvas」與「Windows 式拉框多選 (Box Selection)」
         canvasArea.addEventListener('mousedown', (e) => {
             if (dragNode || linkMode) return;
-
-            // 若按住 Shift 鍵，或按滑鼠左鍵空白處 -> 開始拉框多選
-            if (e.shiftKey || e.button === 0) {
-                isBoxSelecting = true;
-                boxStartX = e.clientX;
-                boxStartY = e.clientY;
-
-                selectionBox.style.left = boxStartX + 'px';
-                selectionBox.style.top = boxStartY + 'px';
-                selectionBox.style.width = '0px';
-                selectionBox.style.height = '0px';
-                selectionBox.style.display = 'block';
-
-                if (!e.shiftKey) {
-                    clearSelection();
-                }
-                return;
-            }
-
-            // 其他情況（如中鍵/右鍵）平移 Canvas
             isPanning = true;
             panStartX = e.clientX - tx;
             panStartY = e.clientY - ty;
         });
 
         document.addEventListener('mousemove', (e) => {
-            // 1. 拖動節點（支援單個或批量多選整體搬移）
             if (dragNode) {
                 const rect = canvasArea.getBoundingClientRect();
-                const currentMouseX = (e.clientX - rect.left - tx) / scale;
-                const currentMouseY = (e.clientY - rect.top - ty) / scale;
-
-                const deltaX = currentMouseX - dragOffsetX;
-                const deltaY = currentMouseY - dragOffsetY;
-
-                if (dragGroupPositions.length > 0) {
-                    dragGroupPositions.forEach(item => {
-                        item.node.x = item.startX + deltaX;
-                        item.node.y = item.startY + deltaY;
-                        const el = document.getElementById(`node-${item.node.id}`);
-                        if (el) {
-                            el.style.left = item.node.x + 'px';
-                            el.style.top = item.node.y + 'px';
-                        }
-                    });
-                } else {
-                    dragNode.x = dragNode.x + deltaX;
-                    dragNode.y = dragNode.y + deltaY;
-                    const el = document.getElementById(`node-${dragNode.id}`);
-                    if (el) {
-                        el.style.left = dragNode.x + 'px';
-                        el.style.top = dragNode.y + 'px';
-                    }
+                const newX = (e.clientX - rect.left - tx) / scale - dragOffsetX;
+                const newY = (e.clientY - rect.top - ty) / scale - dragOffsetY;
+                dragNode.x = newX;
+                dragNode.y = newY;
+                const el = document.getElementById(`node-${dragNode.id}`);
+                if (el) {
+                    el.style.left = newX + 'px';
+                    el.style.top = newY + 'px';
                 }
                 drawLines();
                 return;
             }
-
-            // 2. 框选 Selection Box 拖拉計算
-            if (isBoxSelecting) {
-                const currentX = e.clientX;
-                const currentY = e.clientY;
-
-                const left = Math.min(boxStartX, currentX);
-                const top = Math.min(boxStartY, currentY);
-                const width = Math.abs(currentX - boxStartX);
-                const height = Math.abs(currentY - boxStartY);
-
-                selectionBox.style.left = left + 'px';
-                selectionBox.style.top = top + 'px';
-                selectionBox.style.width = width + 'px';
-                selectionBox.style.height = height + 'px';
-
-                // 計算選框區域與畫布節點之重疊碰撞
-                const rectCanvas = canvasArea.getBoundingClientRect();
-                const selectRect = {
-                    left: (left - rectCanvas.left - tx) / scale,
-                    top: (top - rectCanvas.top - ty) / scale,
-                    right: (left + width - rectCanvas.left - tx) / scale,
-                    bottom: (top + height - rectCanvas.top - ty) / scale
-                };
-
-                nodes.forEach(node => {
-                    const el = document.getElementById(`node-${node.id}`);
-                    if (!el) return;
-                    const nodeW = el.offsetWidth;
-                    const nodeH = el.offsetHeight;
-
-                    const isIntersecting = !(
-                        node.x > selectRect.right ||
-                        (node.x + nodeW) < selectRect.left ||
-                        node.y > selectRect.bottom ||
-                        (node.y + nodeH) < selectRect.top
-                    );
-
-                    if (isIntersecting) {
-                        selectedIds.add(node.id);
-                        el.classList.add('multi-selected');
-                    }
-                });
-
-                return;
-            }
-
-            // 3. Canvas 畫面平移
             if (!isPanning) return;
             tx = e.clientX - panStartX;
             ty = e.clientY - panStartY;
@@ -1967,15 +1459,6 @@
 
         document.addEventListener('mouseup', () => {
             if (dragNode) saveState();
-            if (isBoxSelecting) {
-                isBoxSelecting = false;
-                selectionBox.style.display = 'none';
-
-                if (selectedIds.size === 1) {
-                    selectedId = Array.from(selectedIds)[0];
-                    selectNode(selectedId);
-                }
-            }
             isPanning = false;
             dragNode = null;
         });
@@ -2029,7 +1512,8 @@
                     renderOutline();
                     renderLinkList();
                     updateCount();
-                    clearSelection();
+                    selectedId = null;
+                    selectedInfo.style.display = 'none';
                 };
                 reader.readAsText(e.target.files[0]);
             };
@@ -2038,7 +1522,7 @@
 
         // Keyboard Shortcuts
         document.addEventListener('keydown', (e) => {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
 
             if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
                 e.preventDefault();
@@ -2068,14 +1552,16 @@
             if (e.key === 'Escape') {
                 if (reparentMode) toggleReparentMode();
                 if (linkMode) toggleLinkMode();
-                closeLinkModal();
             }
         });
 
         canvasArea.addEventListener('click', (e) => {
             if (e.target === canvasArea || e.target === treeCanvas || e.target === svg) {
-                if (!linkMode && !isBoxSelecting) {
-                    clearSelection();
+                if (selectedId !== null && !linkMode) {
+                    const prev = document.getElementById(`node-${selectedId}`);
+                    if (prev) prev.classList.remove('selected');
+                    selectedId = null;
+                    selectedInfo.style.display = 'none';
                     renderOutline();
                 }
             }
