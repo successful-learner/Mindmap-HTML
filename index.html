@@ -1058,57 +1058,57 @@
         }
 
         // ====== REPARENT MODE ======
-function toggleReparentMode() {
-    if (selectedId === null) {
-        alert('請先選取要更變父級嘅節點！');
-        return;
-    }
-    reparentMode = !reparentMode;
-    const btn = document.getElementById('reparent-mode-btn');
-    const banner = document.getElementById('reparent-banner');
-    btn.classList.toggle('active', reparentMode);
-    banner.style.display = reparentMode ? 'block' : 'none';
-    canvasArea.classList.toggle('link-cursor', reparentMode || linkMode);
+        function toggleReparentMode() {
+            if (selectedId === null) {
+                alert('請先選取要更變父級嘅節點！');
+                return;
+            }
+            reparentMode = !reparentMode;
+            const btn = document.getElementById('reparent-mode-btn');
+            const banner = document.getElementById('reparent-banner');
+            btn.classList.toggle('active', reparentMode);
+            banner.style.display = reparentMode ? 'block' : 'none';
+            canvasArea.classList.toggle('link-cursor', reparentMode || linkMode);
 
-    if (reparentMode && linkMode) {
-        toggleLinkMode(); // 關閉 link mode
-    }
-}
+            if (reparentMode && linkMode) {
+                toggleLinkMode(); // 關閉 link mode
+            }
+        }
 
-function handleReparentClick(targetId) {
-    if (targetId === selectedId) return; // 唔可以做自己嘅父級
+        function handleReparentClick(targetId) {
+            if (targetId === selectedId) return; // 唔可以做自己嘅父級
 
-    const node = nodes.find(n => n.id === selectedId);
-    if (!node) return;
+            const node = nodes.find(n => n.id === selectedId);
+            if (!node) return;
 
-    // 檢查 cycle：targetId 唔可以係 selectedId 嘅後代
-    const descendants = new Set();
-    function getDesc(id) {
-        nodes.filter(n => n.parentId === id).forEach(child => {
-            descendants.add(child.id);
-            getDesc(child.id);
-        });
-    }
-    getDesc(selectedId);
+            // 檢查 cycle：targetId 唔可以係 selectedId 嘅後代
+            const descendants = new Set();
+            function getDesc(id) {
+                nodes.filter(n => n.parentId === id).forEach(child => {
+                    descendants.add(child.id);
+                    getDesc(child.id);
+                });
+            }
+            getDesc(selectedId);
 
-    if (descendants.has(targetId)) {
-        alert('唔可以將後代設為父級（會造成循環）！');
-        return;
-    }
+            if (descendants.has(targetId)) {
+                alert('唔可以將後代設為父級（會造成循環）！');
+                return;
+            }
 
-    saveState();
-    node.parentId = targetId;
-    drawLines();
-    renderOutline();
-    updateParentSelectOptions(node);
+            saveState();
+            node.parentId = targetId;
+            drawLines();
+            renderOutline();
+            updateParentSelectOptions(node);
 
-    // 自動離開模式
-    reparentMode = false;
-    document.getElementById('reparent-mode-btn').classList.remove('active');
-    document.getElementById('reparent-banner').style.display = 'none';
-    canvasArea.classList.toggle('link-cursor', linkMode);
-}
-        
+            // 自動離開模式
+            reparentMode = false;
+            document.getElementById('reparent-mode-btn').classList.remove('active');
+            document.getElementById('reparent-banner').style.display = 'none';
+            canvasArea.classList.toggle('link-cursor', linkMode);
+        }
+
         // ====== LINK MODE ======
         function toggleLinkMode() {
             linkMode = !linkMode;
@@ -1270,8 +1270,10 @@ function handleReparentClick(targetId) {
                         e.stopPropagation();
                         editLinkDescription(link.id);
                     });
-                        
+
                     svg.appendChild(text);
+                }
+            });
         }
 
         // ====== OUTLINE ======
