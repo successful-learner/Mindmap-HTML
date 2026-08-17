@@ -313,6 +313,18 @@
             border-color: var(--input-focus);
         }
 
+        .parent-select {
+            width: 100%;
+            padding: 8px 12px;
+            margin-top: 8px;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 13px;
+            outline: none;
+        }
+
         .mic-btn {
             width: 34px;
             height: 34px;
@@ -380,6 +392,7 @@
             width: 18px; height: 18px; border-radius: 4px; border: none;
             cursor: pointer; font-size: 9px; display: flex; align-items: center; justify-content: center;
         }
+        .link-action-btn.edit-link { background: rgba(66,133,244,0.2); color: var(--accent); }
         .link-action-btn.del-link { background: rgba(234,67,53,0.2); color: var(--danger); }
 
         .node-count {
@@ -425,6 +438,21 @@
 
         .branch-line { stroke-width: 2.5; fill: none; opacity: 0.5; }
         .cross-link { stroke-width: 2; fill: none; opacity: 0.7; stroke-dasharray: 6 4; }
+
+        /* Cross link text style */
+        .link-text {
+            font-size: 12px;
+            font-weight: 600;
+            fill: var(--text);
+            text-anchor: middle;
+            paint-order: stroke;
+            stroke: var(--bg);
+            stroke-width: 4px;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            pointer-events: auto;
+            cursor: pointer;
+        }
 
         .node {
             position: absolute;
@@ -511,6 +539,12 @@
                 <input class="node-name" id="node-name-input" placeholder="輸入名稱..." />
                 <button class="mic-btn" id="mic-btn-node" title="語音輸入">🎤</button>
             </div>
+            <div class="label" style="margin-top: 10px;">父節點 (變更關聯)</div>
+            <select class="parent-select" id="parent-node-select" onchange="changeParentNode(this.value)">
+            </select>
+            <button class="action-btn" id="reparent-mode-btn" onclick="toggleReparentMode()" style="margin-top:6px;">
+                <span class="icon orange">🎯</span> 撳節點更變父級
+            </button>
         </div>
 
         <div class="sidebar-section">
@@ -524,6 +558,14 @@
             <button class="action-btn" onclick="deleteSelected()">
                 <span class="icon red">✕</span> 刪除節點
             </button>
+            <div style="display: flex; gap: 6px; margin-top: 6px;">
+                <button class="action-btn" onclick="undo()" style="margin-bottom:0;">
+                    <span class="icon purple">⟲</span> Undo (Ctrl+Z)
+                </button>
+                <button class="action-btn" onclick="redo()" style="margin-bottom:0;">
+                    <span class="icon orange">⟳</span> Redo
+                </button>
+            </div>
         </div>
 
         <!-- Structure / Outline Section -->
@@ -544,6 +586,9 @@
                 連結 <span id="link-count-title">(0)</span>
                 <button class="outline-mini-btn" id="link-mode-btn" onclick="toggleLinkMode()">🔗 Link</button>
             </h3>
+            <button class="action-btn" onclick="quickConnectFromSelected()">
+                <span class="icon blue">⚡</span> 快速轉接/連線 (Shift+L)
+            </button>
             <div class="link-list" id="link-list">
                 <div style="font-size:11px; color:var(--text-muted); text-align:center; padding:6px 0;">撳 Link → 選兩個節點建立連結</div>
             </div>
@@ -598,6 +643,7 @@
         </div>
 
         <div class="link-banner" id="link-banner">🔗 Link 模式：撳第一個節點，再撳目標節點</div>
+        <div class="link-banner" id="reparent-banner">🎯 更變模式：撳目標節點設為新父級</div>
 
         <div class="zoom-controls">
             <button class="zoom-btn" onclick="zoomIn()">+</button>
@@ -621,7 +667,13 @@
         let dragOffsetX, dragOffsetY;
         let animating = false;
         let linkMode = false, linkFromId = null;
+        let reparentMode = false;
         let collapsedNodes = new Set();
+
+        // Undo / Redo Stacks
+        let undoStack = [];
+        let redoStack = [];
+        let isPerformingUndoRedo = false;
 
         // Speech recognition setup
         let recognition = null;
@@ -631,6 +683,7 @@
         const treeCanvas = document.getElementById('tree-canvas');
         const svg = document.getElementById('lines-svg');
         const nameInput = document.getElementById('node-name-input');
+        const parentSelect = document.getElementById('parent-node-select');
         const selectedInfo = document.getElementById('selected-info');
         const outlinePanel = document.getElementById('outline-panel');
         const linkBanner = document.getElementById('link-banner');
@@ -640,6 +693,67 @@
             document.body.className = 'theme-' + theme;
             document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
             if (el) el.classList.add('active');
+        }
+
+        // ====== UNDO / REDO HISTORY SYSTEM ======
+        function saveState() {
+            if (isPerformingUndoRedo) return;
+            const state = JSON.stringify({
+                nodes,
+                crossLinks,
+                nextId,
+                nextLinkId
+            });
+            undoStack.push(state);
+            if (undoStack.length > 50) undoStack.shift();
+            redoStack = [];
+        }
+
+        function undo() {
+            if (undoStack.length === 0) return;
+            isPerformingUndoRedo = true;
+
+            const currentState = JSON.stringify({ nodes, crossLinks, nextId, nextLinkId });
+            redoStack.push(currentState);
+
+            const previousState = JSON.parse(undoStack.pop());
+            restoreState(previousState);
+
+            isPerformingUndoRedo = false;
+        }
+
+        function redo() {
+            if (redoStack.length === 0) return;
+            isPerformingUndoRedo = true;
+
+            const currentState = JSON.stringify({ nodes, crossLinks, nextId, nextLinkId });
+            undoStack.push(currentState);
+
+            const nextState = JSON.parse(redoStack.pop());
+            restoreState(nextState);
+
+            isPerformingUndoRedo = false;
+        }
+
+        function restoreState(state) {
+            treeCanvas.querySelectorAll('.node').forEach(el => el.remove());
+            nodes = state.nodes || [];
+            crossLinks = state.crossLinks || [];
+            nextId = state.nextId || 0;
+            nextLinkId = state.nextLinkId || 0;
+
+            nodes.forEach(n => renderNode(n));
+            drawLines();
+            renderOutline();
+            renderLinkList();
+            updateCount();
+
+            if (selectedId !== null && !nodes.some(n => n.id === selectedId)) {
+                selectedId = null;
+                selectedInfo.style.display = 'none';
+            } else if (selectedId !== null) {
+                selectNode(selectedId);
+            }
         }
 
         function init() {
@@ -669,6 +783,7 @@
                 }
                 nameInput.value = transcript;
                 if (selectedId !== null) {
+                    saveState();
                     const node = nodes.find(n => n.id === selectedId);
                     if (node) {
                         node.text = transcript;
@@ -708,6 +823,7 @@
 
         // ====== NODES ======
         function createNode(text, x, y, parentId, bgColor, borderColor) {
+            saveState();
             const id = nextId++;
             nodes.push({ id, text, x, y, parentId, bg: bgColor || '#37474f', border: borderColor || '#546e7a' });
             renderNode(nodes[nodes.length - 1]);
@@ -739,6 +855,10 @@
 
             el.addEventListener('click', (e) => {
                 e.stopPropagation();
+                if (reparentMode) {
+                    handleReparentClick(node.id);
+                    return;
+                }
                 if (linkMode) handleLinkClick(node.id);
             });
 
@@ -765,10 +885,57 @@
             if (node) {
                 selectedInfo.style.display = 'block';
                 nameInput.value = node.text;
+                updateParentSelectOptions(node);
             }
             renderOutline();
         }
 
+        // ====== CHANGE PARENT NODE (RE-PARENTING) ======
+        function updateParentSelectOptions(currentNode) {
+            parentSelect.innerHTML = '';
+
+            const descendants = new Set();
+            function getDescendants(id) {
+                nodes.filter(n => n.parentId === id).forEach(child => {
+                    descendants.add(child.id);
+                    getDescendants(child.id);
+                });
+            }
+            getDescendants(currentNode.id);
+
+            const rootOption = document.createElement('option');
+            rootOption.value = 'null';
+            rootOption.textContent = '(無 - 獨立成為根節點)';
+            if (currentNode.parentId === null) rootOption.selected = true;
+            parentSelect.appendChild(rootOption);
+
+            nodes.forEach(n => {
+                if (n.id !== currentNode.id && !descendants.has(n.id)) {
+                    const opt = document.createElement('option');
+                    opt.value = n.id;
+                    opt.textContent = n.text || `節點 ${n.id}`;
+                    if (currentNode.parentId === n.id) opt.selected = true;
+                    parentSelect.appendChild(opt);
+                }
+            });
+        }
+
+        function changeParentNode(newParentValue) {
+            if (selectedId === null) return;
+            const node = nodes.find(n => n.id === selectedId);
+            if (!node) return;
+
+            const newParentId = newParentValue === 'null' ? null : parseInt(newParentValue, 10);
+            if (node.parentId === newParentId) return;
+
+            saveState();
+            node.parentId = newParentId;
+
+            drawLines();
+            renderOutline();
+        }
+
+        nameInput.addEventListener('focus', () => saveState());
         nameInput.addEventListener('input', () => {
             if (selectedId === null) return;
             const node = nodes.find(n => n.id === selectedId);
@@ -812,6 +979,7 @@
 
         function deleteSelected() {
             if (selectedId === null) return;
+            saveState();
             const toDelete = [];
             function gather(id) {
                 toDelete.push(id);
@@ -836,6 +1004,7 @@
             if (selectedId === null) return;
             const node = nodes.find(n => n.id === selectedId);
             if (!node) return;
+            saveState();
             node.bg = bg;
             node.border = border;
             const el = document.getElementById(`node-${selectedId}`);
@@ -847,6 +1016,99 @@
             renderOutline();
         }
 
+        // ====== QUICK CONNECT FROM SELECTED (快速連線) ======
+        function quickConnectFromSelected() {
+            if (selectedId === null) {
+                alert('請先選取起點節點 (例如 B)！');
+                return;
+            }
+
+            const sourceNode = nodes.find(n => n.id === selectedId);
+            const targetName = prompt(`【快速連線】從「${sourceNode.text}」連線至：\n(輸入目標節點名稱，例如 Y)`);
+
+            if (!targetName || !targetName.trim()) return;
+
+            const trimmed = targetName.trim();
+
+            // 1. 尋找現有目的地節點 (Y)
+            let targetNode = nodes.find(n => n.text === trimmed && n.id !== selectedId);
+
+            // 2. 如果目的地 Y 唔存在，自動建立新節點
+            if (!targetNode) {
+                const newId = createNode(trimmed, sourceNode.x + 250, sourceNode.y + 50, sourceNode.parentId, sourceNode.bg, sourceNode.border);
+                targetNode = nodes.find(n => n.id === newId);
+            }
+
+            // 3. 檢查係咪已經有連線
+            const exists = crossLinks.find(l =>
+                (l.fromId === sourceNode.id && l.toId === targetNode.id) ||
+                (l.fromId === targetNode.id && l.toId === sourceNode.id)
+            );
+
+            if (!exists) {
+                crossLinks.push({ id: nextLinkId++, fromId: sourceNode.id, toId: targetNode.id, label: '' });
+                drawLines();
+                renderLinkList();
+                updateCount();
+            }
+
+            // 4. 自動跳轉視野去目的地 Y
+            panToNode(targetNode);
+            selectNode(targetNode.id);
+        }
+
+        // ====== REPARENT MODE ======
+function toggleReparentMode() {
+    if (selectedId === null) {
+        alert('請先選取要更變父級嘅節點！');
+        return;
+    }
+    reparentMode = !reparentMode;
+    const btn = document.getElementById('reparent-mode-btn');
+    const banner = document.getElementById('reparent-banner');
+    btn.classList.toggle('active', reparentMode);
+    banner.style.display = reparentMode ? 'block' : 'none';
+    canvasArea.classList.toggle('link-cursor', reparentMode || linkMode);
+
+    if (reparentMode && linkMode) {
+        toggleLinkMode(); // 關閉 link mode
+    }
+}
+
+function handleReparentClick(targetId) {
+    if (targetId === selectedId) return; // 唔可以做自己嘅父級
+
+    const node = nodes.find(n => n.id === selectedId);
+    if (!node) return;
+
+    // 檢查 cycle：targetId 唔可以係 selectedId 嘅後代
+    const descendants = new Set();
+    function getDesc(id) {
+        nodes.filter(n => n.parentId === id).forEach(child => {
+            descendants.add(child.id);
+            getDesc(child.id);
+        });
+    }
+    getDesc(selectedId);
+
+    if (descendants.has(targetId)) {
+        alert('唔可以將後代設為父級（會造成循環）！');
+        return;
+    }
+
+    saveState();
+    node.parentId = targetId;
+    drawLines();
+    renderOutline();
+    updateParentSelectOptions(node);
+
+    // 自動離開模式
+    reparentMode = false;
+    document.getElementById('reparent-mode-btn').classList.remove('active');
+    document.getElementById('reparent-banner').style.display = 'none';
+    canvasArea.classList.toggle('link-cursor', linkMode);
+}
+        
         // ====== LINK MODE ======
         function toggleLinkMode() {
             linkMode = !linkMode;
@@ -879,7 +1141,9 @@
                     (l.fromId === nodeId && l.toId === linkFromId)
                 );
                 if (!exists) {
-                    crossLinks.push({ id: nextLinkId++, fromId: linkFromId, toId: nodeId, label: '' });
+                    saveState();
+                    const label = prompt('請輸入連結描述文字 (可留空):', '') || '';
+                    crossLinks.push({ id: nextLinkId++, fromId: linkFromId, toId: nodeId, label });
                     drawLines();
                     renderLinkList();
                     updateCount();
@@ -894,7 +1158,20 @@
             }
         }
 
+        function editLinkDescription(linkId) {
+            const link = crossLinks.find(l => l.id === linkId);
+            if (!link) return;
+            const newDesc = prompt('修改連結描述文字:', link.label || '');
+            if (newDesc !== null) {
+                saveState();
+                link.label = newDesc;
+                drawLines();
+                renderLinkList();
+            }
+        }
+
         function deleteCrossLink(linkId) {
+            saveState();
             crossLinks = crossLinks.filter(l => l.id !== linkId);
             drawLines();
             renderLinkList();
@@ -949,12 +1226,52 @@
                 const cpx = (fx + toX) / 2 + nx * curve;
                 const cpy = (fy + toY) / 2 + ny * curve;
 
+                const pathId = `cross-link-path-${link.id}`;
+
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('id', pathId);
                 path.setAttribute('d', `M${fx},${fy} Q${cpx},${cpy} ${toX},${toY}`);
                 path.setAttribute('class', 'cross-link');
                 path.setAttribute('stroke', '#00f2fe');
                 svg.appendChild(path);
-            });
+
+                // Add curve label if available
+                if (link.label) {
+                    // 計算線嘅角度，判斷打直定打橫
+                    const angle = Math.atan2(Math.abs(toY - fy), Math.abs(toX - fx)) * 180 / Math.PI;
+                    const isVertical = angle > 50; // 超過50度當打直
+
+                    const midX = (fx + toX) / 2 + nx * (curve * 0.5);
+                    const midY = (fy + toY) / 2 + ny * (curve * 0.5);
+
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('class', 'link-text');
+                    text.setAttribute('x', midX);
+                    text.setAttribute('y', midY);
+
+                    if (isVertical) {
+                        // 打直文字
+                        text.setAttribute('writing-mode', 'tb');
+                        text.setAttribute('glyph-orientation-vertical', '0');
+                        text.setAttribute('dx', '12');
+                        text.setAttribute('dy', '0');
+                        text.setAttribute('text-anchor', 'middle');
+                        text.setAttribute('dominant-baseline', 'central');
+                    } else {
+                        // 打橫文字
+                        text.setAttribute('dy', '-10');
+                        text.setAttribute('text-anchor', 'middle');
+                        text.setAttribute('dominant-baseline', 'auto');
+                    }
+
+                    text.textContent = link.label;
+
+                    text.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        editLinkDescription(link.id);
+                    });
+                        
+                    svg.appendChild(text);
         }
 
         // ====== OUTLINE ======
@@ -1044,8 +1361,21 @@
                 item.appendChild(arrow);
                 item.appendChild(toSpan);
 
+                if (link.label) {
+                    const descSpan = document.createElement('span');
+                    descSpan.className = 'link-desc';
+                    descSpan.textContent = `(${link.label})`;
+                    item.appendChild(descSpan);
+                }
+
                 const actions = document.createElement('div');
                 actions.className = 'link-actions';
+
+                const editBtn = document.createElement('button');
+                editBtn.className = 'link-action-btn edit-link';
+                editBtn.textContent = '✎';
+                editBtn.title = '編輯文字';
+                editBtn.addEventListener('click', (e) => { e.stopPropagation(); editLinkDescription(link.id); });
 
                 const delBtn = document.createElement('button');
                 delBtn.className = 'link-action-btn del-link';
@@ -1053,6 +1383,7 @@
                 delBtn.title = '刪除連結';
                 delBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteCrossLink(link.id); });
 
+                actions.appendChild(editBtn);
                 actions.appendChild(delBtn);
                 item.appendChild(actions);
 
@@ -1130,6 +1461,7 @@
         });
 
         document.addEventListener('mouseup', () => {
+            if (dragNode) saveState();
             isPanning = false;
             dragNode = null;
         });
@@ -1171,6 +1503,7 @@
             input.onchange = (e) => {
                 const reader = new FileReader();
                 reader.onload = (ev) => {
+                    saveState();
                     const data = JSON.parse(ev.target.result);
                     treeCanvas.querySelectorAll('.node').forEach(el => el.remove());
                     nodes = data.nodes || [];
@@ -1192,15 +1525,39 @@
 
         // Keyboard Shortcuts
         document.addEventListener('keydown', (e) => {
-            if (e.target.tagName === 'INPUT') return;
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+            // Undo / Redo Shortcuts
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
+                e.preventDefault();
+                if (e.shiftKey) redo();
+                else undo();
+                return;
+            }
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')) {
+                e.preventDefault();
+                redo();
+                return;
+            }
+
+            // Shift+L = 快速連線
+            if (e.shiftKey && (e.key === 'L' || e.key === 'l')) {
+                e.preventDefault();
+                quickConnectFromSelected();
+                return;
+            }
+
             if (e.key === 'Tab') { e.preventDefault(); addChildToSelected(); }
             if (e.key === 'Enter') { e.preventDefault(); addSibling(); }
             if (e.key === 'Delete' || e.key === 'Backspace') {
                 e.preventDefault();
                 deleteSelected();
             }
-            if (e.key === 'l' || e.key === 'L') { toggleLinkMode(); }
-            if (e.key === 'Escape') { if (linkMode) toggleLinkMode(); }
+            if ((e.key === 'l' || e.key === 'L') && !e.shiftKey) { toggleLinkMode(); }
+            if (e.key === 'Escape') {
+                if (reparentMode) toggleReparentMode();
+                if (linkMode) toggleLinkMode();
+            }
         });
 
         canvasArea.addEventListener('click', (e) => {
