@@ -843,8 +843,9 @@
             el.style.background = node.bg;
             el.style.border = `2px solid ${node.border}`;
 
+            // Mousedown: 喺 Link 或 Reparent 模式下停用拖拽，保證 click 順利觸發
             el.addEventListener('mousedown', (e) => {
-                if (linkMode) return;
+                if (linkMode || reparentMode) return;
                 e.stopPropagation();
                 selectNode(node.id);
                 dragNode = node;
@@ -853,13 +854,19 @@
                 dragOffsetY = (e.clientY - rect.top - ty) / scale - node.y;
             });
 
+            // Click: 優先處理 Reparent，再處理 Link
             el.addEventListener('click', (e) => {
                 e.stopPropagation();
+                
                 if (reparentMode) {
                     handleReparentClick(node.id);
                     return;
                 }
-                if (linkMode) handleLinkClick(node.id);
+                
+                if (linkMode) {
+                    handleLinkClick(node.id);
+                    return;
+                }
             });
 
             el.addEventListener('mouseenter', () => {
@@ -1019,27 +1026,24 @@
         // ====== QUICK CONNECT FROM SELECTED (快速連線) ======
         function quickConnectFromSelected() {
             if (selectedId === null) {
-                alert('請先選取起點節點 (例如 B)！');
+                alert('請先選取起點節點！');
                 return;
             }
 
             const sourceNode = nodes.find(n => n.id === selectedId);
-            const targetName = prompt(`【快速連線】從「${sourceNode.text}」連線至：\n(輸入目標節點名稱，例如 Y)`);
+            const targetName = prompt(`【快速連線】從「${sourceNode.text}」連線至：\n(輸入目標節點名稱)`);
 
             if (!targetName || !targetName.trim()) return;
 
             const trimmed = targetName.trim();
 
-            // 1. 尋找現有目的地節點 (Y)
             let targetNode = nodes.find(n => n.text === trimmed && n.id !== selectedId);
 
-            // 2. 如果目的地 Y 唔存在，自動建立新節點
             if (!targetNode) {
                 const newId = createNode(trimmed, sourceNode.x + 250, sourceNode.y + 50, sourceNode.parentId, sourceNode.bg, sourceNode.border);
                 targetNode = nodes.find(n => n.id === newId);
             }
 
-            // 3. 檢查係咪已經有連線
             const exists = crossLinks.find(l =>
                 (l.fromId === sourceNode.id && l.toId === targetNode.id) ||
                 (l.fromId === targetNode.id && l.toId === sourceNode.id)
@@ -1052,7 +1056,6 @@
                 updateCount();
             }
 
-            // 4. 自動跳轉視野去目的地 Y
             panToNode(targetNode);
             selectNode(targetNode.id);
         }
@@ -1071,17 +1074,16 @@
             canvasArea.classList.toggle('link-cursor', reparentMode || linkMode);
 
             if (reparentMode && linkMode) {
-                toggleLinkMode(); // 關閉 link mode
+                toggleLinkMode();
             }
         }
 
         function handleReparentClick(targetId) {
-            if (targetId === selectedId) return; // 唔可以做自己嘅父級
+            if (targetId === selectedId) return;
 
             const node = nodes.find(n => n.id === selectedId);
             if (!node) return;
 
-            // 檢查 cycle：targetId 唔可以係 selectedId 嘅後代
             const descendants = new Set();
             function getDesc(id) {
                 nodes.filter(n => n.parentId === id).forEach(child => {
@@ -1102,7 +1104,6 @@
             renderOutline();
             updateParentSelectOptions(node);
 
-            // 自動離開模式
             reparentMode = false;
             document.getElementById('reparent-mode-btn').classList.remove('active');
             document.getElementById('reparent-banner').style.display = 'none';
@@ -1182,7 +1183,6 @@
         function drawLines() {
             svg.innerHTML = '';
 
-            // Tree lines
             nodes.forEach(node => {
                 if (node.parentId === null || node.parentId === undefined) return;
                 const parent = nodes.find(n => n.id === node.parentId);
@@ -1204,7 +1204,6 @@
                 svg.appendChild(path);
             });
 
-            // Cross links
             crossLinks.forEach(link => {
                 const fromNode = nodes.find(n => n.id === link.fromId);
                 const toNode = nodes.find(n => n.id === link.toId);
@@ -1235,11 +1234,9 @@
                 path.setAttribute('stroke', '#00f2fe');
                 svg.appendChild(path);
 
-                // Add curve label if available
                 if (link.label) {
-                    // 計算線嘅角度，判斷打直定打橫
                     const angle = Math.atan2(Math.abs(toY - fy), Math.abs(toX - fx)) * 180 / Math.PI;
-                    const isVertical = angle > 50; // 超過50度當打直
+                    const isVertical = angle > 50;
 
                     const midX = (fx + toX) / 2 + nx * (curve * 0.5);
                     const midY = (fy + toY) / 2 + ny * (curve * 0.5);
@@ -1250,7 +1247,6 @@
                     text.setAttribute('y', midY);
 
                     if (isVertical) {
-                        // 打直文字
                         text.setAttribute('writing-mode', 'tb');
                         text.setAttribute('glyph-orientation-vertical', '0');
                         text.setAttribute('dx', '12');
@@ -1258,7 +1254,6 @@
                         text.setAttribute('text-anchor', 'middle');
                         text.setAttribute('dominant-baseline', 'central');
                     } else {
-                        // 打橫文字
                         text.setAttribute('dy', '-10');
                         text.setAttribute('text-anchor', 'middle');
                         text.setAttribute('dominant-baseline', 'auto');
@@ -1529,7 +1524,6 @@
         document.addEventListener('keydown', (e) => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
 
-            // Undo / Redo Shortcuts
             if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
                 e.preventDefault();
                 if (e.shiftKey) redo();
@@ -1542,7 +1536,6 @@
                 return;
             }
 
-            // Shift+L = 快速連線
             if (e.shiftKey && (e.key === 'L' || e.key === 'l')) {
                 e.preventDefault();
                 quickConnectFromSelected();
