@@ -2,11 +2,8 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
-    >
-    <title>Mind Map Pro - 多行、縮放、語音修復及關係編輯版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Mind Map Pro - 全功能增強版</title>
 
     <style>
         * {
@@ -40,18 +37,10 @@
             display: flex;
             position: relative;
             background: var(--bg);
-            font-family:
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                Roboto,
-                Arial,
-                sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
         }
 
-        button,
-        input,
-        textarea {
+        button, input, textarea, select {
             font: inherit;
         }
 
@@ -59,10 +48,29 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* =========================
-           Sidebar
-        ========================= */
+        /* 12 款畫布背景樣式 */
+        #canvas-area.bg-default { background: #fafafa; }
+        #canvas-area.bg-night { background: #1a1a2e; }
+        #canvas-area.bg-beige { background: #f5f2eb; }
+        #canvas-area.bg-light-green { background: #eef7ee; }
+        #canvas-area.bg-light-blue { background: #eef5fc; }
+        #canvas-area.bg-grid { 
+            background-color: #f0f3f6; 
+            background-image: linear-gradient(#e1e6ed 1px, transparent 1px), linear-gradient(90deg, #e1e6ed 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        #canvas-area.bg-blueprint { 
+            background-color: #1e3a5f; 
+            background-image: linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        #canvas-area.bg-charcoal { background: #222222; }
+        #canvas-area.bg-sunset { background: #fff5eb; }
+        #canvas-area.bg-lavender { background: #f3f0f9; }
+        #canvas-area.bg-mint { background: #e8f8f5; }
+        #canvas-area.bg-white { background: #ffffff; }
 
+        /* Sidebar */
         .sidebar-toggle-btn {
             position: absolute;
             top: 15px;
@@ -82,9 +90,7 @@
             transition: left 0.3s, transform 0.2s;
         }
 
-        .sidebar-toggle-btn:hover {
-            transform: scale(1.06);
-        }
+        .sidebar-toggle-btn:hover { transform: scale(1.06); }
 
         .sidebar {
             width: 260px;
@@ -98,13 +104,8 @@
             transition: margin-left 0.3s;
         }
 
-        .sidebar.collapsed {
-            margin-left: -260px;
-        }
-
-        .sidebar.collapsed + .sidebar-toggle-btn {
-            left: 10px;
-        }
+        .sidebar.collapsed { margin-left: -260px; }
+        .sidebar.collapsed + .sidebar-toggle-btn { left: 10px; }
 
         .sidebar-header {
             padding: 18px;
@@ -136,16 +137,37 @@
             margin-bottom: 10px;
         }
 
+        /* 置中 Multi Tree Checkbox */
+        .multi-tree-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px;
+            background: rgba(66, 133, 244, 0.08);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .multi-tree-container input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
         .action-btn {
             width: 100%;
-            min-height: 36px;
-            padding: 8px 12px;
+            min-height: 34px;
+            padding: 6px 10px;
             margin-bottom: 6px;
             background: var(--btn-bg);
             border: 1px solid var(--btn-border);
             border-radius: 8px;
             color: var(--text);
-            font-size: 13px;
+            font-size: 12px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -153,8 +175,22 @@
             text-align: left;
         }
 
-        .action-btn:hover {
-            background: var(--btn-hover);
+        .action-btn:hover { background: var(--btn-hover); }
+
+        .style-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+
+        .style-row select, .style-row input {
+            padding: 3px 6px;
+            border-radius: 4px;
+            border: 1px solid var(--btn-border);
+            background: var(--input-bg);
         }
 
         .permission-status {
@@ -166,85 +202,50 @@
             line-height: 1.5;
         }
 
-        .permission-status.granted {
-            background: #e8f5e9;
-            color: #1b5e20;
-        }
+        .permission-status.granted { background: #e8f5e9; color: #1b5e20; }
+        .permission-status.denied { background: #ffebee; color: #b71c1c; }
 
-        .permission-status.denied {
-            background: #ffebee;
-            color: #b71c1c;
-        }
-
-        /* =========================
-           Canvas
-        ========================= */
-
+        /* Canvas */
         #canvas-area {
             flex: 1;
             position: relative;
             overflow: hidden;
             cursor: grab;
-            background: var(--canvas-bg);
         }
 
-        #canvas-area.panning {
-            cursor: grabbing;
-        }
-
-        #canvas-area.linking {
-            cursor: crosshair !important;
-        }
+        #canvas-area.panning { cursor: grabbing; }
+        #canvas-area.linking { cursor: crosshair !important; }
 
         #tree-canvas {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 8000px;
-            height: 8000px;
+            top: 0; left: 0;
+            width: 8000px; height: 8000px;
             transform-origin: 0 0;
         }
 
         #lines-svg {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 8000px;
-            height: 8000px;
+            top: 0; left: 0;
+            width: 8000px; height: 8000px;
             pointer-events: none;
             z-index: 5;
             overflow: visible;
         }
 
-        .branch-line {
-            stroke-width: 2.5;
-            fill: none;
-        }
+        .branch-line { stroke-width: 2.5; fill: none; }
+        .cross-link { stroke-width: 2; fill: none; stroke-dasharray: 6 4; }
 
-        .cross-link {
-            stroke-width: 2;
-            fill: none;
-            stroke-dasharray: 6 4;
-        }
-
-        /* =========================
-           Node / Link Box 共用
-        ========================= */
-
-        .node,
-        .link-box {
+        /* Node / Link Box */
+        .node, .link-box {
             position: absolute;
             user-select: none;
             touch-action: none;
             overflow: visible;
         }
 
-        .node-content,
-        .link-box-content {
-            width: 100%;
-            height: 100%;
-            min-width: 0;
-            min-height: 0;
+        .node-content, .link-box-content {
+            width: 100%; height: 100%;
+            min-width: 0; min-height: 0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -252,8 +253,7 @@
             scrollbar-width: thin;
         }
 
-        .node-text,
-        .link-box-text {
+        .node-text, .link-box-text {
             display: block;
             width: 100%;
             max-width: 100%;
@@ -265,491 +265,149 @@
             pointer-events: none;
         }
 
-        .node.editing .node-content,
-        .link-box.editing .link-box-content {
-            overflow: hidden;
-        }
+        .node.editing .node-content, .link-box.editing .link-box-content { overflow: hidden; }
 
         .text-editor {
-            width: 100%;
-            height: 100%;
-            min-width: 0;
-            min-height: 0;
-            resize: none;
-            outline: none;
-            border-radius: 5px;
-            padding: 4px 6px;
-            line-height: 1.4;
-            text-align: left;
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
-            word-break: break-word;
-            overflow: auto;
-            user-select: text;
-            touch-action: auto;
+            width: 100%; height: 100%;
+            min-width: 0; min-height: 0;
+            resize: none; outline: none;
+            border-radius: 5px; padding: 4px 6px;
+            line-height: 1.4; text-align: left;
+            white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word;
+            overflow: auto; user-select: text; touch-action: auto;
         }
 
-        /* =========================
-           Node
-        ========================= */
-
         .node {
-            min-width: 90px;
-            min-height: 40px;
-            padding: 8px 18px;
-            border-radius: 10px;
-            color: #ffffff;
-            font-size: 14px;
-            cursor: move;
-            box-shadow: 0 4px 12px var(--node-shadow);
+            min-width: 90px; min-height: 40px;
+            padding: 8px 18px; border-radius: 10px;
+            color: #ffffff; font-size: 14px;
+            cursor: move; box-shadow: 0 4px 12px var(--node-shadow);
             z-index: 20;
         }
 
-        .node:hover {
-            box-shadow: 0 7px 18px rgba(0, 0, 0, 0.18);
-        }
-
-        .node.selected {
-            box-shadow:
-                0 0 0 3px var(--input-focus),
-                0 8px 20px var(--node-shadow);
-        }
-
-        .node.linking-source {
-            animation: pulse 0.8s infinite alternate;
-        }
-
-        .node .text-editor {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.22);
-            border: 1px solid rgba(255, 255, 255, 0.95);
-        }
-
-        .node .text-editor::selection {
-            background: rgba(255, 255, 255, 0.4);
-        }
-
-        @keyframes pulse {
-            from {
-                transform: scale(1);
-                box-shadow: 0 0 0 3px #ff9800;
-            }
-
-            to {
-                transform: scale(1.06);
-                box-shadow: 0 0 0 8px rgba(255, 152, 0, 0.4);
-            }
-        }
-
-        /* =========================
-           Link Box
-        ========================= */
+        .node.selected { box-shadow: 0 0 0 3px var(--input-focus), 0 8px 20px var(--node-shadow); }
+        .node.linking-source { animation: pulse 0.8s infinite alternate; }
 
         .link-box {
-            min-width: 80px;
-            min-height: 32px;
-            padding: 5px 9px;
-            border-radius: 7px;
-            color: #333333;
-            font-size: 12px;
-            cursor: move;
-            box-shadow: 0 2px 9px rgba(0, 0, 0, 0.16);
+            min-width: 80px; min-height: 32px;
+            padding: 5px 9px; border-radius: 7px;
+            color: #333333; font-size: 12px;
+            cursor: move; box-shadow: 0 2px 9px rgba(0, 0, 0, 0.16);
             z-index: 25;
         }
 
-        .link-box:hover {
-            box-shadow: 0 5px 14px rgba(0, 0, 0, 0.2);
+        .link-box.selected { box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.6), 0 5px 14px rgba(0, 0, 0, 0.2); }
+
+        @keyframes pulse {
+            from { transform: scale(1); box-shadow: 0 0 0 3px #ff9800; }
+            to { transform: scale(1.06); box-shadow: 0 0 0 8px rgba(255, 152, 0, 0.4); }
         }
 
-        .link-box.selected {
-            box-shadow:
-                0 0 0 3px rgba(255, 152, 0, 0.45),
-                0 5px 14px rgba(0, 0, 0, 0.2);
-        }
+        /* Control Handles */
+        .resize-handle { position: absolute; z-index: 45; display: none; }
+        .node:hover .resize-handle, .node.selected .resize-handle,
+        .link-box:hover .resize-handle, .link-box.selected .resize-handle { display: block; }
 
-        .link-box .text-editor {
-            color: #333333;
-            background: rgba(255, 255, 255, 0.72);
-            border: 1px solid #ff9800;
-        }
+        .resize-handle.n, .resize-handle.s { left: 12px; right: 12px; height: 7px; cursor: ns-resize; }
+        .resize-handle.n { top: -4px; } .resize-handle.s { bottom: -4px; }
+        .resize-handle.e, .resize-handle.w { top: 10px; bottom: 10px; width: 7px; cursor: ew-resize; }
+        .resize-handle.e { right: -4px; } .resize-handle.w { left: -4px; }
 
-        /* =========================
-           Resize Handles
-        ========================= */
-
-        .resize-handle {
-            position: absolute;
-            z-index: 45;
-            display: none;
-        }
-
-        .node:hover .resize-handle,
-        .node.selected .resize-handle,
-        .link-box:hover .resize-handle,
-        .link-box.selected .resize-handle {
-            display: block;
-        }
-
-        .resize-handle.n,
-        .resize-handle.s {
-            left: 12px;
-            right: 12px;
-            height: 7px;
-            cursor: ns-resize;
-        }
-
-        .resize-handle.n {
-            top: -4px;
-        }
-
-        .resize-handle.s {
-            bottom: -4px;
-        }
-
-        .resize-handle.e,
-        .resize-handle.w {
-            top: 10px;
-            bottom: 10px;
-            width: 7px;
-            cursor: ew-resize;
-        }
-
-        .resize-handle.e {
-            right: -4px;
-        }
-
-        .resize-handle.w {
-            left: -4px;
-        }
-
-        .resize-handle.ne,
-        .resize-handle.nw,
-        .resize-handle.se,
-        .resize-handle.sw {
-            width: 11px;
-            height: 11px;
-            border-radius: 3px;
-            background: #ffffff;
-            border: 2px solid #4285f4;
+        .resize-handle.ne, .resize-handle.nw, .resize-handle.se, .resize-handle.sw {
+            width: 11px; height: 11px; border-radius: 3px;
+            background: #ffffff; border: 2px solid #4285f4;
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
         }
+        .link-box .resize-handle.ne, .link-box .resize-handle.nw,
+        .link-box .resize-handle.se, .link-box .resize-handle.sw { border-color: #ff9800; }
 
-        .link-box .resize-handle.ne,
-        .link-box .resize-handle.nw,
-        .link-box .resize-handle.se,
-        .link-box .resize-handle.sw {
-            border-color: #ff9800;
-        }
-
-        .resize-handle.ne {
-            top: -6px;
-            right: -6px;
-            cursor: nesw-resize;
-        }
-
-        .resize-handle.nw {
-            top: -6px;
-            left: -6px;
-            cursor: nwse-resize;
-        }
-
-        .resize-handle.se {
-            right: -6px;
-            bottom: -6px;
-            cursor: nwse-resize;
-        }
-
-        .resize-handle.sw {
-            left: -6px;
-            bottom: -6px;
-            cursor: nesw-resize;
-        }
-
-        /* =========================
-           Node Controls
-        ========================= */
+        .resize-handle.ne { top: -6px; right: -6px; cursor: nesw-resize; }
+        .resize-handle.nw { top: -6px; left: -6px; cursor: nwse-resize; }
+        .resize-handle.se { right: -6px; bottom: -6px; cursor: nwse-resize; }
+        .resize-handle.sw { left: -6px; bottom: -6px; cursor: nesw-resize; }
 
         .node-quick-add {
-            position: absolute;
-            right: -30px;
-            top: 50%;
+            position: absolute; right: -30px; top: 50%;
             transform: translateY(-50%) scale(0.8);
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            background: var(--accent);
-            color: #ffffff;
-            border: none;
-            font-size: 17px;
-            font-weight: bold;
-            line-height: 23px;
-            text-align: center;
-            cursor: pointer;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-            z-index: 50;
+            width: 25px; height: 25px; border-radius: 50%;
+            background: var(--accent); color: #ffffff;
+            border: none; font-size: 17px; font-weight: bold;
+            line-height: 23px; text-align: center; cursor: pointer;
+            opacity: 0; pointer-events: none; transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25); z-index: 50;
         }
 
-        .node:hover .node-quick-add,
-        .node.selected .node-quick-add {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateY(-50%) scale(1);
+        .node:hover .node-quick-add, .node.selected .node-quick-add { opacity: 1; pointer-events: auto; transform: translateY(-50%) scale(1); }
+
+        .inplace-menu-trigger, .box-color-trigger, .speech-btn, .box-unlink-btn {
+            position: absolute; width: 22px; height: 22px;
+            border-radius: 50%; background: var(--sidebar-bg);
+            border: 1px solid var(--sidebar-border); color: var(--text);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); z-index: 55;
         }
 
-        .node-quick-add:hover {
-            transform: translateY(-50%) scale(1.15) !important;
-            background: #2b6cb0;
-        }
-
-        .inplace-menu-trigger,
-        .box-color-trigger,
-        .speech-btn {
-            position: absolute;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            background: var(--sidebar-bg);
-            border: 1px solid var(--sidebar-border);
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            z-index: 55;
-        }
-
-        .inplace-menu-trigger,
-        .box-color-trigger {
-            top: -10px;
-            right: -10px;
-            font-size: 11px;
-        }
-
-        .speech-btn {
-            left: -10px;
-            bottom: -10px;
-            font-size: 11px;
-        }
-
-        .speech-btn:hover,
-        .inplace-menu-trigger:hover,
-        .box-color-trigger:hover {
-            transform: scale(1.1);
-        }
-
-        .speech-btn.listening {
-            color: #ffffff;
-            background: #e53935;
-            border-color: #b71c1c;
-            animation: microphonePulse 0.75s infinite alternate;
-        }
-
-        @keyframes microphonePulse {
-            from {
-                box-shadow: 0 0 0 2px rgba(229, 57, 53, 0.3);
-            }
-
-            to {
-                box-shadow: 0 0 0 7px rgba(229, 57, 53, 0.14);
-            }
-        }
+        .inplace-menu-trigger, .box-color-trigger { top: -10px; right: -10px; font-size: 11px; }
+        .box-unlink-btn { top: -10px; left: -10px; font-size: 11px; color: #d32f2f; }
+        .speech-btn { left: -10px; bottom: -10px; font-size: 11px; }
 
         .inplace-action-menu {
-            position: absolute;
-            top: -48px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--sidebar-bg);
-            border: 1px solid var(--sidebar-border);
-            border-radius: 20px;
-            padding: 4px 8px;
-            display: none;
-            gap: 4px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
-            z-index: 100;
-            white-space: nowrap;
+            position: absolute; top: -48px; left: 50%;
+            transform: translateX(-50%); background: var(--sidebar-bg);
+            border: 1px solid var(--sidebar-border); border-radius: 20px;
+            padding: 4px 8px; display: none; gap: 4px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25); z-index: 100; white-space: nowrap;
         }
-
-        .inplace-action-menu.active {
-            display: flex;
-            align-items: center;
-        }
+        .inplace-action-menu.active { display: flex; align-items: center; }
 
         .inplace-btn {
-            background: var(--btn-bg);
-            border: 1px solid var(--btn-border);
-            color: var(--text);
-            width: 27px;
-            height: 27px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: var(--btn-bg); border: 1px solid var(--btn-border);
+            color: var(--text); width: 27px; height: 27px;
+            border-radius: 50%; cursor: pointer; font-size: 12px;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        .inplace-btn:hover {
-            background: var(--btn-hover);
-            transform: scale(1.08);
-        }
-
-        /* =========================
-           Adobe Picker
-        ========================= */
-
+        /* 擴充 Adobe 格式顏色面板 (HEX, RGB, HSB, CMYK, LAB, RGB Code) */
         .adobe-picker-popover {
-            position: absolute;
-            z-index: 500;
-            width: 230px;
-            background: var(--sidebar-bg);
-            border: 1px solid var(--sidebar-border);
-            border-radius: 12px;
-            padding: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            display: none;
-            flex-direction: column;
-            gap: 8px;
-            font-size: 12px;
-            color: var(--text);
+            position: absolute; z-index: 500; width: 280px;
+            background: var(--sidebar-bg); border: 1px solid var(--sidebar-border);
+            border-radius: 12px; padding: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: none; flex-direction: column; gap: 8px; font-size: 11px; color: var(--text);
         }
 
-        .adobe-picker-header {
-            display: flex;
-            justify-content: space-between;
-            font-weight: 600;
-        }
+        .adobe-picker-header { display: flex; justify-content: space-between; font-weight: 600; font-size: 13px; }
+        .picker-tabs { display: flex; gap: 4px; background: var(--btn-bg); padding: 2px; border-radius: 6px; }
+        .picker-tab { flex: 1; text-align: center; padding: 4px 0; font-size: 10px; cursor: pointer; border-radius: 4px; color: var(--text-sub); }
+        .picker-tab.active { background: var(--accent); color: #ffffff; }
 
-        .picker-tabs {
-            display: flex;
-            gap: 4px;
-            background: var(--btn-bg);
-            padding: 2px;
-            border-radius: 6px;
-        }
-
-        .picker-tab {
-            flex: 1;
-            text-align: center;
-            padding: 4px 0;
-            font-size: 10px;
-            cursor: pointer;
-            border-radius: 4px;
-            color: var(--text-sub);
-        }
-
-        .picker-tab.active {
-            background: var(--accent);
-            color: #ffffff;
-        }
-
-        .picker-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        /* =========================
-           Controls / Banner
-        ========================= */
+        .picker-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+        .picker-row input[type="text"] { width: 150px; padding: 2px 4px; border: 1px solid var(--btn-border); border-radius: 4px; }
+        .picker-row input[type="number"] { width: 45px; padding: 2px 4px; border: 1px solid var(--btn-border); border-radius: 4px; }
 
         .zoom-controls {
-            position: absolute;
-            top: 50%;
-            right: 20px;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            z-index: 200;
+            position: absolute; top: 50%; right: 20px;
+            transform: translateY(-50%); display: flex; flex-direction: column; gap: 6px; z-index: 200;
         }
 
         .zoom-btn {
-            width: 36px;
-            height: 36px;
-            background: var(--sidebar-bg);
-            border: 1px solid var(--sidebar-border);
-            border-radius: 8px;
-            color: var(--text);
-            cursor: pointer;
-            box-shadow: 0 2px 7px rgba(0, 0, 0, 0.08);
-        }
-
-        .zoom-btn:hover {
-            background: var(--btn-hover);
-        }
-
-        .tip-banner {
-            position: absolute;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.82);
-            color: #ffffff;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            pointer-events: none;
-            z-index: 190;
-            display: flex;
-            gap: 12px;
-            white-space: nowrap;
-        }
-
-        @media (max-width: 760px) {
-            .tip-banner {
-                display: none;
-            }
-
-            .zoom-controls {
-                right: 10px;
-            }
-        }
-
-        /* 轉父節點／取消連結模式 */
-        .node.relationship-source {
-            box-shadow:
-                0 0 0 4px #9c27b0,
-                0 0 0 10px rgba(156, 39, 176, 0.22),
-                0 8px 20px var(--node-shadow);
-            animation: relationshipPulse 0.8s infinite alternate;
-        }
-
-        @keyframes relationshipPulse {
-            from {
-                transform: scale(1);
-            }
-
-            to {
-                transform: scale(1.04);
-            }
+            width: 36px; height: 36px; background: var(--sidebar-bg);
+            border: 1px solid var(--sidebar-border); border-radius: 8px;
+            color: var(--text); cursor: pointer; box-shadow: 0 2px 7px rgba(0, 0, 0, 0.08);
         }
 
         .relationship-mode-banner {
-            position: absolute;
-            top: 18px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 260;
-            display: none;
-            max-width: min(560px, calc(100vw - 40px));
-            padding: 10px 18px;
-            border: 2px solid #9c27b0;
-            border-radius: 22px;
-            background: rgba(255, 255, 255, 0.97);
-            color: #4a148c;
-            font-size: 13px;
-            font-weight: 600;
-            text-align: center;
+            position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+            z-index: 260; display: none; max-width: min(600px, calc(100vw - 40px));
+            padding: 8px 16px; border: 2px solid #9c27b0; border-radius: 22px;
+            background: rgba(255, 255, 255, 0.98); color: #4a148c;
+            font-size: 13px; font-weight: 600; text-align: center;
             box-shadow: 0 5px 18px rgba(0, 0, 0, 0.18);
         }
+        .relationship-mode-banner.active { display: flex; align-items: center; gap: 10px; }
 
-        .relationship-mode-banner.active {
-            display: block;
+        .banner-cancel-btn {
+            background: #d32f2f; color: #fff; border: none;
+            padding: 4px 10px; border-radius: 12px; cursor: pointer; font-size: 11px;
         }
     </style>
 </head>
@@ -758,13 +416,21 @@
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h1>🌿 Mind Map Pro</h1>
-            <p>
-                雙擊文字編輯、多行換行、八方向縮放及語音輸入版本
-            </p>
+            <p>雙擊文字編輯、多樹架構、獨立 Link Box 及 Adobe 調色盤版</p>
         </div>
 
         <div class="sidebar-section">
-            <h3>快捷思考指令</h3>
+            <!-- 多樹模式 Multi Tree 置中 Checkbox -->
+            <div class="multi-tree-container">
+                <input type="checkbox" id="multi-tree-toggle" onchange="toggleMultiTree(this.checked)">
+                <label for="multi-tree-toggle">啟用 Multi Tree 多樹模式</label>
+            </div>
+
+            <h3>快捷思考與節點指令</h3>
+
+            <button class="action-btn" onclick="addRootNode()">
+                🌳 新增獨立根節點
+            </button>
 
             <button class="action-btn" onclick="addChildToSelected(true)">
                 ＋ 子節點（Tab）
@@ -774,12 +440,20 @@
                 ↔ 同級節點（Enter）
             </button>
 
+            <button class="action-btn" onclick="addStandaloneLinkBox()">
+                📦 新增獨立 Link Box
+            </button>
+
             <button class="action-btn" onclick="startReparentSelected()">
                 ⇆ 轉父節點
             </button>
 
             <button class="action-btn" onclick="startUnlinkSelected()">
                 ⛓ 取消兩點連結
+            </button>
+
+            <button class="action-btn" onclick="cancelAllModes()" style="color:#d32f2f;">
+                🛑 結束 Link／取消連線模式
             </button>
 
             <button class="action-btn" onclick="deleteSelected()">
@@ -792,79 +466,81 @@
             </div>
         </div>
 
+        <!-- 12 款畫布背景選擇 -->
+        <div class="sidebar-section">
+            <h3>畫布背景 (12 款)</h3>
+            <select id="bg-selector" class="action-btn" onchange="changeCanvasBackground(this.value)">
+                <option value="bg-default">1. 預設淺灰 (Default)</option>
+                <option value="bg-night">2. 夜間極客 (Night)</option>
+                <option value="bg-beige">3. 復古米色 (Beige)</option>
+                <option value="bg-light-green">4. 護眼淺綠 (Light Green)</option>
+                <option value="bg-light-blue">5. 舒適淺藍 (Light Blue)</option>
+                <option value="bg-grid">6. 工程網格 (Grid)</option>
+                <option value="bg-blueprint">7. 建築藍圖 (Blueprint)</option>
+                <option value="bg-charcoal">8. 深色焦炭 (Charcoal)</option>
+                <option value="bg-sunset">9. 日落暖黃 (Warm Sunset)</option>
+                <option value="bg-lavender">10. 薰衣草紫 (Lavender)</option>
+                <option value="bg-mint">11. 清新薄荷 (Mint)</option>
+                <option value="bg-white">12. 純白無瑕 (Pure White)</option>
+            </select>
+        </div>
+
+        <!-- 字體與排版設定 -->
+        <div class="sidebar-section">
+            <h3>文字與排版設定</h3>
+            <div class="style-row">
+                <span>字體:</span>
+                <select id="font-family-select" onchange="applyTextStyle('fontFamily', this.value)">
+                    <option value="sans-serif">System Sans</option>
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="'Georgia', serif">Georgia</option>
+                    <option value="'Courier New', monospace">Monospace</option>
+                    <option value="'Microsoft JhengHei', sans-serif">微軟正黑體</option>
+                </select>
+            </div>
+            <div class="style-row">
+                <span>字級:</span>
+                <input type="number" id="font-size-input" value="14" min="10" max="48" onchange="applyTextStyle('fontSize', this.value + 'px')">
+            </div>
+            <div class="style-row">
+                <span>字重:</span>
+                <select id="font-weight-select" onchange="applyTextStyle('fontWeight', this.value)">
+                    <option value="normal">一般 (Normal)</option>
+                    <option value="bold">粗體 (Bold)</option>
+                    <option value="300">細體 (Light)</option>
+                </select>
+            </div>
+            <div class="style-row">
+                <span>文字顏色:</span>
+                <input type="color" id="text-color-input" value="#ffffff" onchange="applyTextStyle('color', this.value)">
+            </div>
+        </div>
+
         <div class="sidebar-section">
             <h3>語音輸入</h3>
-
-            <button class="action-btn" onclick="requestPermanentMicrophonePermission()">
-                🎤 啟用咪高峰權限
-            </button>
-
-            <div class="permission-status" id="permission-status">
-                正在檢查咪高峰權限……
-            </div>
-
-            <p style="font-size:10px; color:var(--text-sub); margin-top:8px; line-height:1.5;">
-                權限是否永久保留由瀏覽器控制。請選擇「允許」，並使用 HTTPS 或 localhost。
-            </p>
+            <button class="action-btn" onclick="requestPermanentMicrophonePermission()">🎤 啟用咪高峰權限</button>
+            <div class="permission-status" id="permission-status">正在檢查咪高峰權限……</div>
         </div>
 
         <div class="sidebar-section">
             <h3>檔案備份</h3>
-
-            <button class="action-btn" onclick="exportJSON()">
-                ↓ 匯出 JSON
-            </button>
-
-            <button class="action-btn" onclick="importJSON()">
-                ↑ 匯入 JSON
-            </button>
-        </div>
-
-        <div class="sidebar-section">
-            <h3>編輯方法</h3>
-
-            <div style="font-size:11px; color:var(--text-sub); line-height:1.7;">
-                • 雙擊節點或 Link Box 編輯<br>
-                • Enter：文字換行<br>
-                • Ctrl/Cmd + Enter：完成編輯<br>
-                • Escape：取消編輯<br>
-                • 拉動邊框控制點：改變大小<br>
-                • 雙擊縮放控制點：自動配合文字高度
-            </div>
+            <button class="action-btn" onclick="exportJSON()">↓ 匯出 JSON</button>
+            <button class="action-btn" onclick="importJSON()">↑ 匯入 JSON</button>
         </div>
     </div>
 
-    <button
-        class="sidebar-toggle-btn"
-        id="sidebar-toggle-btn"
-        onclick="toggleSidebar()"
-        title="開啟／收起側欄"
-    >
-        ◀
-    </button>
+    <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" onclick="toggleSidebar()" title="開啟／收起側欄">◀</button>
 
-    <div id="canvas-area">
-        <div class="relationship-mode-banner" id="relationship-mode-banner"></div>
-        <div id="tree-canvas">
-            <svg id="lines-svg">
-                <line
-                    id="temp-link-line"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="0"
-                    stroke="#ff9800"
-                    stroke-width="2.5"
-                    stroke-dasharray="6,4"
-                    style="display:none;"
-                ></line>
-            </svg>
+    <div id="canvas-area" class="bg-default">
+        <div class="relationship-mode-banner" id="relationship-mode-banner">
+            <span id="banner-text">模式提示文字</span>
+            <button class="banner-cancel-btn" onclick="cancelAllModes()">結束 / 取消</button>
         </div>
 
-        <div class="tip-banner">
-            <span>💡 雙擊：多行編輯</span>
-            <span>🎤 語音輸入</span>
-            <span>↘ 拉動控制點：自由縮放</span>
+        <div id="tree-canvas">
+            <svg id="lines-svg">
+                <line id="temp-link-line" x1="0" y1="0" x2="0" y2="0" stroke="#ff9800" stroke-width="2.5" stroke-dasharray="6,4" style="display:none;"></line>
+            </svg>
         </div>
 
         <div class="zoom-controls">
@@ -874,100 +550,82 @@
         </div>
     </div>
 
+    <!-- Adobe 格式調色盤 (HEX, RGB, HSB, CMYK, LAB, RGB Code) -->
     <div class="adobe-picker-popover" id="adobe-picker">
         <div class="adobe-picker-header">
-            <span>🎨 調色盤</span>
-
-            <button
-                style="background:none; border:none; color:var(--text); cursor:pointer;"
-                onclick="closeAdobePicker()"
-            >
-                ✕
-            </button>
+            <span>🎨 Adobe 格式調色盤</span>
+            <button style="background:none; border:none; color:var(--text); cursor:pointer;" onclick="closeAdobePicker()">✕</button>
         </div>
 
         <div class="picker-tabs">
-            <div
-                class="picker-tab active"
-                id="tab-solid"
-                onclick="setPickerMode('solid')"
-            >
-                單色
-            </div>
-
-            <div
-                class="picker-tab"
-                id="tab-gradient"
-                onclick="setPickerMode('gradient')"
-            >
-                漸變
-            </div>
-
-            <div
-                class="picker-tab"
-                id="tab-sharp"
-                onclick="setPickerMode('sharp')"
-            >
-                尖邊
-            </div>
+            <div class="picker-tab active" id="tab-solid" onclick="setPickerMode('solid')">單色</div>
+            <div class="picker-tab" id="tab-gradient" onclick="setPickerMode('gradient')">漸變</div>
+            <div class="picker-tab" id="tab-sharp" onclick="setPickerMode('sharp')">尖邊</div>
         </div>
 
         <div class="picker-row">
-            <span>主色：</span>
-            <input
-                type="color"
-                id="picker-c1"
-                value="#1565c0"
-                oninput="applyColorPicker()"
-            >
+            <span>主色 picker:</span>
+            <input type="color" id="picker-c1" value="#1565c0" oninput="onColorPickerChange()">
+            <span>次色:</span>
+            <input type="color" id="picker-c2" value="#1e88e5" oninput="onColorPickerChange()">
         </div>
 
         <div class="picker-row">
-            <span>次色：</span>
-            <input
-                type="color"
-                id="picker-c2"
-                value="#1e88e5"
-                oninput="applyColorPicker()"
-            >
+            <span>HEX:</span>
+            <input type="text" id="color-hex" value="#1565C0" onchange="updateFromHex(this.value)">
         </div>
 
         <div class="picker-row">
-            <span>角度：</span>
-            <input
-                type="range"
-                id="picker-angle"
-                min="0"
-                max="360"
-                value="135"
-                style="width:90px;"
-                oninput="applyColorPicker()"
-            >
+            <span>RGB Code:</span>
+            <input type="text" id="color-rgb-code" value="rgb(21, 101, 192)" readonly>
         </div>
 
         <div class="picker-row">
-            <span>透明度：</span>
-            <input
-                type="range"
-                id="picker-alpha"
-                min="10"
-                max="100"
-                value="100"
-                style="width:90px;"
-                oninput="applyColorPicker()"
-            >
+            <span>RGB:</span>
+            <input type="number" id="rgb-r" min="0" max="255" value="21" onchange="updateFromRgb()">
+            <input type="number" id="rgb-g" min="0" max="255" value="101" onchange="updateFromRgb()">
+            <input type="number" id="rgb-b" min="0" max="255" value="192" onchange="updateFromRgb()">
+        </div>
+
+        <div class="picker-row">
+            <span>HSB:</span>
+            <input type="number" id="hsb-h" min="0" max="360" value="212" onchange="updateFromHsb()">°
+            <input type="number" id="hsb-s" min="0" max="100" value="89" onchange="updateFromHsb()">%
+            <input type="number" id="hsb-b" min="0" max="100" value="75" onchange="updateFromHsb()">%
+        </div>
+
+        <div class="picker-row">
+            <span>CMYK:</span>
+            <input type="number" id="cmyk-c" min="0" max="100" value="89" readonly>%
+            <input type="number" id="cmyk-m" min="0" max="100" value="47" readonly>%
+            <input type="number" id="cmyk-y" min="0" max="100" value="0" readonly>%
+            <input type="number" id="cmyk-k" min="0" max="100" value="25" readonly>%
+        </div>
+
+        <div class="picker-row">
+            <span>LAB:</span>
+            <input type="number" id="lab-l" value="43" readonly>
+            <input type="number" id="lab-a" value="9" readonly>
+            <input type="number" id="lab-b" value="-55" readonly>
+        </div>
+
+        <div class="picker-row">
+            <span>漸變角度:</span>
+            <input type="range" id="picker-angle" min="0" max="360" value="135" style="width:100px;" oninput="applyColorPicker()">
+        </div>
+
+        <div class="picker-row">
+            <span>不透明度:</span>
+            <input type="range" id="picker-alpha" min="10" max="100" value="100" style="width:100px;" oninput="applyColorPicker()">
         </div>
     </div>
 
     <script>
         "use strict";
 
-        /* =========================
-           Main data
-        ========================= */
-
         let nodes = [];
         let crossLinks = [];
+        let standaloneBoxes = [];
 
         let nextId = 0;
         let nextLinkId = 0;
@@ -975,6 +633,10 @@
 
         let selectedId = null;
         let selectedBoxId = null;
+        let clipboardData = null; // Ctrl+C / Ctrl+V 複製貼上快取
+
+        let multiTreeEnabled = false;
+        let currentCanvasBg = "bg-default";
 
         let scale = 1;
         let tx = 0;
@@ -985,43 +647,18 @@
         let isRestoringHistory = false;
 
         let isPanning = false;
-        let panStartX = 0;
-        let panStartY = 0;
+        let panStartX = 0, panStartY = 0;
+        let dragTarget = null, resizeTarget = null, gestureSnapshot = null;
+        let dragMouseX = 0, dragMouseY = 0, gestureStartClientX = 0, gestureStartClientY = 0;
 
-        let dragTarget = null;
-        let resizeTarget = null;
-        let gestureSnapshot = null;
+        let linkMode = false, linkFromId = null;
+        let relationshipMode = null, relationshipSourceId = null;
+        let editingTarget = null, activePickerTarget = null, pickerStartSnapshot = null;
 
-        let dragMouseX = 0;
-        let dragMouseY = 0;
-        let gestureStartClientX = 0;
-        let gestureStartClientY = 0;
+        let activeRecognition = null, activeSpeechButton = null, speechSession = null;
 
-        let linkMode = false;
-        let linkFromId = null;
-        
-        let relationshipMode = null;
-        /*
-        relationshipMode:
-        null       = 普通模式
-        "reparent" = 轉父節點模式
-        "unlink"   = 取消兩點連結模式
-        */
-        let relationshipSourceId = null;
-
-        let editingTarget = null;
-
-        let activePickerTarget = null;
-        let pickerStartSnapshot = null;
-
-        let activeRecognition = null;
-        let activeSpeechButton = null;
-        let speechSession = null;
-
-        const MIN_NODE_WIDTH = 90;
-        const MIN_NODE_HEIGHT = 40;
-        const MIN_BOX_WIDTH = 80;
-        const MIN_BOX_HEIGHT = 32;
+        const MIN_NODE_WIDTH = 90, MIN_NODE_HEIGHT = 40;
+        const MIN_BOX_WIDTH = 80, MIN_BOX_HEIGHT = 32;
 
         const canvasArea = document.getElementById("canvas-area");
         const treeCanvas = document.getElementById("tree-canvas");
@@ -1031,22 +668,9 @@
         const permissionStatus = document.getElementById("permission-status");
         const relationshipModeBanner = document.getElementById("relationship-mode-banner");
 
-        /* =========================
-           Startup
-        ========================= */
-
         window.addEventListener("load", () => {
-            const cx = 4000;
-            const cy = 4000;
-
-            const rootId = createNode(
-                "中心主題",
-                cx - 65,
-                cy - 22,
-                null,
-                false,
-                false
-            );
+            const cx = 4000, cy = 4000;
+            const rootId = createNode("中心主題", cx - 65, cy - 22, null, false, false);
 
             tx = -cx + canvasArea.offsetWidth / 2;
             ty = -cy + canvasArea.offsetHeight / 2;
@@ -1060,2628 +684,788 @@
             drawLines();
         });
 
-        /* =========================
-           History
-        ========================= */
+        /* Multi Tree 模式切換 */
+        function toggleMultiTree(enabled) {
+            multiTreeEnabled = enabled;
+        }
 
+        /* 新增獨立根節點 */
+        function addRootNode() {
+            finishCurrentEditing();
+            const snapshot = captureState();
+            const cx = 4000 + (Math.random() * 200 - 100);
+            const cy = 4000 + (Math.random() * 200 - 100);
+            const id = createNode("獨立根節點", cx, cy, null, true, false);
+            pushHistorySnapshot(snapshot);
+            selectNode(id);
+        }
+
+        /* 切換 12 款畫布背景 */
+        function changeCanvasBackground(bgClass) {
+            canvasArea.className = bgClass;
+            currentCanvasBg = bgClass;
+        }
+
+        /* 複製與貼上 (Ctrl+C / Ctrl+V) */
+        function copySelected() {
+            if (selectedId !== null) {
+                const node = nodes.find(n => n.id === selectedId);
+                if (node) clipboardData = { type: "node", data: JSON.parse(JSON.stringify(node)) };
+            } else if (selectedBoxId !== null) {
+                const box = findBoxById(selectedBoxId);
+                if (box) clipboardData = { type: "box", data: JSON.parse(JSON.stringify(box)) };
+            }
+        }
+
+        function pasteClipboard() {
+            if (!clipboardData) return;
+            const snapshot = captureState();
+
+            if (clipboardData.type === "node") {
+                const item = clipboardData.data;
+                const newId = nextId++;
+                const newNode = {
+                    ...item,
+                    id: newId,
+                    parentId: null, // 貼上後成為獨立 Box / Node
+                    x: item.x + 40,
+                    y: item.y + 40,
+                    text: item.text + " (副本)"
+                };
+                nodes.push(newNode);
+                renderNode(newNode);
+                selectNode(newId);
+            } else if (clipboardData.type === "box") {
+                const item = clipboardData.data;
+                const newBoxId = nextBoxId++;
+                const newBox = {
+                    ...item,
+                    id: newBoxId,
+                    x: item.x + 30,
+                    y: item.y + 30,
+                    text: item.text + " (副本)"
+                };
+                standaloneBoxes.push(newBox);
+                renderSingleLinkBox(newBox, true);
+                selectBox(newBoxId);
+            }
+
+            drawLines();
+            pushHistorySnapshot(snapshot);
+        }
+
+        /* 獨立新增 Link Box */
+        function addStandaloneLinkBox() {
+            finishCurrentEditing();
+            const snapshot = captureState();
+            const box = {
+                id: nextBoxId++,
+                text: "獨立 Link Box",
+                x: 4000 - tx / scale + 50,
+                y: 4000 - ty / scale + 50,
+                width: 110, height: 34,
+                color1: "#ffffff", color2: "#ffffff", colorType: "solid",
+                opacity: 0.96, deg: 135, textColor: "#333333"
+            };
+            standaloneBoxes.push(box);
+            renderSingleLinkBox(box, true);
+            selectBox(box.id);
+            pushHistorySnapshot(snapshot);
+        }
+
+        /* 結束 / 取消所有模式 */
+        function cancelAllModes() {
+            cancelLinkMode();
+            cancelRelationshipMode();
+            closeAdobePicker();
+        }
+
+        /* 套用字體樣式 */
+        function applyTextStyle(property, value) {
+            const snapshot = captureState();
+            let target = null;
+            if (selectedId !== null) target = nodes.find(n => n.id === selectedId);
+            else if (selectedBoxId !== null) target = findBoxById(selectedBoxId);
+
+            if (target) {
+                target[property] = value;
+                const el = document.getElementById(selectedId !== null ? `node-${target.id}` : `box-${target.id}`);
+                if (el) {
+                    const textEl = el.querySelector(".node-text, .link-box-text");
+                    if (textEl) textEl.style[property] = value;
+                }
+                pushHistorySnapshot(snapshot);
+            }
+        }
+
+        /* 歷史記錄 Capture */
         function captureState() {
             return JSON.stringify({
-                nodes,
-                crossLinks,
-                nextId,
-                nextLinkId,
-                nextBoxId
+                nodes, crossLinks, standaloneBoxes,
+                nextId, nextLinkId, nextBoxId,
+                multiTreeEnabled, currentCanvasBg
             });
         }
 
         function pushHistorySnapshot(snapshot) {
             if (isRestoringHistory || !snapshot) return;
-
             const current = captureState();
-
             if (snapshot === current) return;
-
             undoStack.push(snapshot);
-
-            if (undoStack.length > 60) {
-                undoStack.shift();
-            }
-
+            if (undoStack.length > 60) undoStack.shift();
             redoStack = [];
-        }
-
-        function recordCurrentStateBeforeChange() {
-            return captureState();
         }
 
         function undo() {
             finishCurrentEditing();
-
             if (!undoStack.length) return;
-
             isRestoringHistory = true;
-
             redoStack.push(captureState());
-
-            const previous = JSON.parse(undoStack.pop());
-            restoreState(previous);
-
+            restoreState(JSON.parse(undoStack.pop()));
             isRestoringHistory = false;
         }
 
         function redo() {
             finishCurrentEditing();
-
             if (!redoStack.length) return;
-
             isRestoringHistory = true;
-
             undoStack.push(captureState());
-
-            const next = JSON.parse(redoStack.pop());
-            restoreState(next);
-
+            restoreState(JSON.parse(redoStack.pop()));
             isRestoringHistory = false;
         }
 
         function restoreState(state) {
             stopSpeechRecognition(false);
+            treeCanvas.querySelectorAll(".node, .link-box").forEach(el => el.remove());
 
-            editingTarget = null;
-            dragTarget = null;
-            resizeTarget = null;
-            gestureSnapshot = null;
+            nodes = state.nodes || [];
+            crossLinks = state.crossLinks || [];
+            standaloneBoxes = state.standaloneBoxes || [];
+            nextId = state.nextId || 0;
+            nextLinkId = state.nextLinkId || 0;
+            nextBoxId = state.nextBoxId || 0;
+            multiTreeEnabled = !!state.multiTreeEnabled;
+            document.getElementById("multi-tree-toggle").checked = multiTreeEnabled;
 
-            treeCanvas
-                .querySelectorAll(".node, .link-box")
-                .forEach((element) => element.remove());
-
-            nodes = Array.isArray(state.nodes) ? state.nodes : [];
-            crossLinks = Array.isArray(state.crossLinks)
-                ? state.crossLinks
-                : [];
-
-            normaliseImportedData();
-
-            nextId = Number.isFinite(state.nextId)
-                ? state.nextId
-                : getNextNodeId();
-
-            nextLinkId = Number.isFinite(state.nextLinkId)
-                ? state.nextLinkId
-                : getNextLinkId();
-
-            nextBoxId = Number.isFinite(state.nextBoxId)
-                ? state.nextBoxId
-                : getNextBoxId();
-
-            selectedId = null;
-            selectedBoxId = null;
+            if (state.currentCanvasBg) changeCanvasBackground(state.currentCanvasBg);
 
             nodes.forEach(renderNode);
             renderLinkBoxes();
             drawLines();
         }
 
-        function normaliseImportedData() {
-            nodes.forEach((node) => {
-                node.width = Number(node.width) || 130;
-                node.height = Number(node.height) || 44;
-                node.text = String(node.text ?? "新節點");
-                node.opacity = node.opacity ?? 1;
-                node.color1 = node.color1 || "#1565c0";
-                node.color2 = node.color2 || "#1e88e5";
-                node.colorType = node.colorType || "gradient";
-                node.deg = Number(node.deg) || 135;
-            });
-
-            crossLinks.forEach((link) => {
-                if (!Array.isArray(link.boxes)) {
-                    link.boxes = [];
-                }
-
-                link.boxes.forEach((box) => {
-                    box.width = Number(box.width) || 110;
-                    box.height = Number(box.height) || 34;
-                    box.text = String(box.text ?? "連結");
-                    box.opacity = box.opacity ?? 0.95;
-                    box.color1 = box.color1 || "#ffffff";
-                    box.color2 = box.color2 || "#ffffff";
-                    box.colorType = box.colorType || "solid";
-                    box.deg = Number(box.deg) || 135;
-                });
-            });
-        }
-
-        function getNextNodeId() {
-            return nodes.reduce(
-                (maximum, node) => Math.max(maximum, Number(node.id) + 1),
-                0
-            );
-        }
-
-        function getNextLinkId() {
-            return crossLinks.reduce(
-                (maximum, link) => Math.max(maximum, Number(link.id) + 1),
-                0
-            );
-        }
-
-        function getNextBoxId() {
-            let maximum = 0;
-
-            crossLinks.forEach((link) => {
-                link.boxes.forEach((box) => {
-                    maximum = Math.max(maximum, Number(box.id) + 1);
-                });
-            });
-
-            return maximum;
-        }
-
-        /* =========================
-           Sidebar
-        ========================= */
-
-        function toggleSidebar() {
-            const sidebar = document.getElementById("sidebar");
-            const toggleButton = document.getElementById("sidebar-toggle-btn");
-
-            sidebar.classList.toggle("collapsed");
-
-            toggleButton.textContent = sidebar.classList.contains("collapsed")
-                ? "▶"
-                : "◀";
-        }
-
-        /* =========================
-           Node creation/rendering
-        ========================= */
-
-        function createNode(
-            text,
-            x,
-            y,
-            parentId,
-            autoEdit = false,
-            recordHistory = true
-        ) {
-            const historySnapshot = recordHistory
-                ? recordCurrentStateBeforeChange()
-                : null;
-
-            const parent = nodes.find((node) => node.id === parentId);
+        /* Node 建置 */
+        function createNode(text, x, y, parentId, autoEdit = false, recordHistory = true) {
+            const snapshot = recordHistory ? captureState() : null;
+            const parent = nodes.find(n => n.id === parentId);
 
             const node = {
                 id: nextId++,
                 text: String(text ?? "新節點"),
-                x,
-                y,
-                parentId,
-                width: 130,
-                height: 44,
+                x, y, parentId, width: 130, height: 44,
                 color1: parent ? parent.color1 : "#1565c0",
                 color2: parent ? parent.color2 : "#1e88e5",
                 colorType: parent ? parent.colorType : "gradient",
-                opacity: parent ? parent.opacity : 1,
-                deg: parent ? parent.deg : 135
+                opacity: parent ? parent.opacity : 1, deg: parent ? parent.deg : 135,
+                fontSize: "14px", fontFamily: "sans-serif", fontWeight: "normal", textColor: "#ffffff"
             };
 
             nodes.push(node);
             renderNode(node);
             drawLines();
 
-            if (historySnapshot) {
-                pushHistorySnapshot(historySnapshot);
-            }
-
-            if (autoEdit) {
-                window.setTimeout(() => {
-                    startTextEdit("node", node.id);
-                }, 40);
-            }
-
+            if (snapshot) pushHistorySnapshot(snapshot);
+            if (autoEdit) window.setTimeout(() => startTextEdit("node", node.id), 40);
             return node.id;
         }
 
         function renderNode(node) {
-            node.width = Number(node.width) || 130;
-            node.height = Number(node.height) || 44;
-
             const element = document.createElement("div");
-
             element.className = "node";
             element.id = `node-${node.id}`;
-            element.dataset.nodeId = node.id;
 
             setElementGeometry(element, node);
             applyStyle(element, node);
 
             const content = document.createElement("div");
             content.className = "node-content";
-
             const text = document.createElement("span");
             text.className = "node-text";
             text.textContent = node.text;
+
+            if (node.fontFamily) text.style.fontFamily = node.fontFamily;
+            if (node.fontSize) text.style.fontSize = node.fontSize;
+            if (node.fontWeight) text.style.fontWeight = node.fontWeight;
+            if (node.textColor) text.style.color = node.textColor;
 
             content.appendChild(text);
             element.appendChild(content);
 
             const quickAdd = document.createElement("button");
-            quickAdd.type = "button";
             quickAdd.className = "node-quick-add";
             quickAdd.textContent = "+";
-            quickAdd.title = "新增子節點";
-
-            quickAdd.addEventListener("mousedown", stopInteractiveEvent);
-
-            quickAdd.addEventListener("click", (event) => {
-                event.stopPropagation();
-                addChildTo(node.id, true);
-            });
-
+            quickAdd.onclick = (e) => { e.stopPropagation(); addChildTo(node.id, true); };
             element.appendChild(quickAdd);
 
             const menuTrigger = document.createElement("button");
-            menuTrigger.type = "button";
             menuTrigger.className = "inplace-menu-trigger";
             menuTrigger.textContent = "✎";
-            menuTrigger.title = "開啟節點選單";
-
-            menuTrigger.addEventListener("mousedown", stopInteractiveEvent);
-
-            menuTrigger.addEventListener("click", (event) => {
-                event.stopPropagation();
-                toggleInplaceMenu(node.id);
-            });
-
+            menuTrigger.onclick = (e) => { e.stopPropagation(); toggleInplaceMenu(node.id); };
             element.appendChild(menuTrigger);
 
-            const speechButton = createSpeechButton("node", node.id);
-            element.appendChild(speechButton);
+            element.appendChild(createSpeechButton("node", node.id));
 
             const menu = document.createElement("div");
             menu.className = "inplace-action-menu";
             menu.id = `menu-${node.id}`;
-
             menu.innerHTML = `
-                <button
-                    type="button"
-                    class="inplace-btn"
-                    title="加子節點"
-                    onclick="event.stopPropagation(); addChildTo(${node.id}, true)"
-                >＋</button>
-
-                <button
-                    type="button"
-                    class="inplace-btn"
-                    title="加同級節點"
-                    onclick="event.stopPropagation(); addSiblingTo(${node.id}, true)"
-                >↔</button>
-
-                <button
-                    type="button"
-                    class="inplace-btn"
-                    title="轉父節點：選擇新父節點"
-                    onclick="event.stopPropagation(); startReparent(${node.id})"
-                >⇆</button>
-
-                <button
-                    type="button"
-                    class="inplace-btn"
-                    title="取消同另一節點嘅直接連線"
-                    onclick="event.stopPropagation(); startUnlink(${node.id})"
-                >⛓</button>
-
-                <button
-                    type="button"
-                    class="inplace-btn"
-                    title="跨節點連線"
-                    onclick="event.stopPropagation(); startLink(${node.id})"
-                >🔗</button>
-
-                <button
-                    type="button"
-                    class="inplace-btn"
-                    title="調色盤"
-                    onclick="event.stopPropagation(); openPickerForNode(event, ${node.id})"
-                >🎨</button>
-
-                <button
-                    type="button"
-                    class="inplace-btn"
-                    title="開始文字編輯"
-                    onclick="event.stopPropagation(); startTextEdit('node', ${node.id})"
-                >⌨</button>
-
-                <button
-                    type="button"
-                    class="inplace-btn"
-                    title="刪除"
-                    onclick="event.stopPropagation(); deleteNodeById(${node.id})"
-                >✕</button>
+                <button class="inplace-btn" title="加子節點" onclick="event.stopPropagation(); addChildTo(${node.id}, true)">＋</button>
+                <button class="inplace-btn" title="加同級節點" onclick="event.stopPropagation(); addSiblingTo(${node.id}, true)">↔</button>
+                <button class="inplace-btn" title="轉父節點" onclick="event.stopPropagation(); startReparent(${node.id})">⇆</button>
+                <button class="inplace-btn" title="取消連結" onclick="event.stopPropagation(); startUnlink(${node.id})">⛓</button>
+                <button class="inplace-btn" title="跨節點連線" onclick="event.stopPropagation(); startLink(${node.id})">🔗</button>
+                <button class="inplace-btn" title="調色盤" onclick="event.stopPropagation(); openPickerForNode(event, ${node.id})">🎨</button>
+                <button class="inplace-btn" title="刪除" onclick="event.stopPropagation(); deleteNodeById(${node.id})">✕</button>
             `;
-
-            menu.addEventListener("mousedown", stopInteractiveEvent);
             element.appendChild(menu);
 
             addResizeHandles(element, "node", node);
 
-            element.addEventListener("mousedown", (event) => {
-                if (isInteractiveTarget(event.target)) return;
-                if (editingTarget) return;
+            element.addEventListener("mousedown", (e) => {
+                if (isInteractiveTarget(e.target) || editingTarget) return;
+                e.stopPropagation();
 
-                event.stopPropagation();
-
-                /*
-                轉父節點／取消連結模式
-                */
                 if (relationshipMode) {
-                    if (relationshipSourceId === node.id) {
-                        return;
-                    }
-
-                    if (relationshipMode === "reparent") {
-                        completeReparent(node.id);
-                    } else if (relationshipMode === "unlink") {
-                        completeUnlink(node.id);
-                    }
-
+                    if (relationshipSourceId === node.id) return;
+                    if (relationshipMode === "reparent") completeReparent(node.id);
+                    else if (relationshipMode === "unlink") completeUnlink(node.id);
                     return;
                 }
 
-                /*
-                跨節點連線模式
-                */
-                if (linkMode) {
-                    if (
-                        linkFromId !== null &&
-                        linkFromId !== node.id
-                    ) {
-                        completeLink(node.id);
-                    }
-
+                if (linkMode && linkFromId !== null && linkFromId !== node.id) {
+                    completeLink(node.id);
                     return;
                 }
 
                 selectNode(node.id);
-                beginDrag(event, "node", node, element);
+                beginDrag(e, "node", node, element);
             });
 
-            element.addEventListener("dblclick", (event) => {
-                if (isInteractiveTarget(event.target)) return;
-
-                event.preventDefault();
-                event.stopPropagation();
-
-                if (!linkMode) {
-                    startTextEdit("node", node.id);
-                }
+            element.addEventListener("dblclick", (e) => {
+                if (isInteractiveTarget(e.target)) return;
+                e.stopPropagation();
+                startTextEdit("node", node.id);
             });
 
             treeCanvas.appendChild(element);
         }
 
-        /* =========================
-           Link boxes
-        ========================= */
-
+        /* Link Box 渲染與 Attached 解除 */
         function renderLinkBoxes() {
-            treeCanvas
-                .querySelectorAll(".link-box")
-                .forEach((element) => element.remove());
-
-            crossLinks.forEach((link) => {
-                link.boxes.forEach((box) => renderSingleLinkBox(box));
+            treeCanvas.querySelectorAll(".link-box").forEach(el => el.remove());
+            crossLinks.forEach(link => {
+                link.boxes.forEach(box => renderSingleLinkBox(box, false, link.id));
             });
+            standaloneBoxes.forEach(box => renderSingleLinkBox(box, true));
         }
 
-        function renderSingleLinkBox(box) {
-            box.width = Number(box.width) || 110;
-            box.height = Number(box.height) || 34;
-
+        function renderSingleLinkBox(box, isStandalone = false, parentLinkId = null) {
             const element = document.createElement("div");
-
             element.className = "link-box";
             element.id = `box-${box.id}`;
-            element.dataset.boxId = box.id;
 
             setElementGeometry(element, box);
             applyStyle(element, box);
 
             const content = document.createElement("div");
             content.className = "link-box-content";
-
             const text = document.createElement("span");
             text.className = "link-box-text";
             text.textContent = box.text;
 
+            if (box.textColor) text.style.color = box.textColor;
             content.appendChild(text);
             element.appendChild(content);
 
-            const colorButton = document.createElement("button");
-            colorButton.type = "button";
-            colorButton.className = "box-color-trigger";
-            colorButton.textContent = "🎨";
-            colorButton.title = "設定 Link Box 顏色";
+            /* Attached Link Box 直接解除整條 Cross Link 按鈕 */
+            if (!isStandalone && parentLinkId !== null) {
+                const unlinkBtn = document.createElement("button");
+                unlinkBtn.className = "box-unlink-btn";
+                unlinkBtn.textContent = "⛓";
+                unlinkBtn.title = "解除整條 Cross Link";
+                unlinkBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteCrossLinkByLinkId(parentLinkId);
+                };
+                element.appendChild(unlinkBtn);
+            }
 
-            colorButton.addEventListener("mousedown", stopInteractiveEvent);
-
-            colorButton.addEventListener("click", (event) => {
-                event.stopPropagation();
-                openPickerForBox(event, box.id);
-            });
-
-            element.appendChild(colorButton);
-
-            const speechButton = createSpeechButton("box", box.id);
-            element.appendChild(speechButton);
+            const colorBtn = document.createElement("button");
+            colorBtn.className = "box-color-trigger";
+            colorBtn.textContent = "🎨";
+            colorBtn.onclick = (e) => { e.stopPropagation(); openPickerForBox(e, box.id); };
+            element.appendChild(colorBtn);
 
             addResizeHandles(element, "box", box);
 
-            element.addEventListener("mousedown", (event) => {
-                if (isInteractiveTarget(event.target)) return;
-                if (editingTarget) return;
-
-                event.stopPropagation();
-
+            element.addEventListener("mousedown", (e) => {
+                if (isInteractiveTarget(e.target) || editingTarget) return;
+                e.stopPropagation();
                 selectBox(box.id);
-                beginDrag(event, "box", box, element);
+                beginDrag(e, "box", box, element);
             });
 
-            element.addEventListener("dblclick", (event) => {
-                if (isInteractiveTarget(event.target)) return;
-
-                event.preventDefault();
-                event.stopPropagation();
-
+            element.addEventListener("dblclick", (e) => {
+                if (isInteractiveTarget(e.target)) return;
+                e.stopPropagation();
                 startTextEdit("box", box.id);
             });
 
             treeCanvas.appendChild(element);
         }
 
-        function findBoxById(boxId) {
-            for (const link of crossLinks) {
-                const box = link.boxes.find((item) => item.id === boxId);
-
-                if (box) return box;
-            }
-
-            return null;
+        function deleteCrossLinkByLinkId(linkId) {
+            const snapshot = captureState();
+            crossLinks = crossLinks.filter(l => l.id !== linkId);
+            renderLinkBoxes();
+            drawLines();
+            pushHistorySnapshot(snapshot);
         }
 
-        /* =========================
-           Multiline text editing
-        ========================= */
+        function findBoxById(boxId) {
+            for (const link of crossLinks) {
+                const box = link.boxes.find(b => b.id === boxId);
+                if (box) return box;
+            }
+            return standaloneBoxes.find(b => b.id === boxId) || null;
+        }
 
+        /* 雙擊多行文字編輯 */
         function startTextEdit(type, id) {
-            if (editingTarget) {
-                if (
-                    editingTarget.type === type &&
-                    editingTarget.id === id
-                ) {
-                    editingTarget.textarea.focus();
-                    return;
-                }
+            finishCurrentEditing();
+            const item = type === "node" ? nodes.find(n => n.id === id) : findBoxById(id);
+            const el = document.getElementById(type === "node" ? `node-${id}` : `box-${id}`);
+            if (!item || !el) return;
 
-                finishCurrentEditing();
-            }
+            if (type === "node") selectNode(id); else selectBox(id);
 
-            stopSpeechRecognition(true);
-
-            const item = type === "node"
-                ? nodes.find((node) => node.id === id)
-                : findBoxById(id);
-
-            const element = document.getElementById(
-                type === "node" ? `node-${id}` : `box-${id}`
-            );
-
-            if (!item || !element) return;
-
-            if (type === "node") {
-                selectNode(id);
-            } else {
-                selectBox(id);
-            }
-
-            const content = element.querySelector(
-                type === "node"
-                    ? ".node-content"
-                    : ".link-box-content"
-            );
-
-            const textElement = content.querySelector(
-                type === "node"
-                    ? ".node-text"
-                    : ".link-box-text"
-            );
+            const content = el.querySelector(type === "node" ? ".node-content" : ".link-box-content");
+            const textEl = content.querySelector(".node-text, .link-box-text");
 
             const textarea = document.createElement("textarea");
             textarea.className = "text-editor";
             textarea.value = item.text;
-            textarea.spellcheck = true;
-            textarea.setAttribute(
-                "aria-label",
-                type === "node" ? "節點文字" : "連結文字"
-            );
-
-            textElement.style.display = "none";
+            textEl.style.display = "none";
             content.appendChild(textarea);
-            element.classList.add("editing");
+            el.classList.add("editing");
 
-            editingTarget = {
-                type,
-                id,
-                item,
-                element,
-                content,
-                textElement,
-                textarea,
-                originalState: captureState(),
-                originalItem: JSON.parse(JSON.stringify(item)),
-                finished: false
-            };
+            editingTarget = { type, id, item, element: el, textElement: textEl, textarea, originalState: captureState() };
 
-            textarea.addEventListener("mousedown", (event) => {
-                event.stopPropagation();
-            });
+            textarea.focus();
+            textarea.select();
 
-            textarea.addEventListener("dblclick", (event) => {
-                event.stopPropagation();
-            });
-
-            textarea.addEventListener("input", () => {
-                if (!editingTarget) return;
-
-                item.text = textarea.value;
-
-                autoGrowWhileEditing(
-                    item,
-                    element,
-                    textarea,
-                    type
-                );
-
-                drawLines();
-            });
-
-            textarea.addEventListener("keydown", (event) => {
-                event.stopPropagation();
-
-                if (
-                    event.key === "Enter" &&
-                    (event.ctrlKey || event.metaKey)
-                ) {
-                    event.preventDefault();
+            textarea.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
                     finishCurrentEditing();
-                    return;
-                }
-
-                if (event.key === "Escape") {
-                    event.preventDefault();
-                    cancelCurrentEditing();
-                    return;
-                }
-
-                if (event.key === "Tab") {
-                    event.preventDefault();
-
-                    const start = textarea.selectionStart;
-                    const end = textarea.selectionEnd;
-                    const value = textarea.value;
-
-                    textarea.value =
-                        value.slice(0, start) +
-                        "    " +
-                        value.slice(end);
-
-                    textarea.selectionStart =
-                        textarea.selectionEnd =
-                            start + 4;
-
-                    textarea.dispatchEvent(new Event("input"));
+                } else if (e.key === "Escape") {
+                    cancelAllModes();
                 }
             });
-
-            textarea.addEventListener("blur", () => {
-                window.setTimeout(() => {
-                    if (
-                        editingTarget &&
-                        editingTarget.textarea === textarea &&
-                        !element.contains(document.activeElement)
-                    ) {
-                        finishCurrentEditing();
-                    }
-                }, 0);
-            });
-
-            window.setTimeout(() => {
-                textarea.focus();
-                textarea.select();
-            }, 0);
-        }
-
-        function autoGrowWhileEditing(
-            item,
-            element,
-            textarea,
-            type
-        ) {
-            const minimumHeight = type === "node"
-                ? MIN_NODE_HEIGHT
-                : MIN_BOX_HEIGHT;
-
-            textarea.style.height = "1px";
-
-            const verticalPadding = type === "node" ? 18 : 12;
-            const requiredHeight =
-                textarea.scrollHeight + verticalPadding;
-
-            if (requiredHeight > item.height) {
-                item.height = Math.max(
-                    minimumHeight,
-                    requiredHeight
-                );
-
-                element.style.height = `${item.height}px`;
-            }
-
-            textarea.style.height = "100%";
         }
 
         function finishCurrentEditing() {
-            if (!editingTarget || editingTarget.finished) return;
-
-            const session = editingTarget;
-            session.finished = true;
-
-            let newText = session.textarea.value;
-
-            if (!newText.trim()) {
-                newText = session.type === "node"
-                    ? "新節點"
-                    : "連結";
-            }
-
-            session.item.text = newText;
-            session.textElement.textContent = newText;
-            session.textElement.style.display = "";
-
-            session.textarea.remove();
-            session.element.classList.remove("editing");
-
-            editingTarget = null;
-
-            autoFitHeight(
-                session.type,
-                session.id,
-                false
-            );
-
-            drawLines();
-
-            pushHistorySnapshot(session.originalState);
-        }
-
-        function cancelCurrentEditing() {
             if (!editingTarget) return;
-
-            const session = editingTarget;
-            const original = session.originalItem;
-
-            Object.keys(session.item).forEach((key) => {
-                delete session.item[key];
-            });
-
-            Object.assign(session.item, original);
-
-            session.textElement.textContent = session.item.text;
-            session.textElement.style.display = "";
-
-            session.textarea.remove();
-            session.element.classList.remove("editing");
-
-            setElementGeometry(session.element, session.item);
-            applyStyle(session.element, session.item);
-
+            const { type, item, element, textElement, textarea, originalState } = editingTarget;
+            item.text = textarea.value.trim() || (type === "node" ? "新節點" : "連結");
+            textElement.textContent = item.text;
+            textElement.style.display = "";
+            textarea.remove();
+            element.classList.remove("editing");
             editingTarget = null;
-
+            pushHistorySnapshot(originalState);
             drawLines();
         }
 
-        /* =========================
-           Auto fit text height
-        ========================= */
+        /* 顏色轉算 (Adobe Panel: HEX, RGB, HSB, CMYK, LAB, RGB Code) */
+        function onColorPickerChange() {
+            const hex = document.getElementById("picker-c1").value;
+            updateAdobePanelFields(hex);
+            applyColorPicker();
+        }
 
-        function autoFitHeight(type, id, recordHistory = true) {
-            const item = type === "node"
-                ? nodes.find((node) => node.id === id)
-                : findBoxById(id);
+        function updateAdobePanelFields(hex) {
+            document.getElementById("color-hex").value = hex.toUpperCase();
+            const rgb = hexToRgb(hex);
+            document.getElementById("color-rgb-code").value = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+            document.getElementById("rgb-r").value = rgb.r;
+            document.getElementById("rgb-g").value = rgb.g;
+            document.getElementById("rgb-b").value = rgb.b;
 
-            const element = document.getElementById(
-                type === "node" ? `node-${id}` : `box-${id}`
-            );
+            const hsb = rgbToHsb(rgb.r, rgb.g, rgb.b);
+            document.getElementById("hsb-h").value = hsb.h;
+            document.getElementById("hsb-s").value = hsb.s;
+            document.getElementById("hsb-b").value = hsb.b;
 
-            if (!item || !element) return;
+            const cmyk = rgbToCmyk(rgb.r, rgb.g, rgb.b);
+            document.getElementById("cmyk-c").value = cmyk.c;
+            document.getElementById("cmyk-m").value = cmyk.m;
+            document.getElementById("cmyk-y").value = cmyk.y;
+            document.getElementById("cmyk-k").value = cmyk.k;
 
-            const snapshot = recordHistory
-                ? captureState()
-                : null;
+            const lab = rgbToLab(rgb.r, rgb.g, rgb.b);
+            document.getElementById("lab-l").value = lab.l;
+            document.getElementById("lab-a").value = lab.a;
+            document.getElementById("lab-b").value = lab.b;
+        }
 
-            const content = element.querySelector(
-                type === "node"
-                    ? ".node-content"
-                    : ".link-box-content"
-            );
-
-            const minimumHeight = type === "node"
-                ? MIN_NODE_HEIGHT
-                : MIN_BOX_HEIGHT;
-
-            const verticalPadding = type === "node" ? 18 : 12;
-
-            const oldHeight = element.style.height;
-
-            element.style.height = `${minimumHeight}px`;
-            item.height = minimumHeight;
-
-            const requiredHeight = Math.max(
-                minimumHeight,
-                content.scrollHeight + verticalPadding
-            );
-
-            item.height = requiredHeight;
-            element.style.height = `${requiredHeight}px`;
-
-            if (!requiredHeight) {
-                element.style.height = oldHeight;
-            }
-
-            drawLines();
-
-            if (snapshot) {
-                pushHistorySnapshot(snapshot);
+        function updateFromHex(hex) {
+            if (/^#[0-9A-F]{6}$/i.test(hex)) {
+                document.getElementById("picker-c1").value = hex;
+                updateAdobePanelFields(hex);
+                applyColorPicker();
             }
         }
 
-        /* =========================
-           Resize
-        ========================= */
+        function updateFromRgb() {
+            const r = parseInt(document.getElementById("rgb-r").value) || 0;
+            const g = parseInt(document.getElementById("rgb-g").value) || 0;
+            const b = parseInt(document.getElementById("rgb-b").value) || 0;
+            const hex = rgbToHex(r, g, b);
+            document.getElementById("picker-c1").value = hex;
+            updateAdobePanelFields(hex);
+            applyColorPicker();
+        }
 
-        function addResizeHandles(element, type, item) {
-            const directions = [
-                "n",
-                "s",
-                "e",
-                "w",
-                "ne",
-                "nw",
-                "se",
-                "sw"
-            ];
+        function updateFromHsb() {
+            const h = parseInt(document.getElementById("hsb-h").value) || 0;
+            const s = parseInt(document.getElementById("hsb-s").value) || 0;
+            const b = parseInt(document.getElementById("hsb-b").value) || 0;
+            const rgb = hsbToRgb(h, s, b);
+            const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+            document.getElementById("picker-c1").value = hex;
+            updateAdobePanelFields(hex);
+            applyColorPicker();
+        }
 
-            directions.forEach((direction) => {
-                const handle = document.createElement("div");
+        function hexToRgb(hex) {
+            const num = parseInt(hex.replace("#", ""), 16);
+            return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+        }
 
-                handle.className = `resize-handle ${direction}`;
-                handle.dataset.resizeDirection = direction;
-                handle.title =
-                    "拖曳改變大小；雙擊自動配合文字高度";
+        function rgbToHex(r, g, b) {
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+        }
 
-                handle.addEventListener("mousedown", (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
+        function rgbToHsb(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            let max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, v = max, d = max - min;
+            s = max === 0 ? 0 : d / max;
+            if (max === min) h = 0;
+            else {
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            return { h: Math.round(h * 360), s: Math.round(s * 100), b: Math.round(v * 100) };
+        }
 
-                    if (editingTarget) {
-                        finishCurrentEditing();
-                    }
+        function hsbToRgb(h, s, v) {
+            s /= 100; v /= 100;
+            let c = v * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c;
+            let r = 0, g = 0, b = 0;
+            if (h < 60) { r = c; g = x; }
+            else if (h < 120) { r = x; g = c; }
+            else if (h < 180) { g = c; b = x; }
+            else if (h < 240) { g = x; b = c; }
+            else if (h < 300) { r = x; b = c; }
+            else { r = c; b = x; }
+            return { r: Math.round((r + m) * 255), g: Math.round((g + m) * 255), b: Math.round((b + m) * 255) };
+        }
 
-                    beginResize(
-                        event,
-                        type,
-                        item,
-                        element,
-                        direction
-                    );
-                });
+        function rgbToCmyk(r, g, b) {
+            let c = 1 - (r / 255), m = 1 - (g / 255), y = 1 - (b / 255), k = Math.min(c, Math.min(m, y));
+            if (k === 1) return { c: 0, m: 0, y: 0, k: 100 };
+            return {
+                c: Math.round(((c - k) / (1 - k)) * 100),
+                m: Math.round(((m - k) / (1 - k)) * 100),
+                y: Math.round(((y - k) / (1 - k)) * 100),
+                k: Math.round(k * 100)
+            };
+        }
 
-                handle.addEventListener("dblclick", (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
+        function rgbToLab(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            r = r > 0.04045 ? Math.pow((r + 0.055) / 1.055, 2.4) : r / 12.92;
+            g = g > 0.04045 ? Math.pow((g + 0.055) / 1.055, 2.4) : g / 12.92;
+            b = b > 0.04045 ? Math.pow((b + 0.055) / 1.055, 2.4) : b / 12.92;
+            let x = (r * 0.4124 + g * 0.3576 + b * 0.1805) / 0.95047;
+            let y = (r * 0.2126 + g * 0.7152 + b * 0.0722) / 1.00000;
+            let z = (r * 0.0193 + g * 0.1192 + b * 0.9505) / 1.08883;
+            x = x > 0.008856 ? Math.pow(x, 1/3) : (7.787 * x) + (16 / 116);
+            y = y > 0.008856 ? Math.pow(y, 1/3) : (7.787 * y) + (16 / 116);
+            z = z > 0.008856 ? Math.pow(z, 1/3) : (7.787 * z) + (16 / 116);
+            return { l: Math.round((116 * y) - 16), a: Math.round(500 * (x - y)), b: Math.round(200 * (y - z)) };
+        }
 
-                    autoFitHeight(type, item.id, true);
-                });
+        /* 快捷鍵設定 (含 Ctrl+C, Ctrl+V) */
+        function setupKeyboardShortcuts() {
+            window.addEventListener("keydown", (e) => {
+                const tag = document.activeElement?.tagName?.toLowerCase();
+                if (tag === "input" || tag === "textarea") return;
 
-                element.appendChild(handle);
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c") {
+                    e.preventDefault(); copySelected();
+                } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "v") {
+                    e.preventDefault(); pasteClipboard();
+                } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
+                    e.preventDefault(); if (e.shiftKey) redo(); else undo();
+                } else if (e.key === "Tab") {
+                    e.preventDefault(); if (selectedId !== null) addChildTo(selectedId, true);
+                } else if (e.key === "Enter") {
+                    e.preventDefault(); if (selectedId !== null) addSiblingTo(selectedId, true);
+                } else if (e.key === "Delete" || e.key === "Backspace") {
+                    e.preventDefault(); deleteSelected();
+                } else if (e.key === "Escape") {
+                    cancelAllModes();
+                }
             });
         }
 
-        function beginResize(
-            event,
-            type,
-            item,
-            element,
-            direction
-        ) {
-            if (type === "node") {
-                selectNode(item.id);
-            } else {
-                selectBox(item.id);
-            }
+        /* 繪製連線 */
+        function drawLines() {
+            Array.from(svg.children).forEach(child => { if (child.id !== "temp-link-line") child.remove(); });
 
-            gestureSnapshot = captureState();
+            nodes.forEach(node => {
+                if (node.parentId === null || node.parentId === undefined) return;
+                const parent = nodes.find(n => n.id === node.parentId);
+                if (!parent) return;
 
-            gestureStartClientX = event.clientX;
-            gestureStartClientY = event.clientY;
+                const startX = parent.x + parent.width, startY = parent.y + parent.height / 2;
+                const endX = node.x, endY = node.y + node.height / 2;
+                const controlX = (startX + endX) / 2;
 
-            resizeTarget = {
-                type,
-                item,
-                element,
-                direction,
-                startX: item.x,
-                startY: item.y,
-                startWidth: item.width,
-                startHeight: item.height,
-                moved: false
-            };
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", `M ${startX} ${startY} C ${controlX} ${startY}, ${controlX} ${endY}, ${endX} ${endY}`);
+                path.setAttribute("class", "branch-line");
+                path.setAttribute("stroke", node.color1 || "#4285f4");
+                svg.appendChild(path);
+            });
+
+            crossLinks.forEach(link => {
+                const from = nodes.find(n => n.id === link.fromId);
+                const to = nodes.find(n => n.id === link.toId);
+                if (!from || !to) return;
+
+                const startX = from.x + from.width / 2, startY = from.y + from.height / 2;
+                const endX = to.x + to.width / 2, endY = to.y + to.height / 2;
+                const middleX = (startX + endX) / 2, middleY = (startY + endY) / 2 - 40;
+
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", `M ${startX} ${startY} Q ${middleX} ${middleY} ${endX} ${endY}`);
+                path.setAttribute("class", "cross-link");
+                path.setAttribute("stroke", "#ff9800");
+                svg.appendChild(path);
+            });
         }
 
-        function updateResize(event) {
-            if (!resizeTarget) return;
-
-            const target = resizeTarget;
-            const dx =
-                (event.clientX - gestureStartClientX) / scale;
-            const dy =
-                (event.clientY - gestureStartClientY) / scale;
-
-            const direction = target.direction;
-
-            const minimumWidth = target.type === "node"
-                ? MIN_NODE_WIDTH
-                : MIN_BOX_WIDTH;
-
-            const minimumHeight = target.type === "node"
-                ? MIN_NODE_HEIGHT
-                : MIN_BOX_HEIGHT;
-
-            let newX = target.startX;
-            let newY = target.startY;
-            let newWidth = target.startWidth;
-            let newHeight = target.startHeight;
-
-            if (direction.includes("e")) {
-                newWidth = Math.max(
-                    minimumWidth,
-                    target.startWidth + dx
-                );
-            }
-
-            if (direction.includes("s")) {
-                newHeight = Math.max(
-                    minimumHeight,
-                    target.startHeight + dy
-                );
-            }
-
-            if (direction.includes("w")) {
-                newWidth = Math.max(
-                    minimumWidth,
-                    target.startWidth - dx
-                );
-
-                newX =
-                    target.startX +
-                    target.startWidth -
-                    newWidth;
-            }
-
-            if (direction.includes("n")) {
-                newHeight = Math.max(
-                    minimumHeight,
-                    target.startHeight - dy
-                );
-
-                newY =
-                    target.startY +
-                    target.startHeight -
-                    newHeight;
-            }
-
-            target.item.x = newX;
-            target.item.y = newY;
-            target.item.width = newWidth;
-            target.item.height = newHeight;
-
-            setElementGeometry(target.element, target.item);
-
-            if (
-                Math.abs(event.clientX - gestureStartClientX) > 1 ||
-                Math.abs(event.clientY - gestureStartClientY) > 1
-            ) {
-                target.moved = true;
-            }
-
-            drawLines();
-        }
-
-        /* =========================
-           Dragging
-        ========================= */
-
-        function beginDrag(event, type, item, element) {
-            const rect = canvasArea.getBoundingClientRect();
-
-            gestureSnapshot = captureState();
-
-            gestureStartClientX = event.clientX;
-            gestureStartClientY = event.clientY;
-
-            dragMouseX =
-                (event.clientX - rect.left - tx) / scale -
-                item.x;
-
-            dragMouseY =
-                (event.clientY - rect.top - ty) / scale -
-                item.y;
-
-            dragTarget = {
-                type,
-                item,
-                element,
-                moved: false
-            };
-        }
-
-        function updateDrag(mouseX, mouseY, event) {
-            if (!dragTarget) return;
-
-            dragTarget.item.x = mouseX - dragMouseX;
-            dragTarget.item.y = mouseY - dragMouseY;
-
-            dragTarget.element.style.left =
-                `${dragTarget.item.x}px`;
-
-            dragTarget.element.style.top =
-                `${dragTarget.item.y}px`;
-
-            if (
-                Math.abs(event.clientX - gestureStartClientX) > 2 ||
-                Math.abs(event.clientY - gestureStartClientY) > 2
-            ) {
-                dragTarget.moved = true;
-            }
-
-            drawLines();
-        }
-
-        function finishGesture() {
-            const moved =
-                (dragTarget && dragTarget.moved) ||
-                (resizeTarget && resizeTarget.moved);
-
-            if (moved && gestureSnapshot) {
-                pushHistorySnapshot(gestureSnapshot);
-            }
-
-            dragTarget = null;
-            resizeTarget = null;
-            gestureSnapshot = null;
-        }
-
-        /* =========================
-           Selection
-        ========================= */
-
-        function selectNode(id) {
-            selectedId = id;
-            selectedBoxId = null;
-
-            document
-                .querySelectorAll(".node")
-                .forEach((element) => {
-                    element.classList.remove("selected");
-                });
-
-            document
-                .querySelectorAll(".link-box")
-                .forEach((element) => {
-                    element.classList.remove("selected");
-                });
-
-            document
-                .getElementById(`node-${id}`)
-                ?.classList.add("selected");
-        }
-
-        function selectBox(id) {
-            selectedBoxId = id;
-            selectedId = null;
-
-            document
-                .querySelectorAll(".node")
-                .forEach((element) => {
-                    element.classList.remove("selected");
-                });
-
-            document
-                .querySelectorAll(".link-box")
-                .forEach((element) => {
-                    element.classList.remove("selected");
-                });
-
-            document
-                .getElementById(`box-${id}`)
-                ?.classList.add("selected");
-        }
-
-        /* =========================
-           Add node
-        ========================= */
-
+        /* 其餘互動與基礎事件處理 */
         function addChildTo(parentId, autoEdit = false) {
             finishCurrentEditing();
-
-            const parent = nodes.find(
-                (node) => node.id === parentId
-            );
-
+            const parent = nodes.find(n => n.id === parentId);
             if (!parent) return;
-
-            const siblings = nodes.filter(
-                (node) => node.parentId === parentId
-            );
-
-            const newX =
-                parent.x +
-                parent.width +
-                80;
-
-            const newY =
-                parent.y +
-                siblings.length * 65;
-
-            const newId = createNode(
-                "新節點",
-                newX,
-                newY,
-                parentId,
-                autoEdit,
-                true
-            );
-
-            selectNode(newId);
+            const siblings = nodes.filter(n => n.parentId === parentId);
+            const id = createNode("新節點", parent.x + parent.width + 80, parent.y + siblings.length * 65, parentId, autoEdit, true);
+            selectNode(id);
         }
 
         function addSiblingTo(id, autoEdit = false) {
             finishCurrentEditing();
-
-            const node = nodes.find(
-                (item) => item.id === id
-            );
-
+            const node = nodes.find(n => n.id === id);
             if (!node) return;
-
-            if (node.parentId === null || node.parentId === undefined) {
-                addChildTo(id, autoEdit);
+            if (node.parentId === null) {
+                if (multiTreeEnabled) addRootNode();
+                else addChildTo(id, autoEdit);
                 return;
             }
-
-            const newId = createNode(
-                "新節點",
-                node.x,
-                node.y + node.height + 20,
-                node.parentId,
-                autoEdit,
-                true
-            );
-
+            const newId = createNode("新節點", node.x, node.y + node.height + 20, node.parentId, autoEdit, true);
             selectNode(newId);
         }
 
-        function addChildToSelected(autoEdit = false) {
-            if (selectedId !== null) {
-                addChildTo(selectedId, autoEdit);
-            }
-        }
+        function addChildToSelected(autoEdit = false) { if (selectedId !== null) addChildTo(selectedId, autoEdit); }
+        function addSiblingToSelected(autoEdit = false) { if (selectedId !== null) addSiblingTo(selectedId, autoEdit); }
 
-        function addSiblingToSelected(autoEdit = false) {
-            if (selectedId !== null) {
-                addSiblingTo(selectedId, autoEdit);
-            }
-        }
-
-        /* =========================
-           Delete
-        ========================= */
-
-        function getDescendantIds(parentId) {
-            const result = [];
-            const children = nodes.filter(
-                (node) => node.parentId === parentId
-            );
-
-            children.forEach((child) => {
-                result.push(child.id);
-                result.push(...getDescendantIds(child.id));
-            });
-
-            return result;
+        function deleteSelected() {
+            if (selectedId !== null) deleteNodeById(selectedId);
+            else if (selectedBoxId !== null) deleteBoxById(selectedBoxId);
         }
 
         function deleteNodeById(id) {
             finishCurrentEditing();
-
             const snapshot = captureState();
-            const idsToDelete = new Set([
-                id,
-                ...getDescendantIds(id)
-            ]);
-
-            nodes = nodes.filter(
-                (node) => !idsToDelete.has(node.id)
-            );
-
-            crossLinks = crossLinks.filter((link) => {
-                return (
-                    !idsToDelete.has(link.fromId) &&
-                    !idsToDelete.has(link.toId)
-                );
-            });
-
+            nodes = nodes.filter(n => n.id !== id && n.parentId !== id);
+            crossLinks = crossLinks.filter(l => l.fromId !== id && l.toId !== id);
             selectedId = null;
-
-            treeCanvas
-                .querySelectorAll(".node, .link-box")
-                .forEach((element) => element.remove());
-
-            nodes.forEach(renderNode);
-            renderLinkBoxes();
-            drawLines();
-
+            restoreState(JSON.parse(snapshot));
             pushHistorySnapshot(snapshot);
         }
 
         function deleteBoxById(boxId) {
             finishCurrentEditing();
-
             const snapshot = captureState();
-
-            crossLinks.forEach((link) => {
-                link.boxes = link.boxes.filter(
-                    (box) => box.id !== boxId
-                );
-            });
-
+            crossLinks.forEach(l => { l.boxes = l.boxes.filter(b => b.id !== boxId); });
+            standaloneBoxes = standaloneBoxes.filter(b => b.id !== boxId);
             selectedBoxId = null;
-
-            document.getElementById(`box-${boxId}`)?.remove();
-
+            renderLinkBoxes();
             pushHistorySnapshot(snapshot);
         }
 
-        function deleteSelected() {
-            if (selectedId !== null) {
-                deleteNodeById(selectedId);
-                return;
-            }
-
-            if (selectedBoxId !== null) {
-                deleteBoxById(selectedBoxId);
-            }
-        }
-
-        /* =========================
-           Cross links
-        ========================= */
-
         function startLink(id) {
-            finishCurrentEditing();
-            
-            cancelRelationshipMode();
-
-            linkMode = true;
-            linkFromId = id;
-
+            cancelAllModes();
+            linkMode = true; linkFromId = id;
             canvasArea.classList.add("linking");
-
-            document
-                .querySelectorAll(".node")
-                .forEach((node) => {
-                    node.classList.remove("linking-source");
-                });
-
-            document
-                .getElementById(`node-${id}`)
-                ?.classList.add("linking-source");
-
-            const fromNode = nodes.find(
-                (node) => node.id === id
-            );
-
-            if (!fromNode) return;
-
-            const centerX =
-                fromNode.x + fromNode.width / 2;
-
-            const centerY =
-                fromNode.y + fromNode.height / 2;
-
-            tempLinkLine.setAttribute("x1", centerX);
-            tempLinkLine.setAttribute("y1", centerY);
-            tempLinkLine.setAttribute("x2", centerX);
-            tempLinkLine.setAttribute("y2", centerY);
-            tempLinkLine.style.display = "block";
+            document.getElementById(`node-${id}`)?.classList.add("linking-source");
+            showRelationshipMessage("🔗 跨節點連線：請點擊目標節點完成連線；按 Esc 取消");
         }
 
         function completeLink(targetId) {
-            if (
-                linkFromId === null ||
-                targetId === linkFromId
-            ) {
-                return;
-            }
-
-            const from = nodes.find(
-                (node) => node.id === linkFromId
-            );
-
-            const to = nodes.find(
-                (node) => node.id === targetId
-            );
-
-            if (!from || !to) {
-                cancelLinkMode();
-                return;
-            }
-
-            const duplicate = crossLinks.some((link) => {
-                return (
-                    (link.fromId === from.id &&
-                        link.toId === to.id) ||
-                    (link.fromId === to.id &&
-                        link.toId === from.id)
-                );
-            });
-
-            if (duplicate) {
-                cancelLinkMode();
-                return;
-            }
-
+            if (linkFromId === null || targetId === linkFromId) return;
             const snapshot = captureState();
-
+            const from = nodes.find(n => n.id === linkFromId), to = nodes.find(n => n.id === targetId);
             const box = {
-                id: nextBoxId++,
-                text: "連結",
-                x:
-                    (
-                        from.x +
-                        from.width / 2 +
-                        to.x +
-                        to.width / 2
-                    ) / 2 -
-                    55,
-                y:
-                    (
-                        from.y +
-                        from.height / 2 +
-                        to.y +
-                        to.height / 2
-                    ) / 2 -
-                    17,
-                width: 110,
-                height: 34,
-                color1: "#ffffff",
-                color2: "#ffffff",
-                colorType: "solid",
-                opacity: 0.96,
-                deg: 135
+                id: nextBoxId++, text: "跨連線",
+                x: (from.x + to.x) / 2, y: (from.y + to.y) / 2,
+                width: 110, height: 34, color1: "#ffffff", color2: "#ffffff", colorType: "solid", opacity: 0.95, deg: 135
             };
-
-            crossLinks.push({
-                id: nextLinkId++,
-                fromId: from.id,
-                toId: to.id,
-                boxes: [box]
-            });
-
+            crossLinks.push({ id: nextLinkId++, fromId: from.id, toId: targetId, boxes: [box] });
             cancelLinkMode();
-            renderSingleLinkBox(box);
+            renderLinkBoxes();
             drawLines();
-
             pushHistorySnapshot(snapshot);
-
-            window.setTimeout(() => {
-                startTextEdit("box", box.id);
-            }, 30);
         }
 
         function cancelLinkMode() {
-            linkMode = false;
-            linkFromId = null;
-
+            linkMode = false; linkFromId = null;
             canvasArea.classList.remove("linking");
-
-            tempLinkLine.style.display = "none";
-
-            document
-                .querySelectorAll(".node")
-                .forEach((node) => {
-                    node.classList.remove("linking-source");
-                });
-        }
-        
-        /* =========================
-           轉父節點／取消指定連結
-        ========================= */
-
-        function startReparentSelected() {
-            if (selectedId === null) {
-                alert("請先選擇需要轉換父節點嘅節點。");
-                return;
-            }
-
-            startReparent(selectedId);
-        }
-
-        function startUnlinkSelected() {
-            if (selectedId === null) {
-                alert("請先選擇連線其中一個節點。");
-                return;
-            }
-
-            startUnlink(selectedId);
-        }
-
-        /*
-        使用方式：
-        選擇 B → startReparent(B) → 點擊 X
-        結果：B.parentId 變成 X
-        B 下面全部子節點都會保留
-        */
-        function startReparent(nodeId) {
-            finishCurrentEditing();
-            stopSpeechRecognition(true);
-
-            if (linkMode) {
-                cancelLinkMode();
-            }
-
-            cancelRelationshipMode();
-
-            const node = nodes.find((item) => item.id === nodeId);
-
-            if (!node) return;
-
-            relationshipMode = "reparent";
-            relationshipSourceId = nodeId;
-
-            selectNode(nodeId);
-
-            document
-                .getElementById(`node-${nodeId}`)
-                ?.classList.add("relationship-source");
-
-            showRelationshipMessage(
-                `⇆ 轉父節點：請撳新父節點。正在移動「${node.text}」；按 Esc 取消。`
-            );
-        }
-
-        /*
-        選擇 A → startUnlink(A) → 點擊 B
-        只取消 A、B 之間嘅直接連線
-        */
-        function startUnlink(nodeId) {
-            finishCurrentEditing();
-            stopSpeechRecognition(true);
-
-            if (linkMode) {
-                cancelLinkMode();
-            }
-
-            cancelRelationshipMode();
-
-            const node = nodes.find((item) => item.id === nodeId);
-
-            if (!node) return;
-
-            relationshipMode = "unlink";
-            relationshipSourceId = nodeId;
-
-            selectNode(nodeId);
-
-            document
-                .getElementById(`node-${nodeId}`)
-                ?.classList.add("relationship-source");
-
-            showRelationshipMessage(
-                `⛓ 取消連結：請撳另一個節點。只會取消同「${node.text}」之間嘅直接連線；按 Esc 取消。`
-            );
-        }
-
-        /*
-        完成轉父節點
-        */
-        function completeReparent(newParentId) {
-            const movingNodeId = relationshipSourceId;
-
-            const movingNode = nodes.find(
-                (item) => item.id === movingNodeId
-            );
-
-            const newParent = nodes.find(
-                (item) => item.id === newParentId
-            );
-
-            if (!movingNode || !newParent) {
-                cancelRelationshipMode();
-                return;
-            }
-
-            if (movingNodeId === newParentId) {
-                alert("一個節點唔可以成為自己嘅父節點。");
-                return;
-            }
-
-            /*
-            防止循環：
-            例如 A → B → C
-            唔可以將 A 放落 C 下面，
-            否則會變成 A → B → C → A
-            */
-            if (isNodeInsideSubtree(newParentId, movingNodeId)) {
-                alert(
-                    "無法轉換：新父節點係目前節點嘅子節點，咁樣會造成循環連線。"
-                );
-                return;
-            }
-
-            if (movingNode.parentId === newParentId) {
-                cancelRelationshipMode();
-                selectNode(movingNodeId);
-                return;
-            }
-
-            const snapshot = captureState();
-
-            /*
-            只修改 parentId：
-            唔會刪除 movingNode，
-            亦唔會刪除 movingNode 下面嘅任何子節點。
-            */
-            movingNode.parentId = newParentId;
-
-            drawLines();
-
-            pushHistorySnapshot(snapshot);
-
-            cancelRelationshipMode();
-            selectNode(movingNodeId);
-        }
-
-        /*
-        檢查 candidateId 係咪 rootId 子樹內嘅節點
-        */
-        function isNodeInsideSubtree(candidateId, rootId) {
-            let currentId = candidateId;
-            const checkedIds = new Set();
-
-            while (
-                currentId !== null &&
-                currentId !== undefined
-            ) {
-                if (currentId === rootId) {
-                    return true;
-                }
-
-                if (checkedIds.has(currentId)) {
-                    return true;
-                }
-
-                checkedIds.add(currentId);
-
-                const currentNode = nodes.find(
-                    (item) => item.id === currentId
-                );
-
-                if (!currentNode) {
-                    return false;
-                }
-
-                currentId = currentNode.parentId;
-            }
-
-            return false;
-        }
-
-        /*
-        完成取消兩點連結
-
-        處理次序：
-        1. 如果兩點之間有橙色 Cross Link，先移除 Cross Link
-        2. 如果冇 Cross Link，就移除父子關係線
-        */
-        function completeUnlink(targetId) {
-            const sourceId = relationshipSourceId;
-
-            if (
-                sourceId === null ||
-                sourceId === targetId
-            ) {
-                return;
-            }
-
-            const sourceNode = nodes.find(
-                (item) => item.id === sourceId
-            );
-
-            const targetNode = nodes.find(
-                (item) => item.id === targetId
-            );
-
-            if (!sourceNode || !targetNode) {
-                cancelRelationshipMode();
-                return;
-            }
-
-            const snapshot = captureState();
-            let removed = false;
-            let removedType = "";
-
-            /*
-            先檢查兩點之間有冇橙色跨節點連線
-            */
-            const matchingCrossLinks = crossLinks.filter((link) => {
-                return (
-                    (
-                        link.fromId === sourceId &&
-                        link.toId === targetId
-                    ) ||
-                    (
-                        link.fromId === targetId &&
-                        link.toId === sourceId
-                    )
-                );
-            });
-
-            if (matchingCrossLinks.length > 0) {
-                const matchingIds = new Set(
-                    matchingCrossLinks.map((link) => link.id)
-                );
-
-                crossLinks = crossLinks.filter(
-                    (link) => !matchingIds.has(link.id)
-                );
-
-                removed = true;
-                removedType = "cross-link";
-
-                /*
-                Cross Link 被刪除後，
-                其附屬 Link Box 亦會移除。
-                */
-                renderLinkBoxes();
-            } else if (targetNode.parentId === sourceId) {
-                /*
-                A → B：
-                B.parentId 由 A 改成 null。
-                B 下面嘅子節點全部保留。
-                */
-                targetNode.parentId = null;
-                removed = true;
-                removedType = "parent-link";
-            } else if (sourceNode.parentId === targetId) {
-                /*
-                B → A：
-                A.parentId 由 B 改成 null。
-                A 下面嘅子節點全部保留。
-                */
-                sourceNode.parentId = null;
-                removed = true;
-                removedType = "parent-link";
-            }
-
-            if (!removed) {
-                cancelRelationshipMode();
-
-                alert(
-                    `「${sourceNode.text}」同「${targetNode.text}」之間冇直接連線。`
-                );
-
-                return;
-            }
-
-            drawLines();
-            pushHistorySnapshot(snapshot);
-
-            cancelRelationshipMode();
-
-            if (removedType === "parent-link") {
-                /*
-                保持被取消父子關係嘅節點仍然存在
-                */
-                if (targetNode.parentId === null) {
-                    selectNode(targetNode.id);
-                } else if (sourceNode.parentId === null) {
-                    selectNode(sourceNode.id);
-                }
-            } else {
-                selectNode(sourceId);
-            }
-        }
-
-        function cancelRelationshipMode() {
-            relationshipMode = null;
-            relationshipSourceId = null;
-
-            document
-                .querySelectorAll(".node")
-                .forEach((element) => {
-                    element.classList.remove("relationship-source");
-                });
-
+            document.querySelectorAll(".node").forEach(n => n.classList.remove("linking-source"));
             hideRelationshipMessage();
         }
 
-        function showRelationshipMessage(message) {
-            if (!relationshipModeBanner) return;
+        function startReparent(id) {
+            cancelAllModes();
+            relationshipMode = "reparent"; relationshipSourceId = id;
+            showRelationshipMessage(`⇆ 轉父節點：請點擊新的父節點；按 Esc 取消`);
+        }
 
-            relationshipModeBanner.textContent = message;
+        function completeReparent(newParentId) {
+            if (relationshipSourceId === newParentId) return;
+            const snapshot = captureState();
+            const target = nodes.find(n => n.id === relationshipSourceId);
+            if (target) target.parentId = newParentId;
+            cancelRelationshipMode();
+            drawLines();
+            pushHistorySnapshot(snapshot);
+        }
+
+        function startUnlink(id) {
+            cancelAllModes();
+            relationshipMode = "unlink"; relationshipSourceId = id;
+            showRelationshipMessage(`⛓ 取消連結：請點擊要解除連線的另一個節點；按 Esc 取消`);
+        }
+
+        function completeUnlink(targetId) {
+            const snapshot = captureState();
+            crossLinks = crossLinks.filter(l => !((l.fromId === relationshipSourceId && l.toId === targetId) || (l.fromId === targetId && l.toId === relationshipSourceId)));
+            const target = nodes.find(n => n.id === targetId);
+            if (target && target.parentId === relationshipSourceId) target.parentId = null;
+            cancelRelationshipMode();
+            renderLinkBoxes();
+            drawLines();
+            pushHistorySnapshot(snapshot);
+        }
+
+        function cancelRelationshipMode() {
+            relationshipMode = null; relationshipSourceId = null;
+            hideRelationshipMessage();
+        }
+
+        function showRelationshipMessage(msg) {
+            document.getElementById("banner-text").textContent = msg;
             relationshipModeBanner.classList.add("active");
         }
 
         function hideRelationshipMessage() {
-            if (!relationshipModeBanner) return;
-
-            relationshipModeBanner.textContent = "";
             relationshipModeBanner.classList.remove("active");
         }
 
-        /* =========================
-           Draw lines
-        ========================= */
-
-        function drawLines() {
-            Array.from(svg.children).forEach((child) => {
-                if (child.id !== "temp-link-line") {
-                    child.remove();
-                }
-            });
-
-            nodes.forEach((node) => {
-                if (
-                    node.parentId === null ||
-                    node.parentId === undefined
-                ) {
-                    return;
-                }
-
-                const parent = nodes.find(
-                    (item) => item.id === node.parentId
-                );
-
-                if (!parent) return;
-
-                const startX =
-                    parent.x + parent.width;
-
-                const startY =
-                    parent.y + parent.height / 2;
-
-                const endX = node.x;
-                const endY =
-                    node.y + node.height / 2;
-
-                const controlX =
-                    (startX + endX) / 2;
-
-                const path = document.createElementNS(
-                    "http://www.w3.org/2000/svg",
-                    "path"
-                );
-
-                path.setAttribute(
-                    "d",
-                    `M ${startX} ${startY}
-                     C ${controlX} ${startY},
-                       ${controlX} ${endY},
-                       ${endX} ${endY}`
-                );
-
-                path.setAttribute("class", "branch-line");
-                path.setAttribute(
-                    "stroke",
-                    node.color1 || "#4285f4"
-                );
-
-                svg.appendChild(path);
-            });
-
-            crossLinks.forEach((link) => {
-                const from = nodes.find(
-                    (node) => node.id === link.fromId
-                );
-
-                const to = nodes.find(
-                    (node) => node.id === link.toId
-                );
-
-                if (!from || !to) return;
-
-                const startX =
-                    from.x + from.width / 2;
-
-                const startY =
-                    from.y + from.height / 2;
-
-                const endX =
-                    to.x + to.width / 2;
-
-                const endY =
-                    to.y + to.height / 2;
-
-                const middleX =
-                    (startX + endX) / 2;
-
-                const middleY =
-                    (startY + endY) / 2 - 40;
-
-                const path = document.createElementNS(
-                    "http://www.w3.org/2000/svg",
-                    "path"
-                );
-
-                path.setAttribute(
-                    "d",
-                    `M ${startX} ${startY}
-                     Q ${middleX} ${middleY}
-                       ${endX} ${endY}`
-                );
-
-                path.setAttribute("class", "cross-link");
-                path.setAttribute("stroke", "#ff9800");
-
-                svg.appendChild(path);
-            });
+        function selectNode(id) {
+            selectedId = id; selectedBoxId = null;
+            document.querySelectorAll(".node, .link-box").forEach(el => el.classList.remove("selected"));
+            document.getElementById(`node-${id}`)?.classList.add("selected");
         }
 
-        /* =========================
-           Speech input
-        ========================= */
-
-        function createSpeechButton(type, id) {
-            const button = document.createElement("button");
-
-            button.type = "button";
-            button.className = "speech-btn";
-            button.textContent = "🎤";
-            button.title = "語音輸入；再按一次停止";
-
-            button.addEventListener("mousedown", stopInteractiveEvent);
-
-            button.addEventListener("click", async (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-
-                await startSpeechFor(type, id, button);
-            });
-
-            return button;
+        function selectBox(id) {
+            selectedBoxId = id; selectedId = null;
+            document.querySelectorAll(".node, .link-box").forEach(el => el.classList.remove("selected"));
+            document.getElementById(`box-${id}`)?.classList.add("selected");
         }
 
-        async function requestPermanentMicrophonePermission() {
-            try {
-                if (
-                    !navigator.mediaDevices ||
-                    !navigator.mediaDevices.getUserMedia
-                ) {
-                    throw new Error(
-                        "瀏覽器不支援咪高峰權限功能"
-                    );
-                }
+        function openPickerForNode(e, id) { activePickerTarget = { type: "node", id }; popPicker(e, nodes.find(n => n.id === id)); }
+        function openPickerForBox(e, id) { activePickerTarget = { type: "box", id }; popPicker(e, findBoxById(id)); }
 
-                const stream =
-                    await navigator.mediaDevices.getUserMedia({
-                        audio: true
-                    });
-
-                stream
-                    .getTracks()
-                    .forEach((track) => track.stop());
-
-                localStorage.setItem(
-                    "mindmap-microphone-enabled",
-                    "true"
-                );
-
-                updatePermissionStatus(
-                    "granted",
-                    "✅ 咪高峰權限已允許。瀏覽器會按照網站權限設定保留。"
-                );
-            } catch (error) {
-                console.error(error);
-
-                updatePermissionStatus(
-                    "denied",
-                    "❌ 未能取得咪高峰權限。請在瀏覽器網站設定內改為「允許」。"
-                );
-
-                alert(
-                    "未能取得咪高峰權限。\n\n" +
-                    "請確認：\n" +
-                    "1. 網頁使用 HTTPS 或 localhost\n" +
-                    "2. 瀏覽器網站權限已允許咪高峰\n" +
-                    "3. 裝置有可用咪高峰"
-                );
-            }
-        }
-
-        async function ensureMicrophonePermission() {
-            if (
-                !navigator.mediaDevices ||
-                !navigator.mediaDevices.getUserMedia
-            ) {
-                return true;
-            }
-
-            try {
-                const stream =
-                    await navigator.mediaDevices.getUserMedia({
-                        audio: true
-                    });
-
-                stream
-                    .getTracks()
-                    .forEach((track) => track.stop());
-
-                localStorage.setItem(
-                    "mindmap-microphone-enabled",
-                    "true"
-                );
-
-                updatePermissionStatus(
-                    "granted",
-                    "✅ 咪高峰權限已允許"
-                );
-
-                return true;
-            } catch (error) {
-                updatePermissionStatus(
-                    "denied",
-                    "❌ 咪高峰權限被拒絕"
-                );
-
-                return false;
-            }
-        }
-
-        async function checkMicrophonePermission() {
-            if (!navigator.permissions?.query) {
-                const remembered =
-                    localStorage.getItem(
-                        "mindmap-microphone-enabled"
-                    ) === "true";
-
-                updatePermissionStatus(
-                    remembered ? "granted" : "prompt",
-                    remembered
-                        ? "✅ 此網站之前已啟用咪高峰"
-                        : "按上方按鈕啟用咪高峰權限"
-                );
-
-                return;
-            }
-
-            try {
-                const status =
-                    await navigator.permissions.query({
-                        name: "microphone"
-                    });
-
-                updatePermissionFromState(status.state);
-
-                status.addEventListener("change", () => {
-                    updatePermissionFromState(status.state);
-                });
-            } catch (error) {
-                updatePermissionStatus(
-                    "prompt",
-                    "按上方按鈕啟用咪高峰權限"
-                );
-            }
-        }
-
-        function updatePermissionFromState(state) {
-            if (state === "granted") {
-                updatePermissionStatus(
-                    "granted",
-                    "✅ 咪高峰權限已允許"
-                );
-            } else if (state === "denied") {
-                updatePermissionStatus(
-                    "denied",
-                    "❌ 咪高峰權限已被瀏覽器封鎖"
-                );
-            } else {
-                updatePermissionStatus(
-                    "prompt",
-                    "尚未設定咪高峰權限"
-                );
-            }
-        }
-
-        function updatePermissionStatus(type, message) {
-            permissionStatus.className = "permission-status";
-
-            if (type === "granted") {
-                permissionStatus.classList.add("granted");
-            }
-
-            if (type === "denied") {
-                permissionStatus.classList.add("denied");
-            }
-
-            permissionStatus.textContent = message;
-        }
-
-        async function startSpeechFor(type, id, button) {
-            if (
-                activeRecognition &&
-                activeSpeechButton === button
-            ) {
-                stopSpeechRecognition(true);
-                return;
-            }
-
-            stopSpeechRecognition(true);
-            finishCurrentEditing();
-
-            const SpeechRecognition =
-                window.SpeechRecognition ||
-                window.webkitSpeechRecognition;
-
-            if (!SpeechRecognition) {
-                alert(
-                    "此瀏覽器不支援 Web Speech Recognition。\n\n" +
-                    "建議使用最新版 Chrome 或 Edge。"
-                );
-                return;
-            }
-
-            const allowed =
-                await ensureMicrophonePermission();
-
-            if (!allowed) {
-                alert(
-                    "咪高峰權限未允許，無法開始語音輸入。"
-                );
-                return;
-            }
-
-            const item = type === "node"
-                ? nodes.find((node) => node.id === id)
-                : findBoxById(id);
-
-            if (!item) return;
-
-            const originalSnapshot = captureState();
-            const originalText = item.text || "";
-
-            const recognition = new SpeechRecognition();
-
-            recognition.lang = "zh-HK";
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.maxAlternatives = 1;
-
-            activeRecognition = recognition;
-            activeSpeechButton = button;
-
-            speechSession = {
-                type,
-                id,
-                item,
-                originalSnapshot,
-                originalText,
-                changed: false
-            };
-
-            button.classList.add("listening");
-            button.textContent = "⏹";
-            button.title = "停止語音輸入";
-
-            recognition.onresult = (event) => {
-                let finalText = "";
-                let interimText = "";
-
-                for (
-                    let index = 0;
-                    index < event.results.length;
-                    index++
-                ) {
-                    const transcript =
-                        event.results[index][0].transcript;
-
-                    if (event.results[index].isFinal) {
-                        finalText += transcript;
-                    } else {
-                        interimText += transcript;
-                    }
-                }
-
-                const separator =
-                    originalText &&
-                    !/\s$/.test(originalText)
-                        ? " "
-                        : "";
-
-                item.text =
-                    originalText +
-                    separator +
-                    finalText +
-                    interimText;
-
-                speechSession.changed =
-                    item.text !== originalText;
-
-                updateItemTextDisplay(type, id, item.text);
-                autoFitHeight(type, id, false);
-                drawLines();
-            };
-
-            recognition.onerror = (event) => {
-                console.warn(
-                    "Speech recognition error:",
-                    event.error
-                );
-
-                if (event.error === "not-allowed") {
-                    updatePermissionStatus(
-                        "denied",
-                        "❌ 語音辨識權限被拒絕"
-                    );
-                }
-            };
-
-            recognition.onend = () => {
-                finishSpeechSession();
-            };
-
-            try {
-                recognition.start();
-            } catch (error) {
-                console.error(error);
-                finishSpeechSession();
-            }
-        }
-
-        function stopSpeechRecognition(commit = true) {
-            if (!activeRecognition) {
-                if (!commit && speechSession) {
-                    speechSession.item.text =
-                        speechSession.originalText;
-                }
-
-                return;
-            }
-
-            try {
-                activeRecognition.stop();
-            } catch (error) {
-                console.warn(error);
-            }
-        }
-
-        function finishSpeechSession() {
-            if (activeSpeechButton) {
-                activeSpeechButton.classList.remove("listening");
-                activeSpeechButton.textContent = "🎤";
-                activeSpeechButton.title =
-                    "語音輸入；再按一次停止";
-            }
-
-            if (
-                speechSession &&
-                speechSession.changed
-            ) {
-                pushHistorySnapshot(
-                    speechSession.originalSnapshot
-                );
-            }
-
-            activeRecognition = null;
-            activeSpeechButton = null;
-            speechSession = null;
-        }
-
-        function updateItemTextDisplay(type, id, text) {
-            const element = document.getElementById(
-                type === "node" ? `node-${id}` : `box-${id}`
-            );
-
-            if (!element) return;
-
-            const textElement = element.querySelector(
-                type === "node"
-                    ? ".node-text"
-                    : ".link-box-text"
-            );
-
-            if (textElement) {
-                textElement.textContent = text;
-            }
-        }
-
-        /* =========================
-           Colour picker
-        ========================= */
-
-        function openPickerForNode(event, nodeId) {
-            commitPickerHistory();
-
-            const node = nodes.find(
-                (item) => item.id === nodeId
-            );
-
-            if (!node) return;
-
-            activePickerTarget = {
-                type: "node",
-                id: nodeId
-            };
-
-            popPicker(event, node);
-        }
-
-        function openPickerForBox(event, boxId) {
-            commitPickerHistory();
-
-            const box = findBoxById(boxId);
-
-            if (!box) return;
-
-            activePickerTarget = {
-                type: "box",
-                id: boxId
-            };
-
-            popPicker(event, box);
-        }
-
-        function popPicker(event, item) {
+        function popPicker(e, item) {
             pickerStartSnapshot = captureState();
-
-            document.getElementById("picker-c1").value =
-                item.color1 || "#1565c0";
-
-            document.getElementById("picker-c2").value =
-                item.color2 || "#1e88e5";
-
-            document.getElementById("picker-angle").value =
-                item.deg ?? 135;
-
-            document.getElementById("picker-alpha").value =
-                Math.round((item.opacity ?? 1) * 100);
-
-            document
-                .querySelectorAll(".picker-tab")
-                .forEach((tab) => {
-                    tab.classList.remove("active");
-                });
-
-            const mode = item.colorType || "solid";
-
-            document
-                .getElementById(`tab-${mode}`)
-                ?.classList.add("active");
-
+            document.getElementById("picker-c1").value = item.color1 || "#1565c0";
+            document.getElementById("picker-c2").value = item.color2 || "#1e88e5";
+            updateAdobePanelFields(item.color1 || "#1565c0");
             adobePicker.style.display = "flex";
-
-            const pickerWidth = 230;
-            const pickerHeight = 250;
-
-            const left = Math.min(
-                window.innerWidth - pickerWidth - 10,
-                event.clientX + 10
-            );
-
-            const top = Math.min(
-                window.innerHeight - pickerHeight - 10,
-                Math.max(10, event.clientY - 10)
-            );
-
-            adobePicker.style.left =
-                `${Math.max(10, left)}px`;
-
-            adobePicker.style.top =
-                `${Math.max(10, top)}px`;
+            adobePicker.style.left = `${Math.min(window.innerWidth - 290, e.clientX + 10)}px`;
+            adobePicker.style.top = `${Math.min(window.innerHeight - 300, e.clientY + 10)}px`;
         }
 
-        function closeAdobePicker() {
-            commitPickerHistory();
-
-            adobePicker.style.display = "none";
-            activePickerTarget = null;
-            pickerStartSnapshot = null;
-        }
-
-        function commitPickerHistory() {
-            if (!pickerStartSnapshot) return;
-
-            pushHistorySnapshot(pickerStartSnapshot);
-            pickerStartSnapshot = null;
-        }
-
-        function getActivePickerItem() {
-            if (!activePickerTarget) return null;
-
-            return activePickerTarget.type === "node"
-                ? nodes.find(
-                    (node) =>
-                        node.id === activePickerTarget.id
-                )
-                : findBoxById(activePickerTarget.id);
-        }
+        function closeAdobePicker() { adobePicker.style.display = "none"; activePickerTarget = null; }
 
         function applyColorPicker() {
-            const item = getActivePickerItem();
-
+            if (!activePickerTarget) return;
+            const item = activePickerTarget.type === "node" ? nodes.find(n => n.id === activePickerTarget.id) : findBoxById(activePickerTarget.id);
             if (!item) return;
-
-            item.color1 =
-                document.getElementById("picker-c1").value;
-
-            item.color2 =
-                document.getElementById("picker-c2").value;
-
-            item.deg = Number(
-                document.getElementById("picker-angle").value
-            );
-
-            item.opacity =
-                Number(
-                    document.getElementById("picker-alpha").value
-                ) / 100;
-
-            const element = document.getElementById(
-                activePickerTarget.type === "node"
-                    ? `node-${item.id}`
-                    : `box-${item.id}`
-            );
-
-            if (element) {
-                applyStyle(element, item);
-            }
-
+            item.color1 = document.getElementById("picker-c1").value;
+            item.color2 = document.getElementById("picker-c2").value;
+            item.deg = parseInt(document.getElementById("picker-angle").value);
+            item.opacity = parseInt(document.getElementById("picker-alpha").value) / 100;
+            const el = document.getElementById(activePickerTarget.type === "node" ? `node-${item.id}` : `box-${item.id}`);
+            if (el) applyStyle(el, item);
             drawLines();
         }
 
         function setPickerMode(mode) {
-            document
-                .querySelectorAll(".picker-tab")
-                .forEach((tab) => {
-                    tab.classList.remove("active");
-                });
-
-            document
-                .getElementById(`tab-${mode}`)
-                ?.classList.add("active");
-
-            const item = getActivePickerItem();
-
-            if (!item) return;
-
-            item.colorType = mode;
-            applyColorPicker();
+            document.querySelectorAll(".picker-tab").forEach(t => t.classList.remove("active"));
+            document.getElementById(`tab-${mode}`)?.classList.add("active");
+            if (!activePickerTarget) return;
+            const item = activePickerTarget.type === "node" ? nodes.find(n => n.id === activePickerTarget.id) : findBoxById(activePickerTarget.id);
+            if (item) { item.colorType = mode; applyColorPicker(); }
         }
 
         function applyStyle(element, item) {
             const alpha = item.opacity ?? 1;
-
-            const color1 = hexToRgba(
-                item.color1 || "#1565c0",
-                alpha
-            );
-
-            const color2 = hexToRgba(
-                item.color2 || "#1e88e5",
-                alpha
-            );
-
+            const color1 = hexToRgba(item.color1 || "#1565c0", alpha);
+            const color2 = hexToRgba(item.color2 || "#1e88e5", alpha);
             const degree = item.deg ?? 135;
 
-            if (item.colorType === "sharp") {
-                element.style.background =
-                    `linear-gradient(
-                        ${degree}deg,
-                        ${color1} 50%,
-                        ${color2} 50%
-                    )`;
-            } else if (item.colorType === "gradient") {
-                element.style.background =
-                    `linear-gradient(
-                        ${degree}deg,
-                        ${color1},
-                        ${color2}
-                    )`;
-            } else {
-                element.style.background = color1;
-            }
-
-            element.style.border =
-                `2px solid ${item.color1 || "#1565c0"}`;
+            if (item.colorType === "sharp") element.style.background = `linear-gradient(${degree}deg, ${color1} 50%, ${color2} 50%)`;
+            else if (item.colorType === "gradient") element.style.background = `linear-gradient(${degree}deg, ${color1}, ${color2})`;
+            else element.style.background = color1;
+            element.style.border = `2px solid ${item.color1 || "#1565c0"}`;
         }
 
         function hexToRgba(hex, alpha) {
-            let value = String(hex).replace("#", "");
-
-            if (value.length === 3) {
-                value = value
-                    .split("")
-                    .map((character) => character + character)
-                    .join("");
-            }
-
-            const number = parseInt(value, 16);
-
-            return `rgba(
-                ${(number >> 16) & 255},
-                ${(number >> 8) & 255},
-                ${number & 255},
-                ${alpha}
-            )`;
+            const rgb = hexToRgb(hex);
+            return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
         }
-
-        /* =========================
-           In-place menu
-        ========================= */
-
-        function toggleInplaceMenu(id) {
-            const target =
-                document.getElementById(`menu-${id}`);
-
-            const wasActive =
-                target?.classList.contains("active");
-
-            document
-                .querySelectorAll(".inplace-action-menu")
-                .forEach((menu) => {
-                    menu.classList.remove("active");
-                });
-
-            if (!wasActive) {
-                target?.classList.add("active");
-            }
-        }
-
-        /* =========================
-           Canvas events
-        ========================= */
-
-        function setupCanvasEvents() {
-            canvasArea.addEventListener("mousedown", (event) => {
-                document
-                    .querySelectorAll(".inplace-action-menu")
-                    .forEach((menu) => {
-                        menu.classList.remove("active");
-                    });
-
-                if (!adobePicker.contains(event.target)) {
-                    closeAdobePicker();
-                }
-
-                const isCanvasBackground =
-                    event.target === canvasArea ||
-                    event.target === treeCanvas ||
-                    event.target === svg ||
-                    event.target.tagName?.toLowerCase() === "svg";
-
-                if (
-                    (linkMode || relationshipMode) &&
-                    isCanvasBackground
-                ) {
-                    cancelLinkMode();
-                    cancelRelationshipMode();
-                    return;
-                }
-
-                if (!isCanvasBackground) return;
-
-                finishCurrentEditing();
-
-                selectedId = null;
-                selectedBoxId = null;
-
-                document
-                    .querySelectorAll(".node, .link-box")
-                    .forEach((element) => {
-                        element.classList.remove("selected");
-                    });
-
-                isPanning = true;
-                canvasArea.classList.add("panning");
-
-                panStartX = event.clientX - tx;
-                panStartY = event.clientY - ty;
-            });
-
-            window.addEventListener("mousemove", (event) => {
-                const rect =
-                    canvasArea.getBoundingClientRect();
-
-                const mouseX =
-                    (event.clientX - rect.left - tx) / scale;
-
-                const mouseY =
-                    (event.clientY - rect.top - ty) / scale;
-
-                if (
-                    linkMode &&
-                    linkFromId !== null &&
-                    tempLinkLine
-                ) {
-                    tempLinkLine.setAttribute("x2", mouseX);
-                    tempLinkLine.setAttribute("y2", mouseY);
-                }
-
-                if (resizeTarget) {
-                    updateResize(event);
-                    return;
-                }
-
-                if (dragTarget) {
-                    updateDrag(mouseX, mouseY, event);
-                    return;
-                }
-
-                if (isPanning) {
-                    tx = event.clientX - panStartX;
-                    ty = event.clientY - panStartY;
-
-                    updateTransform();
-                }
-            });
-
-            window.addEventListener("mouseup", () => {
-                finishGesture();
-
-                isPanning = false;
-                canvasArea.classList.remove("panning");
-            });
-
-            canvasArea.addEventListener(
-                "wheel",
-                (event) => {
-                    event.preventDefault();
-
-                    const rect =
-                        canvasArea.getBoundingClientRect();
-
-                    const pointerX =
-                        event.clientX - rect.left;
-
-                    const pointerY =
-                        event.clientY - rect.top;
-
-                    const worldX =
-                        (pointerX - tx) / scale;
-
-                    const worldY =
-                        (pointerY - ty) / scale;
-
-                    const factor =
-                        event.deltaY < 0 ? 1.1 : 0.9;
-
-                    const newScale = Math.max(
-                        0.2,
-                        Math.min(3, scale * factor)
-                    );
-
-                    tx =
-                        pointerX -
-                        worldX * newScale;
-
-                    ty =
-                        pointerY -
-                        worldY * newScale;
-
-                    scale = newScale;
-
-                    updateTransform();
-                },
-                { passive: false }
-            );
-        }
-
-        /* =========================
-           Keyboard shortcuts
-        ========================= */
-
-        function setupKeyboardShortcuts() {
-            window.addEventListener("keydown", (event) => {
-                const activeTag =
-                    document.activeElement?.tagName?.toLowerCase();
-
-                if (
-                    activeTag === "input" ||
-                    activeTag === "textarea" ||
-                    activeTag === "select"
-                ) {
-                    return;
-                }
-
-                if (editingTarget) return;
-
-                if (
-                    (event.ctrlKey || event.metaKey) &&
-                    event.key.toLowerCase() === "z"
-                ) {
-                    event.preventDefault();
-
-                    if (event.shiftKey) {
-                        redo();
-                    } else {
-                        undo();
-                    }
-
-                    return;
-                }
-
-                if (
-                    (event.ctrlKey || event.metaKey) &&
-                    event.key.toLowerCase() === "y"
-                ) {
-                    event.preventDefault();
-                    redo();
-                    return;
-                }
-
-                if (event.key === "Tab") {
-                    event.preventDefault();
-
-                    if (selectedId !== null) {
-                        addChildTo(selectedId, true);
-                    }
-
-                    return;
-                }
-
-                if (event.key === "Enter") {
-                    event.preventDefault();
-
-                    if (selectedId !== null) {
-                        addSiblingTo(selectedId, true);
-                    } else if (selectedBoxId !== null) {
-                        startTextEdit("box", selectedBoxId);
-                    }
-
-                    return;
-                }
-
-                if (
-                    event.key === "Delete" ||
-                    event.key === "Backspace"
-                ) {
-                    event.preventDefault();
-                    deleteSelected();
-                    return;
-                }
-
-                if (event.key === "Escape") {
-                    cancelLinkMode();
-                    cancelRelationshipMode();
-                    closeAdobePicker();
-                }
-            });
-        }
-
-        /* =========================
-           Geometry/helpers
-        ========================= */
 
         function setElementGeometry(element, item) {
             element.style.left = `${item.x}px`;
@@ -3690,134 +1474,171 @@
             element.style.height = `${item.height}px`;
         }
 
-        function stopInteractiveEvent(event) {
-            event.stopPropagation();
+        function addResizeHandles(element, type, item) {
+            ["n", "s", "e", "w", "ne", "nw", "se", "sw"].forEach(dir => {
+                const handle = document.createElement("div");
+                handle.className = `resize-handle ${dir}`;
+                handle.onmousedown = (e) => {
+                    e.stopPropagation();
+                    beginResize(e, type, item, element, dir);
+                };
+                element.appendChild(handle);
+            });
+        }
+
+        function beginResize(e, type, item, element, dir) {
+            gestureSnapshot = captureState();
+            gestureStartClientX = e.clientX; gestureStartClientY = e.clientY;
+            resizeTarget = { type, item, element, dir, startX: item.x, startY: item.y, startW: item.width, startH: item.height };
+        }
+
+        function beginDrag(e, type, item, element) {
+            const rect = canvasArea.getBoundingClientRect();
+            gestureSnapshot = captureState();
+            gestureStartClientX = e.clientX; gestureStartClientY = e.clientY;
+            dragMouseX = (e.clientX - rect.left - tx) / scale - item.x;
+            dragMouseY = (e.clientY - rect.top - ty) / scale - item.y;
+            dragTarget = { type, item, element };
+        }
+
+        function setupCanvasEvents() {
+            canvasArea.addEventListener("mousedown", (e) => {
+                if (e.target === canvasArea || e.target === treeCanvas || e.target === svg) {
+                    finishCurrentEditing();
+                    cancelAllModes();
+                    isPanning = true;
+                    panStartX = e.clientX - tx;
+                    panStartY = e.clientY - ty;
+                }
+            });
+
+            window.addEventListener("mousemove", (e) => {
+                const rect = canvasArea.getBoundingClientRect();
+                const mouseX = (e.clientX - rect.left - tx) / scale;
+                const mouseY = (e.clientY - rect.top - ty) / scale;
+
+                if (dragTarget) {
+                    dragTarget.item.x = mouseX - dragMouseX;
+                    dragTarget.item.y = mouseY - dragMouseY;
+                    dragTarget.element.style.left = `${dragTarget.item.x}px`;
+                    dragTarget.element.style.top = `${dragTarget.item.y}px`;
+                    drawLines();
+                } else if (resizeTarget) {
+                    const dx = (e.clientX - gestureStartClientX) / scale;
+                    const dy = (e.clientY - gestureStartClientY) / scale;
+                    if (resizeTarget.dir.includes("e")) resizeTarget.item.width = Math.max(MIN_NODE_WIDTH, resizeTarget.startW + dx);
+                    if (resizeTarget.dir.includes("s")) resizeTarget.item.height = Math.max(MIN_NODE_HEIGHT, resizeTarget.startH + dy);
+                    setElementGeometry(resizeTarget.element, resizeTarget.item);
+                    drawLines();
+                } else if (isPanning) {
+                    tx = e.clientX - panStartX;
+                    ty = e.clientY - panStartY;
+                    updateTransform();
+                }
+            });
+
+            window.addEventListener("mouseup", () => {
+                if (dragTarget || resizeTarget) pushHistorySnapshot(gestureSnapshot);
+                dragTarget = null; resizeTarget = null; isPanning = false;
+            });
+
+            canvasArea.addEventListener("wheel", (e) => {
+                e.preventDefault();
+                const factor = e.deltaY < 0 ? 1.1 : 0.9;
+                scale = Math.max(0.2, Math.min(3, scale * factor));
+                updateTransform();
+            }, { passive: false });
+        }
+
+        function updateTransform() { treeCanvas.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`; }
+        function zoomIn() { scale = Math.min(3, scale * 1.2); updateTransform(); }
+        function zoomOut() { scale = Math.max(0.2, scale * 0.8); updateTransform(); }
+        function backToCenter() { tx = -4000 + canvasArea.offsetWidth / 2; ty = -4000 + canvasArea.offsetHeight / 2; scale = 1; updateTransform(); }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById("sidebar");
+            sidebar.classList.toggle("collapsed");
+            document.getElementById("sidebar-toggle-btn").textContent = sidebar.classList.contains("collapsed") ? "▶" : "◀";
+        }
+
+        function toggleInplaceMenu(id) {
+            const menu = document.getElementById(`menu-${id}`);
+            menu?.classList.toggle("active");
         }
 
         function isInteractiveTarget(target) {
-            return Boolean(
-                target.closest(
-                    "button, input, textarea, select, " +
-                    ".resize-handle, .inplace-action-menu"
-                )
-            );
+            return Boolean(target.closest("button, input, textarea, select, .resize-handle, .inplace-action-menu"));
         }
 
-        /* =========================
-           Zoom
-        ========================= */
-
-        function updateTransform() {
-            treeCanvas.style.transform =
-                `translate(${tx}px, ${ty}px) scale(${scale})`;
+        function createSpeechButton(type, id) {
+            const btn = document.createElement("button");
+            btn.className = "speech-btn"; btn.textContent = "🎤";
+            btn.onclick = (e) => { e.stopPropagation(); startSpeechFor(type, id, btn); };
+            return btn;
         }
 
-        function zoomIn() {
-            scale = Math.min(3, scale * 1.2);
-            updateTransform();
+        async function startSpeechFor(type, id, btn) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) { alert("瀏覽器不支援 Web Speech Recognition"); return; }
+            const item = type === "node" ? nodes.find(n => n.id === id) : findBoxById(id);
+            if (!item) return;
+
+            const rec = new SpeechRecognition();
+            rec.lang = "zh-HK";
+            rec.onresult = (e) => {
+                item.text += " " + e.results[0][0].transcript;
+                const el = document.getElementById(type === "node" ? `node-${id}` : `box-${id}`);
+                if (el) el.querySelector(".node-text, .link-box-text").textContent = item.text;
+                drawLines();
+            };
+            rec.start();
         }
 
-        function zoomOut() {
-            scale = Math.max(0.2, scale * 0.8);
-            updateTransform();
+        function requestPermanentMicrophonePermission() {
+            navigator.mediaDevices?.getUserMedia({ audio: true }).then(() => {
+                permissionStatus.className = "permission-status granted";
+                permissionStatus.textContent = "✅ 咪高峰權限已啟用";
+            }).catch(() => {
+                permissionStatus.className = "permission-status denied";
+                permissionStatus.textContent = "❌ 咪高峰權限被拒絕";
+            });
         }
 
-        function backToCenter() {
-            tx = -4000 + canvasArea.offsetWidth / 2;
-            ty = -4000 + canvasArea.offsetHeight / 2;
-            scale = 1;
-
-            updateTransform();
+        function checkMicrophonePermission() {
+            permissionStatus.textContent = "請按上方按鈕啟用咪高峰權限";
         }
 
-        /* =========================
-           Import / Export
-        ========================= */
-
+        /* 匯出／匯入保存新設定 */
         function exportJSON() {
             finishCurrentEditing();
-
             const data = {
-                version: 2,
-                exportedAt: new Date().toISOString(),
-                nodes,
-                crossLinks,
-                nextId,
-                nextLinkId,
-                nextBoxId
+                version: "3.0", exportedAt: new Date().toISOString(),
+                nodes, crossLinks, standaloneBoxes, nextId, nextLinkId, nextBoxId,
+                multiTreeEnabled, currentCanvasBg
             };
-
-            const blob = new Blob(
-                [JSON.stringify(data, null, 2)],
-                { type: "application/json;charset=utf-8" }
-            );
-
-            const url = URL.createObjectURL(blob);
-            const anchor = document.createElement("a");
-
-            anchor.href = url;
-            anchor.download = "mindmap-pro.json";
-
-            document.body.appendChild(anchor);
-            anchor.click();
-            anchor.remove();
-
-            URL.revokeObjectURL(url);
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "mindmap-pro-backup.json";
+            a.click();
         }
 
         function importJSON() {
             finishCurrentEditing();
-
             const input = document.createElement("input");
-
-            input.type = "file";
-            input.accept = ".json,application/json";
-
-            input.addEventListener("change", () => {
-                const file = input.files?.[0];
-
+            input.type = "file"; input.accept = ".json";
+            input.onchange = () => {
+                const file = input.files[0];
                 if (!file) return;
-
                 const reader = new FileReader();
-
-                reader.addEventListener("load", () => {
+                reader.onload = () => {
                     try {
-                        const data = JSON.parse(
-                            String(reader.result)
-                        );
-
-                        const snapshot = captureState();
-
-                        restoreState({
-                            nodes: data.nodes || [],
-                            crossLinks: data.crossLinks || [],
-                            nextId:
-                                Number.isFinite(data.nextId)
-                                    ? data.nextId
-                                    : undefined,
-                            nextLinkId:
-                                Number.isFinite(data.nextLinkId)
-                                    ? data.nextLinkId
-                                    : undefined,
-                            nextBoxId:
-                                Number.isFinite(data.nextBoxId)
-                                    ? data.nextBoxId
-                                    : undefined
-                        });
-
-                        pushHistorySnapshot(snapshot);
-                    } catch (error) {
-                        console.error(error);
-
-                        alert(
-                            "匯入失敗：JSON 檔案格式不正確。"
-                        );
-                    }
-                });
-
+                        const data = JSON.parse(reader.result);
+                        restoreState(data);
+                    } catch (err) { alert("匯入失敗：格式不正確。"); }
+                };
                 reader.readAsText(file);
-            });
-
+            };
             input.click();
         }
     </script>
