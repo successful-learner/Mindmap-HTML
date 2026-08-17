@@ -3,833 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mind Map</title>
+    <title>Mind Map Pro - Ultimate Edition</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; overflow: hidden; width: 100vw; height: 100vh; display: flex; background: #0f0f1a; color: #fff; }
+
+        /* 左側 Sidebar & 折疊 */
+        .sidebar-toggle-btn {
+            position: absolute; top: 15px; left: 290px; z-index: 101; width: 32px; height: 32px;
+            border-radius: 50%; background: #16162a; border: 1px solid #2a2a4a; color: #fff;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; transition: left 0.3s;
         }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            transition: background 0.3s;
-        }
-
-        /* Theme variables */
-        body.theme-light {
-            --bg: #f5f5f5;
-            --sidebar-bg: #ffffff;
-            --sidebar-border: #e0e0e0;
-            --text: #1a1a1a;
-            --text-sub: #666;
-            --text-muted: #999;
-            --btn-bg: #f0f0f0;
-            --btn-border: #ddd;
-            --btn-hover: #e4e4e4;
-            --input-bg: #f8f8f8;
-            --input-border: #ddd;
-            --input-focus: #4285f4;
-            --canvas-bg: #fafafa;
-            --node-shadow: rgba(0,0,0,0.08);
-            --accent: #4285f4;
-            --danger: #d32f2f;
-        }
-
-        body.theme-dark {
-            --bg: #0f0f1a;
-            --sidebar-bg: #16162a;
-            --sidebar-border: #2a2a4a;
-            --text: #ffffff;
-            --text-sub: #aaa;
-            --text-muted: #555;
-            --btn-bg: #1e1e3a;
-            --btn-border: #2a2a4a;
-            --btn-hover: #2a2a4a;
-            --input-bg: #1e1e3a;
-            --input-border: #2a2a4a;
-            --input-focus: #5c7cfa;
-            --canvas-bg: #0f0f1a;
-            --node-shadow: rgba(0,0,0,0.3);
-            --accent: #5c7cfa;
-            --danger: #f44336;
-        }
-
-        body.theme-warm {
-            --bg: #fef9f3;
-            --sidebar-bg: #fff8f0;
-            --sidebar-border: #f0dcc8;
-            --text: #3d2c1e;
-            --text-sub: #8b6f56;
-            --text-muted: #c4a882;
-            --btn-bg: #fdf2e6;
-            --btn-border: #f0dcc8;
-            --btn-hover: #f5e6d4;
-            --input-bg: #fef9f3;
-            --input-border: #f0dcc8;
-            --input-focus: #e67e22;
-            --canvas-bg: #fefbf7;
-            --node-shadow: rgba(139,95,52,0.08);
-            --accent: #e67e22;
-            --danger: #c0392b;
-        }
-
-        body.theme-ocean {
-            --bg: #f0f7fa;
-            --sidebar-bg: #f5fafc;
-            --sidebar-border: #c8e3ed;
-            --text: #1a3a4a;
-            --text-sub: #4a7a8a;
-            --text-muted: #8ab5c4;
-            --btn-bg: #e8f4f8;
-            --btn-border: #c8e3ed;
-            --btn-hover: #d5ecf4;
-            --input-bg: #f0f7fa;
-            --input-border: #c8e3ed;
-            --input-focus: #0288d1;
-            --canvas-bg: #f5fafc;
-            --node-shadow: rgba(2,136,209,0.08);
-            --accent: #0288d1;
-            --danger: #d32f2f;
-        }
-
-        body.theme-forest {
-            --bg: #f2f7f2;
-            --sidebar-bg: #f7faf7;
-            --sidebar-border: #c8ddc8;
-            --text: #1a3a1a;
-            --text-sub: #4a7a4a;
-            --text-muted: #8ab58a;
-            --btn-bg: #e8f2e8;
-            --btn-border: #c8ddc8;
-            --btn-hover: #d5e8d5;
-            --input-bg: #f2f7f2;
-            --input-border: #c8ddc8;
-            --input-focus: #2e7d32;
-            --canvas-bg: #f5faf5;
-            --node-shadow: rgba(46,125,50,0.08);
-            --accent: #2e7d32;
-            --danger: #c62828;
-        }
-
-        body { background: var(--bg); }
-
-        /* Sidebar */
         .sidebar {
-            width: 260px;
-            background: var(--sidebar-bg);
-            border-right: 1px solid var(--sidebar-border);
-            display: flex;
-            flex-direction: column;
-            z-index: 100;
-            flex-shrink: 0;
-            overflow-y: auto;
+            width: 280px; background: #16162a; border-right: 1px solid #2a2a4a; display: flex; flex-direction: column;
+            z-index: 100; flex-shrink: 0; overflow-y: auto; transition: margin-left 0.3s;
         }
+        .sidebar.collapsed { margin-left: -280px; }
+        .sidebar.collapsed + .sidebar-toggle-btn { left: 10px; }
 
-        .sidebar-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--sidebar-border);
-        }
-
-        .sidebar-header h1 {
-            color: var(--text);
-            font-size: 20px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        .sidebar-header p {
-            color: var(--text-muted);
-            font-size: 12px;
-            margin-top: 4px;
-        }
-
-        .sidebar-section {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--sidebar-border);
-        }
-
-        .sidebar-section h3 {
-            color: var(--text-sub);
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        .sidebar-section { padding: 16px; border-bottom: 1px solid #2a2a4a; resize: vertical; overflow: auto; min-height: 80px; }
+        .sidebar-section h3 { font-size: 12px; text-transform: uppercase; color: #888; display: flex; justify-content: space-between; cursor: pointer; margin-bottom: 10px; }
+        .sidebar-section.collapsed .section-content { display: none; }
 
         .action-btn {
-            width: 100%;
-            padding: 10px 14px;
-            margin-bottom: 6px;
-            background: var(--btn-bg);
-            border: 1px solid var(--btn-border);
-            border-radius: 8px;
-            color: var(--text);
-            font-size: 13px;
-            cursor: pointer;
-            text-align: left;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.15s;
+            width: 100%; padding: 8px 12px; margin-bottom: 6px; background: #1e1e3a; border: 1px solid #2a2a4a;
+            border-radius: 6px; color: #fff; font-size: 13px; cursor: pointer; text-align: left; display: flex; align-items: center; justify-content: space-between;
         }
+        .action-btn:hover { background: #2a2a4a; }
 
-        .action-btn:hover {
-            background: var(--btn-hover);
-            border-color: var(--text-muted);
-        }
+        /* Adobe 級 Color Palette */
+        .color-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: #ccc; }
+        .color-row input[type="color"] { border: none; width: 32px; height: 32px; border-radius: 4px; cursor: pointer; background: none; }
+        
+        /* Canvas & Line */
+        #canvas-area { flex: 1; position: relative; overflow: hidden; cursor: grab; background: #0f0f1a; }
+        #tree-canvas { position: absolute; top: 0; left: 0; width: 8000px; height: 8000px; transform-origin: 0 0; }
+        #lines-svg { position: absolute; top: 0; left: 0; width: 8000px; height: 8000px; pointer-events: none; }
 
-        .action-btn:active {
-            transform: scale(0.98);
-        }
+        /* 選取框 */
+        #selection-box { position: absolute; border: 1px dashed #5c7cfa; background: rgba(92, 124, 250, 0.2); pointer-events: none; display: none; z-index: 90; }
 
-        .action-btn.active {
-            border-color: var(--accent);
-            background: rgba(66, 133, 244, 0.1);
-        }
-
-        .action-btn .icon {
-            width: 24px;
-            height: 24px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            flex-shrink: 0;
-        }
-
-        .action-btn .icon.green { background: #e8f5e9; color: #2e7d32; }
-        .action-btn .icon.red { background: #fce4ec; color: #c62828; }
-        .action-btn .icon.blue { background: #e3f2fd; color: #1565c0; }
-        .action-btn .icon.purple { background: #f3e5f5; color: #6a1b9a; }
-        .action-btn .icon.orange { background: #fff3e0; color: #e65100; }
-
-        body.theme-dark .action-btn .icon.green { background: #1b4332; color: #4caf50; }
-        body.theme-dark .action-btn .icon.red { background: #3d1212; color: #f44336; }
-        body.theme-dark .action-btn .icon.blue { background: #0d2137; color: #42a5f5; }
-        body.theme-dark .action-btn .icon.purple { background: #2d1250; color: #ab47bc; }
-        body.theme-dark .action-btn .icon.orange { background: #3d2000; color: #ff9800; }
-
-        .color-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
-        }
-
-        .color-swatch {
-            aspect-ratio: 1;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.15s;
-        }
-
-        .color-swatch:hover {
-            transform: scale(1.1);
-            border-color: var(--text-muted);
-        }
-
-        .color-swatch.active {
-            border-color: var(--text);
-        }
-
-        .theme-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
-        }
-
-        .theme-swatch {
-            aspect-ratio: 1;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.15s;
-            position: relative;
-        }
-
-        .theme-swatch:hover {
-            transform: scale(1.1);
-            border-color: rgba(0,0,0,0.3);
-        }
-
-        .theme-swatch.active {
-            border-color: var(--text);
-            box-shadow: 0 0 0 2px var(--input-focus);
-        }
-
-        .theme-swatch::after {
-            content: attr(data-label);
-            position: absolute;
-            bottom: -16px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 9px;
-            color: var(--text-muted);
-            white-space: nowrap;
-        }
-
-        .selected-info {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--sidebar-border);
-        }
-
-        .selected-info .label {
-            color: var(--text-sub);
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .input-with-mic {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
-
-        .selected-info .node-name {
-            color: var(--text);
-            font-size: 15px;
-            font-weight: 600;
-            padding: 8px 12px;
-            background: var(--input-bg);
-            border: 1px solid var(--input-border);
-            border-radius: 8px;
-            width: 100%;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .selected-info .node-name:focus {
-            border-color: var(--input-focus);
-        }
-
-        .parent-select {
-            width: 100%;
-            padding: 8px 12px;
-            margin-top: 8px;
-            background: var(--input-bg);
-            border: 1px solid var(--input-border);
-            border-radius: 8px;
-            color: var(--text);
-            font-size: 13px;
-            outline: none;
-        }
-
-        .mic-btn {
-            width: 34px;
-            height: 34px;
-            border-radius: 8px;
-            border: 1px solid var(--btn-border);
-            background: var(--btn-bg);
-            color: var(--text);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            transition: all 0.15s;
-        }
-
-        .mic-btn:hover { background: var(--btn-hover); }
-        .mic-btn.recording {
-            background: rgba(234, 67, 53, 0.2);
-            border-color: var(--danger);
-            color: var(--danger);
-            animation: pulse-rec 1s infinite;
-        }
-
-        @keyframes pulse-rec {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(234,67,53,0.4); }
-            50% { box-shadow: 0 0 0 6px rgba(234,67,53,0); }
-        }
-
-        /* Outline Tree Panel */
-        .outline-mini-btn {
-            font-size: 9px; padding: 2px 6px;
-            border-radius: 4px; border: 1px solid var(--btn-border);
-            background: var(--btn-bg); color: var(--text-sub);
-            cursor: pointer; transition: all 0.15s;
-        }
-        .outline-mini-btn:hover { background: var(--btn-hover); color: var(--text); }
-
-        .outline-panel { max-height: 160px; overflow-y: auto; }
-        .tree-item {
-            display: flex; align-items: center; padding: 4px 6px;
-            cursor: pointer; border-radius: 6px; transition: background 0.15s;
-        }
-        .tree-item:hover { background: var(--btn-hover); }
-        .tree-item.active { background: rgba(66, 133, 244, 0.15); }
-        .tree-toggle {
-            width: 14px; height: 14px; display: flex; align-items: center; justify-content: center;
-            font-size: 8px; color: var(--text-muted); cursor: pointer; transition: transform 0.2s;
-        }
-        .tree-toggle.expanded { transform: rotate(90deg); }
-        .tree-toggle.empty { visibility: hidden; }
-        .tree-dot { width: 6px; height: 6px; border-radius: 50%; margin: 0 6px; flex-shrink: 0; }
-        .tree-text { font-size: 12px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* Links Section */
-        .link-list { max-height: 120px; overflow-y: auto; }
-        .link-item {
-            display: flex; align-items: center; gap: 4px; padding: 4px 6px;
-            border-radius: 6px; font-size: 11px; color: var(--text-sub);
-        }
-        .link-item:hover { background: var(--btn-hover); }
-        .link-arrow { color: var(--accent); }
-        .link-desc { color: var(--accent); font-style: italic; margin-left: 2px; }
-        .link-actions { margin-left: auto; display: flex; gap: 4px; }
-        .link-action-btn {
-            width: 18px; height: 18px; border-radius: 4px; border: none;
-            cursor: pointer; font-size: 9px; display: flex; align-items: center; justify-content: center;
-        }
-        .link-action-btn.edit-link { background: rgba(66,133,244,0.2); color: var(--accent); }
-        .link-action-btn.del-link { background: rgba(234,67,53,0.2); color: var(--danger); }
-
-        .node-count {
-            margin-top: auto;
-            padding: 16px 20px;
-            border-top: 1px solid var(--sidebar-border);
-            color: var(--text-muted);
-            font-size: 12px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        /* Canvas */
-        #canvas-area {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-            cursor: grab;
-            background: var(--canvas-bg);
-            transition: background 0.3s;
-        }
-
-        #canvas-area:active { cursor: grabbing; }
-        #canvas-area.link-cursor { cursor: crosshair; }
-
-        #tree-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 8000px;
-            height: 8000px;
-            transform-origin: 0 0;
-        }
-
-        #lines-svg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 8000px;
-            height: 8000px;
-            pointer-events: none;
-        }
-
-        .branch-line { stroke-width: 2.5; fill: none; opacity: 0.5; }
-        .cross-link { stroke-width: 2; fill: none; opacity: 0.7; stroke-dasharray: 6 4; }
-
-        /* Cross link text style */
-        .link-text {
-            font-size: 12px;
-            font-weight: 600;
-            fill: var(--text);
-            text-anchor: middle;
-            paint-order: stroke;
-            stroke: var(--bg);
-            stroke-width: 4px;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            pointer-events: auto;
-            cursor: pointer;
-        }
-
+        /* Node 樣式與可調節 Link Box */
         .node {
-            position: absolute;
-            border-radius: 12px;
-            padding: 12px 20px;
-            color: #fff;
-            font-size: 14px;
-            cursor: pointer;
-            min-width: 100px;
-            text-align: center;
-            user-select: none;
-            transition: box-shadow 0.2s, transform 0.1s;
-            font-weight: 500;
-            box-shadow: 0 2px 8px var(--node-shadow);
+            position: absolute; border-radius: 12px; padding: 12px 28px 12px 16px; color: #fff;
+            font-size: 14px; cursor: move; min-width: 120px; min-height: 45px; user-select: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: box-shadow 0.2s; display: flex; align-items: center; justify-content: center;
+        }
+        .node.selected { box-shadow: 0 0 0 3px #5c7cfa; }
+        .node.multi-selected { box-shadow: 0 0 0 3px #ff9800; }
+
+        .node-edit-icon {
+            position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background: #16162a;
+            border: 1px solid #5c7cfa; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 12px; cursor: pointer; z-index: 10;
         }
 
-        .node.selected {
-            box-shadow: 0 0 0 3px var(--input-focus), 0 8px 25px var(--node-shadow);
-            transform: scale(1.02);
+        /* 附近彈出的 Document 編輯窗口 */
+        .near-popover {
+            position: absolute; width: 320px; background: #16162a; border: 1px solid #5c7cfa; border-radius: 10px;
+            padding: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 1000; display: none; flex-direction: column; gap: 10px;
         }
-
-        .node:not(.selected):hover { box-shadow: 0 4px 20px var(--node-shadow); }
-        .node.link-hover { box-shadow: 0 0 0 3px #00f2fe; transform: scale(1.05); }
-
-        .link-banner {
-            position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
-            background: var(--sidebar-bg); border: 1px solid var(--accent);
-            border-radius: 20px; padding: 8px 20px; font-size: 12px;
-            color: var(--accent); z-index: 50; display: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        /* Controls / FAB */
-        .zoom-controls {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            z-index: 50;
-        }
-
-        .zoom-btn {
-            width: 38px;
-            height: 38px;
-            background: var(--sidebar-bg);
-            border: 1px solid var(--sidebar-border);
-            border-radius: 8px;
-            color: var(--text);
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.15s;
-            box-shadow: 0 2px 8px var(--node-shadow);
-        }
-
-        .zoom-btn:hover { background: var(--btn-hover); transform: scale(1.05); }
-
-        .zoom-label {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 11px;
-            padding: 2px 0;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar { width: 210px; }
+        .near-popover textarea {
+            width: 100%; height: 120px; background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 6px;
+            color: #fff; padding: 8px; font-family: inherit; font-size: 13px; resize: vertical; outline: none;
         }
     </style>
 </head>
-<body class="theme-light">
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <h1>🌿 Mind Map</h1>
-            <p>撳節點選取 → 左邊操作</p>
+<body>
+
+    <button class="sidebar-toggle-btn" id="sidebar-btn" onclick="toggleSidebar()">◀</button>
+
+    <div class="sidebar" id="sidebar">
+        <div style="padding:16px; border-bottom:1px solid #2a2a4a;">
+            <h2>🌿 Mind Map</h2>
+            <p style="font-size:11px; color:#888;">拉框多選 + 整頁群組拖拉移動</p>
         </div>
 
-        <div class="selected-info" id="selected-info" style="display:none;">
-            <div class="label">選取中</div>
-            <div class="input-with-mic">
-                <input class="node-name" id="node-name-input" placeholder="輸入名稱..." />
-                <button class="mic-btn" id="mic-btn-node" title="語音輸入">🎤</button>
-            </div>
-            <div class="label" style="margin-top: 10px;">父節點 (變更關聯)</div>
-            <select class="parent-select" id="parent-node-select" onchange="changeParentNode(this.value)">
-            </select>
-            <button class="action-btn" id="reparent-mode-btn" onclick="toggleReparentMode()" style="margin-top:6px;">
-                <span class="icon orange">🎯</span> 撳節點更變父級
-            </button>
-        </div>
-
-        <div class="sidebar-section">
-            <h3>操作</h3>
-            <button class="action-btn" onclick="addChildToSelected()">
-                <span class="icon green">＋</span> 加子節點
-            </button>
-            <button class="action-btn" onclick="addSibling()">
-                <span class="icon blue">↔</span> 加同級節點
-            </button>
-            <button class="action-btn" onclick="deleteSelected()">
-                <span class="icon red">✕</span> 刪除節點
-            </button>
-            <div style="display: flex; gap: 6px; margin-top: 6px;">
-                <button class="action-btn" onclick="undo()" style="margin-bottom:0;">
-                    <span class="icon purple">⟲</span> Undo (Ctrl+Z)
-                </button>
-                <button class="action-btn" onclick="redo()" style="margin-bottom:0;">
-                    <span class="icon orange">⟳</span> Redo
-                </button>
+        <div class="sidebar-section" id="sec-ops">
+            <h3 onclick="toggleSection('sec-ops')">操作菜單 <span>▼</span></h3>
+            <div class="section-content">
+                <button class="action-btn" onclick="addChild()"><span>＋ 加子節點</span><kbd>Tab</kbd></button>
+                <button class="action-btn" onclick="addSibling()"><span>↔ 加同級節點</span><kbd>Enter</kbd></button>
+                <button class="action-btn" onclick="deleteSelected()"><span style="color:#ff5252">✕ 刪除選取</span><kbd>Del</kbd></button>
             </div>
         </div>
 
-        <!-- Structure / Outline Section -->
-        <div class="sidebar-section">
-            <h3>
-                結構
-                <div>
-                    <button class="outline-mini-btn" onclick="expandAllOutline()">展開</button>
-                    <button class="outline-mini-btn" onclick="collapseAllOutline()">收合</button>
-                </div>
-            </h3>
-            <div class="outline-panel" id="outline-panel"></div>
-        </div>
-
-        <!-- Cross Links Section -->
-        <div class="sidebar-section">
-            <h3>
-                連結 <span id="link-count-title">(0)</span>
-                <button class="outline-mini-btn" id="link-mode-btn" onclick="toggleLinkMode()">🔗 Link</button>
-            </h3>
-            <button class="action-btn" onclick="quickConnectFromSelected()">
-                <span class="icon blue">⚡</span> 快速轉接/連線 (Shift+L)
-            </button>
-            <div class="link-list" id="link-list">
-                <div style="font-size:11px; color:var(--text-muted); text-align:center; padding:6px 0;">撳 Link → 選兩個節點建立連結</div>
+        <div class="sidebar-section" id="sec-color">
+            <h3 onclick="toggleSection('sec-color')">Adobe 級分支色彩與儲存 <span>▼</span></h3>
+            <div class="section-content">
+                <div class="color-row"><span>主背景色 (Gradation):</span><input type="color" id="main-bg" value="#37474f"></div>
+                <div class="color-row"><span>邊框/線條色:</span><input type="color" id="main-border" value="#546e7a"></div>
+                <button class="action-btn" onclick="saveNodeColor()" style="margin-top:8px;">💾 儲存 (Save) 單個節點顏色</button>
+                <button class="action-btn" onclick="saveBranchColor()">🎨 套用並「儲存」至整個分支</button>
             </div>
-        </div>
-
-        <div class="sidebar-section">
-            <h3>主題色</h3>
-            <div class="theme-grid" style="margin-bottom: 20px;">
-                <div class="theme-swatch active" style="background: linear-gradient(135deg, #f5f5f5, #fff);" onclick="setTheme('light', this)" data-label="白"></div>
-                <div class="theme-swatch" style="background: linear-gradient(135deg, #0f0f1a, #16162a);" onclick="setTheme('dark', this)" data-label="黑"></div>
-                <div class="theme-swatch" style="background: linear-gradient(135deg, #fef9f3, #f0dcc8);" onclick="setTheme('warm', this)" data-label="暖"></div>
-                <div class="theme-swatch" style="background: linear-gradient(135deg, #f0f7fa, #c8e3ed);" onclick="setTheme('ocean', this)" data-label="海"></div>
-                <div class="theme-swatch" style="background: linear-gradient(135deg, #f2f7f2, #c8ddc8);" onclick="setTheme('forest', this)" data-label="林"></div>
-            </div>
-        </div>
-
-        <div class="sidebar-section">
-            <h3>節點顏色</h3>
-            <div class="color-grid">
-                <div class="color-swatch" style="background: #2e7d32;" onclick="setNodeColor('#2e7d32','#43a047')"></div>
-                <div class="color-swatch" style="background: #1565c0;" onclick="setNodeColor('#1565c0','#1e88e5')"></div>
-                <div class="color-swatch" style="background: #6a1b9a;" onclick="setNodeColor('#6a1b9a','#8e24aa')"></div>
-                <div class="color-swatch" style="background: #e65100;" onclick="setNodeColor('#e65100','#f4511e')"></div>
-                <div class="color-swatch" style="background: #c62828;" onclick="setNodeColor('#c62828','#e53935')"></div>
-                <div class="color-swatch" style="background: #00838f;" onclick="setNodeColor('#00838f','#00acc1')"></div>
-                <div class="color-swatch" style="background: #4527a0;" onclick="setNodeColor('#4527a0','#5e35b1')"></div>
-                <div class="color-swatch" style="background: #ef6c00;" onclick="setNodeColor('#ef6c00','#fb8c00')"></div>
-                <div class="color-swatch" style="background: #37474f;" onclick="setNodeColor('#37474f','#546e7a')"></div>
-                <div class="color-swatch" style="background: #d81b60;" onclick="setNodeColor('#d81b60','#e91e63')"></div>
-            </div>
-        </div>
-
-        <div class="sidebar-section">
-            <h3>檔案</h3>
-            <button class="action-btn" onclick="exportJSON()">
-                <span class="icon purple">↓</span> 匯出 JSON
-            </button>
-            <button class="action-btn" onclick="importJSON()">
-                <span class="icon orange">↑</span> 匯入 JSON
-            </button>
-        </div>
-
-        <div class="node-count">
-            <span id="node-count">0 個節點</span>
-            <span id="link-count-bar">0 個連結</span>
         </div>
     </div>
 
     <div id="canvas-area">
+        <div id="selection-box"></div>
         <div id="tree-canvas">
             <svg id="lines-svg"></svg>
         </div>
+    </div>
 
-        <div class="link-banner" id="link-banner">🔗 Link 模式：撳第一個節點，再撳目標節點</div>
-        <div class="link-banner" id="reparent-banner">🎯 更變模式：撳目標節點設為新父級</div>
-
-        <div class="zoom-controls">
-            <button class="zoom-btn" onclick="zoomIn()">+</button>
-            <div class="zoom-label" id="zoom-label">100%</div>
-            <button class="zoom-btn" onclick="zoomOut()">−</button>
-            <button class="zoom-btn" onclick="backToCenter()" style="margin-top:4px; font-size:14px;" title="回到中心">⟲</button>
+    <!-- 附載於節點附近的 Document 明細彈窗 -->
+    <div class="near-popover" id="popover">
+        <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:bold;">
+            <span>編輯節點內容 (支援多行分行)</span>
+            <span style="cursor:pointer;" onclick="closePopover()">✕</span>
         </div>
+        <textarea id="pop-text" placeholder="在此輸入長文件內容，支援 Enter 分行..."></textarea>
+        <div style="display:flex; gap:8px; align-items:center;">
+            <label style="font-size:11px;">字體大小:</label>
+            <input type="number" id="pop-font-size" value="14" style="width:50px; background:#0f0f1a; border:1px solid #2a2a4a; color:#fff; padding:2px 4px;">
+            <label style="font-size:11px;">背景:</label>
+            <input type="color" id="pop-bg">
+        </div>
+        <button class="action-btn" onclick="applyPopoverSave()" style="justify-content:center; background:#5c7cfa;">💾 Save 儲存變更</button>
     </div>
 
     <script>
         let nodes = [];
-        let crossLinks = [];
         let nextId = 0;
-        let nextLinkId = 0;
-        let selectedId = null;
-        let scale = 1;
-        let tx = 0, ty = 0;
-        let isPanning = false;
-        let panStartX, panStartY;
-        let dragNode = null;
-        let dragOffsetX, dragOffsetY;
-        let animating = false;
-        let linkMode = false, linkFromId = null;
-        let reparentMode = false;
-        let collapsedNodes = new Set();
+        let selectedIds = new Set();
+        let scale = 1, tx = 0, ty = 0;
 
-        // Undo / Redo Stacks
-        let undoStack = [];
-        let redoStack = [];
-        let isPerformingUndoRedo = false;
+        let isDraggingGroup = false;
+        let dragStartPos = { x: 0, y: 0 };
+        let initialNodePositions = [];
 
-        // Speech recognition setup
-        let recognition = null;
-        let isRecording = false;
+        let isBoxSelecting = false;
+        let boxStart = { x: 0, y: 0 };
+        let activePopoverNodeId = null;
 
         const canvasArea = document.getElementById('canvas-area');
         const treeCanvas = document.getElementById('tree-canvas');
         const svg = document.getElementById('lines-svg');
-        const nameInput = document.getElementById('node-name-input');
-        const parentSelect = document.getElementById('parent-node-select');
-        const selectedInfo = document.getElementById('selected-info');
-        const outlinePanel = document.getElementById('outline-panel');
-        const linkBanner = document.getElementById('link-banner');
-        const micBtnNode = document.getElementById('mic-btn-node');
+        const selectionBox = document.getElementById('selection-box');
+        const popover = document.getElementById('popover');
 
-        function setTheme(theme, el) {
-            document.body.className = 'theme-' + theme;
-            document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
-            if (el) el.classList.add('active');
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+            document.getElementById('sidebar-btn').textContent = document.getElementById('sidebar').classList.contains('collapsed') ? '▶' : '◀';
         }
-
-        // ====== UNDO / REDO HISTORY SYSTEM ======
-        function saveState() {
-            if (isPerformingUndoRedo) return;
-            const state = JSON.stringify({
-                nodes,
-                crossLinks,
-                nextId,
-                nextLinkId
-            });
-            undoStack.push(state);
-            if (undoStack.length > 50) undoStack.shift();
-            redoStack = [];
-        }
-
-        function undo() {
-            if (undoStack.length === 0) return;
-            isPerformingUndoRedo = true;
-
-            const currentState = JSON.stringify({ nodes, crossLinks, nextId, nextLinkId });
-            redoStack.push(currentState);
-
-            const previousState = JSON.parse(undoStack.pop());
-            restoreState(previousState);
-
-            isPerformingUndoRedo = false;
-        }
-
-        function redo() {
-            if (redoStack.length === 0) return;
-            isPerformingUndoRedo = true;
-
-            const currentState = JSON.stringify({ nodes, crossLinks, nextId, nextLinkId });
-            undoStack.push(currentState);
-
-            const nextState = JSON.parse(redoStack.pop());
-            restoreState(nextState);
-
-            isPerformingUndoRedo = false;
-        }
-
-        function restoreState(state) {
-            treeCanvas.querySelectorAll('.node').forEach(el => el.remove());
-            nodes = state.nodes || [];
-            crossLinks = state.crossLinks || [];
-            nextId = state.nextId || 0;
-            nextLinkId = state.nextLinkId || 0;
-
-            nodes.forEach(n => renderNode(n));
-            drawLines();
-            renderOutline();
-            renderLinkList();
-            updateCount();
-
-            if (selectedId !== null && !nodes.some(n => n.id === selectedId)) {
-                selectedId = null;
-                selectedInfo.style.display = 'none';
-            } else if (selectedId !== null) {
-                selectNode(selectedId);
-            }
-        }
+        function toggleSection(id) { document.getElementById(id).classList.toggle('collapsed'); }
 
         function init() {
-            const cx = 4000;
-            const cy = 4000;
-            createNode('中心主題', cx - 60, cy - 20, null, '#1565c0', '#1e88e5');
-            tx = -cx + canvasArea.offsetWidth / 2;
-            ty = -cy + canvasArea.offsetHeight / 2;
+            createNode('中心主題', 3900, 3950, null, '#1565c0', '#1e88e5');
+            tx = -3900 + canvasArea.offsetWidth / 2;
+            ty = -3950 + canvasArea.offsetHeight / 2;
             updateTransform();
-            setupSpeechRecognition();
         }
 
-        // ====== SPEECH RECOGNITION ======
-        function setupSpeechRecognition() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) return;
-
-            recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = true;
-            recognition.lang = 'zh-HK';
-
-            recognition.onresult = (event) => {
-                let transcript = '';
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    transcript += event.results[i][0].transcript;
-                }
-                nameInput.value = transcript;
-                if (selectedId !== null) {
-                    saveState();
-                    const node = nodes.find(n => n.id === selectedId);
-                    if (node) {
-                        node.text = transcript;
-                        const el = document.getElementById(`node-${node.id}`);
-                        if (el) el.textContent = transcript;
-                        renderOutline();
-                        renderLinkList();
-                    }
-                }
-            };
-
-            recognition.onend = () => stopRecording();
-            recognition.onerror = () => stopRecording();
-        }
-
-        function toggleRecording() {
-            if (!recognition) {
-                alert('你嘅瀏覽器唔支援語音輸入，請用 Chrome 或 Edge。');
-                return;
-            }
-            if (isRecording) {
-                recognition.stop();
-                stopRecording();
-            } else {
-                isRecording = true;
-                recognition.start();
-                micBtnNode.classList.add('recording');
-            }
-        }
-
-        function stopRecording() {
-            isRecording = false;
-            micBtnNode.classList.remove('recording');
-        }
-
-        micBtnNode.addEventListener('click', toggleRecording);
-
-        // ====== NODES ======
-        function createNode(text, x, y, parentId, bgColor, borderColor) {
-            saveState();
+        function createNode(text, x, y, parentId, bg='#37474f', border='#546e7a', fontSize=14) {
             const id = nextId++;
-            nodes.push({ id, text, x, y, parentId, bg: bgColor || '#37474f', border: borderColor || '#546e7a' });
-            renderNode(nodes[nodes.length - 1]);
+            const node = { id, text, x, y, parentId, bg, border, fontSize };
+            nodes.push(node);
+            renderNode(node);
             drawLines();
-            renderOutline();
-            updateCount();
             return id;
         }
 
@@ -837,735 +168,261 @@
             const el = document.createElement('div');
             el.className = 'node';
             el.id = `node-${node.id}`;
-            el.textContent = node.text;
             el.style.left = node.x + 'px';
             el.style.top = node.y + 'px';
             el.style.background = node.bg;
             el.style.border = `2px solid ${node.border}`;
+            el.style.fontSize = node.fontSize + 'px';
+            el.innerText = node.text;
 
-            // Mousedown: 喺 Link 或 Reparent 模式下停用拖拽，保證 click 順利觸發
+            // 右上角 ✏️ 快捷按鈕
+            const icon = document.createElement('div');
+            icon.className = 'node-edit-icon';
+            icon.textContent = '✏️';
+            icon.onclick = (e) => {
+                e.stopPropagation();
+                openPopoverNearNode(node.id);
+            };
+            el.appendChild(icon);
+
+            // 單擊與多選拖拽（群組移位）
             el.addEventListener('mousedown', (e) => {
-                if (linkMode || reparentMode) return;
+                if (e.button !== 0) return;
                 e.stopPropagation();
-                selectNode(node.id);
-                dragNode = node;
-                const rect = canvasArea.getBoundingClientRect();
-                dragOffsetX = (e.clientX - rect.left - tx) / scale - node.x;
-                dragOffsetY = (e.clientY - rect.top - ty) / scale - node.y;
-            });
 
-            // Click: 優先處理 Reparent，再處理 Link
-            el.addEventListener('click', (e) => {
-                e.stopPropagation();
-                
-                if (reparentMode) {
-                    handleReparentClick(node.id);
-                    return;
+                if (!e.shiftKey && !selectedIds.has(node.id)) {
+                    clearSelection();
+                    selectNode(node.id);
+                } else if (e.shiftKey) {
+                    toggleSelect(node.id);
                 }
-                
-                if (linkMode) {
-                    handleLinkClick(node.id);
-                    return;
-                }
-            });
 
-            el.addEventListener('mouseenter', () => {
-                if (linkMode && linkFromId !== null && linkFromId !== node.id) {
-                    el.classList.add('link-hover');
-                }
+                // 準備多選/整體拖動
+                isDraggingGroup = true;
+                dragStartPos = { x: e.clientX, y: e.clientY };
+                initialNodePositions = [];
+                selectedIds.forEach(id => {
+                    const n = nodes.find(item => item.id === id);
+                    if (n) initialNodePositions.push({ node: n, startX: n.x, startY: n.y });
+                });
             });
-
-            el.addEventListener('mouseleave', () => el.classList.remove('link-hover'));
 
             treeCanvas.appendChild(el);
         }
 
         function selectNode(id) {
-            if (selectedId !== null) {
-                const prev = document.getElementById(`node-${selectedId}`);
-                if (prev) prev.classList.remove('selected');
-            }
-            selectedId = id;
-            const el = document.getElementById(`node-${id}`);
-            if (el) el.classList.add('selected');
-            const node = nodes.find(n => n.id === id);
-            if (node) {
-                selectedInfo.style.display = 'block';
-                nameInput.value = node.text;
-                updateParentSelectOptions(node);
-            }
-            renderOutline();
+            selectedIds.add(id);
+            document.getElementById(`node-${id}`)?.classList.add('selected');
         }
 
-        // ====== CHANGE PARENT NODE (RE-PARENTING) ======
-        function updateParentSelectOptions(currentNode) {
-            parentSelect.innerHTML = '';
-
-            const descendants = new Set();
-            function getDescendants(id) {
-                nodes.filter(n => n.parentId === id).forEach(child => {
-                    descendants.add(child.id);
-                    getDescendants(child.id);
-                });
-            }
-            getDescendants(currentNode.id);
-
-            const rootOption = document.createElement('option');
-            rootOption.value = 'null';
-            rootOption.textContent = '(無 - 獨立成為根節點)';
-            if (currentNode.parentId === null) rootOption.selected = true;
-            parentSelect.appendChild(rootOption);
-
-            nodes.forEach(n => {
-                if (n.id !== currentNode.id && !descendants.has(n.id)) {
-                    const opt = document.createElement('option');
-                    opt.value = n.id;
-                    opt.textContent = n.text || `節點 ${n.id}`;
-                    if (currentNode.parentId === n.id) opt.selected = true;
-                    parentSelect.appendChild(opt);
-                }
-            });
-        }
-
-        function changeParentNode(newParentValue) {
-            if (selectedId === null) return;
-            const node = nodes.find(n => n.id === selectedId);
-            if (!node) return;
-
-            const newParentId = newParentValue === 'null' ? null : parseInt(newParentValue, 10);
-            if (node.parentId === newParentId) return;
-
-            saveState();
-            node.parentId = newParentId;
-
-            drawLines();
-            renderOutline();
-        }
-
-        nameInput.addEventListener('focus', () => saveState());
-        nameInput.addEventListener('input', () => {
-            if (selectedId === null) return;
-            const node = nodes.find(n => n.id === selectedId);
-            if (node) {
-                node.text = nameInput.value;
-                const el = document.getElementById(`node-${selectedId}`);
-                if (el) el.textContent = node.text;
-                renderOutline();
-                renderLinkList();
-            }
-        });
-
-        function addChildToSelected() {
-            const parentId = selectedId !== null ? selectedId : (nodes.length > 0 ? nodes[0].id : null);
-            if (parentId === null) {
-                createNode('新節點', 4000, 4000, null, '#37474f', '#546e7a');
-                return;
-            }
-            const parent = nodes.find(n => n.id === parentId);
-            const children = nodes.filter(n => n.parentId === parentId);
-            const count = children.length;
-            const angle = (-90 + (count - 1) * 45 + count * 40) * Math.PI / 180;
-            const dist = 180;
-            const x = parent.x + Math.cos(angle) * dist;
-            const y = parent.y + Math.sin(angle) * dist;
-            collapsedNodes.delete(parentId);
-            const newId = createNode('新節點', x, y, parentId, parent.bg, parent.border);
-            selectNode(newId);
-        }
-
-        function addSibling() {
-            if (selectedId === null) return;
-            const node = nodes.find(n => n.id === selectedId);
-            if (!node || node.parentId === null) {
-                addChildToSelected();
-                return;
-            }
-            const newId = createNode('新節點', node.x, node.y + 70, node.parentId, node.bg, node.border);
-            selectNode(newId);
-        }
-
-        function deleteSelected() {
-            if (selectedId === null) return;
-            saveState();
-            const toDelete = [];
-            function gather(id) {
-                toDelete.push(id);
-                nodes.filter(n => n.parentId === id).forEach(c => gather(c.id));
-            }
-            gather(selectedId);
-            toDelete.forEach(id => {
-                const el = document.getElementById(`node-${id}`);
-                if (el) el.remove();
-            });
-            nodes = nodes.filter(n => !toDelete.includes(n.id));
-            crossLinks = crossLinks.filter(l => !toDelete.includes(l.fromId) && !toDelete.includes(l.toId));
-            selectedId = null;
-            selectedInfo.style.display = 'none';
-            drawLines();
-            renderOutline();
-            renderLinkList();
-            updateCount();
-        }
-
-        function setNodeColor(bg, border) {
-            if (selectedId === null) return;
-            const node = nodes.find(n => n.id === selectedId);
-            if (!node) return;
-            saveState();
-            node.bg = bg;
-            node.border = border;
-            const el = document.getElementById(`node-${selectedId}`);
-            if (el) {
-                el.style.background = bg;
-                el.style.border = `2px solid ${border}`;
-            }
-            drawLines();
-            renderOutline();
-        }
-
-        // ====== QUICK CONNECT FROM SELECTED (快速連線) ======
-        function quickConnectFromSelected() {
-            if (selectedId === null) {
-                alert('請先選取起點節點！');
-                return;
-            }
-
-            const sourceNode = nodes.find(n => n.id === selectedId);
-            const targetName = prompt(`【快速連線】從「${sourceNode.text}」連線至：\n(輸入目標節點名稱)`);
-
-            if (!targetName || !targetName.trim()) return;
-
-            const trimmed = targetName.trim();
-
-            let targetNode = nodes.find(n => n.text === trimmed && n.id !== selectedId);
-
-            if (!targetNode) {
-                const newId = createNode(trimmed, sourceNode.x + 250, sourceNode.y + 50, sourceNode.parentId, sourceNode.bg, sourceNode.border);
-                targetNode = nodes.find(n => n.id === newId);
-            }
-
-            const exists = crossLinks.find(l =>
-                (l.fromId === sourceNode.id && l.toId === targetNode.id) ||
-                (l.fromId === targetNode.id && l.toId === sourceNode.id)
-            );
-
-            if (!exists) {
-                crossLinks.push({ id: nextLinkId++, fromId: sourceNode.id, toId: targetNode.id, label: '' });
-                drawLines();
-                renderLinkList();
-                updateCount();
-            }
-
-            panToNode(targetNode);
-            selectNode(targetNode.id);
-        }
-
-        // ====== REPARENT MODE ======
-        function toggleReparentMode() {
-            if (selectedId === null) {
-                alert('請先選取要更變父級嘅節點！');
-                return;
-            }
-            reparentMode = !reparentMode;
-            const btn = document.getElementById('reparent-mode-btn');
-            const banner = document.getElementById('reparent-banner');
-            btn.classList.toggle('active', reparentMode);
-            banner.style.display = reparentMode ? 'block' : 'none';
-            canvasArea.classList.toggle('link-cursor', reparentMode || linkMode);
-
-            if (reparentMode && linkMode) {
-                toggleLinkMode();
-            }
-        }
-
-        function handleReparentClick(targetId) {
-            if (targetId === selectedId) return;
-
-            const node = nodes.find(n => n.id === selectedId);
-            if (!node) return;
-
-            const descendants = new Set();
-            function getDesc(id) {
-                nodes.filter(n => n.parentId === id).forEach(child => {
-                    descendants.add(child.id);
-                    getDesc(child.id);
-                });
-            }
-            getDesc(selectedId);
-
-            if (descendants.has(targetId)) {
-                alert('唔可以將後代設為父級（會造成循環）！');
-                return;
-            }
-
-            saveState();
-            node.parentId = targetId;
-            drawLines();
-            renderOutline();
-            updateParentSelectOptions(node);
-
-            reparentMode = false;
-            document.getElementById('reparent-mode-btn').classList.remove('active');
-            document.getElementById('reparent-banner').style.display = 'none';
-            canvasArea.classList.toggle('link-cursor', linkMode);
-        }
-
-        // ====== LINK MODE ======
-        function toggleLinkMode() {
-            linkMode = !linkMode;
-            linkFromId = null;
-            const btn = document.getElementById('link-mode-btn');
-            btn.classList.toggle('active', linkMode);
-            linkBanner.style.display = linkMode ? 'block' : 'none';
-            canvasArea.classList.toggle('link-cursor', linkMode);
-            if (!linkMode) {
-                document.querySelectorAll('.node.link-hover').forEach(el => el.classList.remove('link-hover'));
-            }
-        }
-
-        function handleLinkClick(nodeId) {
-            if (linkFromId === null) {
-                linkFromId = nodeId;
-                linkBanner.textContent = '🔗 已選起點 → 撳目標節點';
-                const el = document.getElementById(`node-${nodeId}`);
-                if (el) el.classList.add('link-hover');
+        function toggleSelect(id) {
+            if (selectedIds.has(id)) {
+                selectedIds.delete(id);
+                document.getElementById(`node-${id}`)?.classList.remove('selected', 'multi-selected');
             } else {
-                if (linkFromId === nodeId) {
-                    const el = document.getElementById(`node-${linkFromId}`);
-                    if (el) el.classList.remove('link-hover');
-                    linkFromId = null;
-                    linkBanner.textContent = '🔗 Link 模式：撳第一個節點，再撳目標節點';
-                    return;
-                }
-                const exists = crossLinks.find(l =>
-                    (l.fromId === linkFromId && l.toId === nodeId) ||
-                    (l.fromId === nodeId && l.toId === linkFromId)
-                );
-                if (!exists) {
-                    saveState();
-                    const label = prompt('請輸入連結描述文字 (可留空):', '') || '';
-                    crossLinks.push({ id: nextLinkId++, fromId: linkFromId, toId: nodeId, label });
-                    drawLines();
-                    renderLinkList();
-                    updateCount();
-                }
-                const el = document.getElementById(`node-${linkFromId}`);
-                if (el) el.classList.remove('link-hover');
-                linkFromId = null;
-                linkBanner.textContent = '🔗 連結已建立！';
-                setTimeout(() => {
-                    if (linkMode) linkBanner.textContent = '🔗 Link 模式：撳第一個節點，再撳目標節點';
-                }, 1500);
+                selectedIds.add(id);
+                document.getElementById(`node-${id}`)?.classList.add('multi-selected');
             }
         }
 
-        function editLinkDescription(linkId) {
-            const link = crossLinks.find(l => l.id === linkId);
-            if (!link) return;
-            const newDesc = prompt('修改連結描述文字:', link.label || '');
-            if (newDesc !== null) {
-                saveState();
-                link.label = newDesc;
+        function clearSelection() {
+            selectedIds.forEach(id => document.getElementById(`node-${id}`)?.classList.remove('selected', 'multi-selected'));
+            selectedIds.clear();
+        }
+
+        // 附載於點擊物件附近的 Document 編輯窗
+        function openPopoverNearNode(id) {
+            const node = nodes.find(n => n.id === id);
+            if (!node) return;
+            activePopoverNodeId = id;
+
+            const el = document.getElementById(`node-${id}`);
+            const rect = el.getBoundingClientRect();
+
+            popover.style.display = 'flex';
+            popover.style.left = (rect.right + 15) + 'px';
+            popover.style.top = rect.top + 'px';
+
+            document.getElementById('pop-text').value = node.text;
+            document.getElementById('pop-font-size').value = node.fontSize || 14;
+            document.getElementById('pop-bg').value = RGBToHex(node.bg) || '#37474f';
+        }
+
+        function closePopover() { popover.style.display = 'none'; activePopoverNodeId = null; }
+
+        function applyPopoverSave() {
+            if (activePopoverNodeId === null) return;
+            const node = nodes.find(n => n.id === activePopoverNodeId);
+            if (node) {
+                node.text = document.getElementById('pop-text').value;
+                node.fontSize = document.getElementById('pop-font-size').value;
+                node.bg = document.getElementById('pop-bg').value;
+
+                const el = document.getElementById(`node-${node.id}`);
+                if (el) {
+                    el.innerText = node.text;
+                    el.style.fontSize = node.fontSize + 'px';
+                    el.style.background = node.bg;
+                    // 重建 edit icon
+                    const icon = document.createElement('div');
+                    icon.className = 'node-edit-icon'; icon.textContent = '✏️';
+                    icon.onclick = (e) => { e.stopPropagation(); openPopoverNearNode(node.id); };
+                    el.appendChild(icon);
+                }
                 drawLines();
-                renderLinkList();
             }
+            closePopover();
         }
 
-        function deleteCrossLink(linkId) {
-            saveState();
-            crossLinks = crossLinks.filter(l => l.id !== linkId);
-            drawLines();
-            renderLinkList();
-            updateCount();
-        }
-
-        // ====== DRAW LINES ======
-        function drawLines() {
-            svg.innerHTML = '';
-
-            nodes.forEach(node => {
-                if (node.parentId === null || node.parentId === undefined) return;
-                const parent = nodes.find(n => n.id === node.parentId);
-                if (!parent) return;
-                const pEl = document.getElementById(`node-${parent.id}`);
-                const cEl = document.getElementById(`node-${node.id}`);
-                if (!pEl || !cEl) return;
-
-                const px = parent.x + pEl.offsetWidth / 2;
-                const py = parent.y + pEl.offsetHeight / 2;
-                const cx = node.x + cEl.offsetWidth / 2;
-                const cy = node.y + cEl.offsetHeight / 2;
-                const mx = (px + cx) / 2;
-
-                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                path.setAttribute('d', `M${px},${py} C${mx},${py} ${mx},${cy} ${cx},${cy}`);
-                path.setAttribute('class', 'branch-line');
-                path.setAttribute('stroke', node.border);
-                svg.appendChild(path);
-            });
-
-            crossLinks.forEach(link => {
-                const fromNode = nodes.find(n => n.id === link.fromId);
-                const toNode = nodes.find(n => n.id === link.toId);
-                if (!fromNode || !toNode) return;
-                const fEl = document.getElementById(`node-${fromNode.id}`);
-                const tEl = document.getElementById(`node-${toNode.id}`);
-                if (!fEl || !tEl) return;
-
-                const fx = fromNode.x + fEl.offsetWidth / 2;
-                const fy = fromNode.y + fEl.offsetHeight / 2;
-                const toX = toNode.x + tEl.offsetWidth / 2;
-                const toY = toNode.y + tEl.offsetHeight / 2;
-
-                const dx = toX - fx, dy = toY - fy;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                const curve = dist * 0.2;
-                const nx = -dy / (dist || 1);
-                const ny = dx / (dist || 1);
-                const cpx = (fx + toX) / 2 + nx * curve;
-                const cpy = (fy + toY) / 2 + ny * curve;
-
-                const pathId = `cross-link-path-${link.id}`;
-
-                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                path.setAttribute('id', pathId);
-                path.setAttribute('d', `M${fx},${fy} Q${cpx},${cpy} ${toX},${toY}`);
-                path.setAttribute('class', 'cross-link');
-                path.setAttribute('stroke', '#00f2fe');
-                svg.appendChild(path);
-
-                if (link.label) {
-                    const angle = Math.atan2(Math.abs(toY - fy), Math.abs(toX - fx)) * 180 / Math.PI;
-                    const isVertical = angle > 50;
-
-                    const midX = (fx + toX) / 2 + nx * (curve * 0.5);
-                    const midY = (fy + toY) / 2 + ny * (curve * 0.5);
-
-                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                    text.setAttribute('class', 'link-text');
-                    text.setAttribute('x', midX);
-                    text.setAttribute('y', midY);
-
-                    if (isVertical) {
-                        text.setAttribute('writing-mode', 'tb');
-                        text.setAttribute('glyph-orientation-vertical', '0');
-                        text.setAttribute('dx', '12');
-                        text.setAttribute('dy', '0');
-                        text.setAttribute('text-anchor', 'middle');
-                        text.setAttribute('dominant-baseline', 'central');
-                    } else {
-                        text.setAttribute('dy', '-10');
-                        text.setAttribute('text-anchor', 'middle');
-                        text.setAttribute('dominant-baseline', 'auto');
-                    }
-
-                    text.textContent = link.label;
-
-                    text.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        editLinkDescription(link.id);
-                    });
-
-                    svg.appendChild(text);
-                }
-            });
-        }
-
-        // ====== OUTLINE ======
-        function renderOutline() {
-            outlinePanel.innerHTML = '';
-            const roots = nodes.filter(n => n.parentId === null || n.parentId === undefined);
-            roots.forEach(r => renderOutlineItem(r, 0));
-        }
-
-        function renderOutlineItem(node, depth) {
-            const children = nodes.filter(n => n.parentId === node.id);
-            const hasChildren = children.length > 0;
-            const isCollapsed = collapsedNodes.has(node.id);
-
-            const item = document.createElement('div');
-            item.className = 'tree-item' + (selectedId === node.id ? ' active' : '');
-            item.style.paddingLeft = (6 + depth * 12) + 'px';
-
-            const toggle = document.createElement('div');
-            toggle.className = 'tree-toggle' + (!hasChildren ? ' empty' : '') + (!isCollapsed && hasChildren ? ' expanded' : '');
-            toggle.textContent = '▶';
-            if (hasChildren) {
-                toggle.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (collapsedNodes.has(node.id)) collapsedNodes.delete(node.id);
-                    else collapsedNodes.add(node.id);
-                    renderOutline();
-                });
-            }
-
-            const dot = document.createElement('div');
-            dot.className = 'tree-dot';
-            dot.style.background = node.bg;
-
-            const text = document.createElement('div');
-            text.className = 'tree-text';
-            text.textContent = node.text;
-
-            item.appendChild(toggle);
-            item.appendChild(dot);
-            item.appendChild(text);
-            item.addEventListener('click', () => { selectNode(node.id); panToNode(node); });
-
-            outlinePanel.appendChild(item);
-
-            if (hasChildren && !isCollapsed) {
-                children.forEach(c => renderOutlineItem(c, depth + 1));
-            }
-        }
-
-        function expandAllOutline() { collapsedNodes.clear(); renderOutline(); }
-        function collapseAllOutline() {
-            nodes.forEach(n => {
-                if (nodes.some(c => c.parentId === n.id)) collapsedNodes.add(n.id);
-            });
-            renderOutline();
-        }
-
-        // ====== LINK LIST ======
-        function renderLinkList() {
-            const list = document.getElementById('link-list');
-            list.innerHTML = '';
-            document.getElementById('link-count-title').textContent = `(${crossLinks.length})`;
-
-            if (crossLinks.length === 0) {
-                list.innerHTML = '<div style="font-size:11px; color:var(--text-muted); text-align:center; padding:6px 0;">撳 Link → 選兩個節點建立連結</div>';
-                return;
-            }
-
-            crossLinks.forEach(link => {
-                const from = nodes.find(n => n.id === link.fromId);
-                const to = nodes.find(n => n.id === link.toId);
-                if (!from || !to) return;
-
-                const item = document.createElement('div');
-                item.className = 'link-item';
-
-                const fromSpan = document.createElement('span');
-                fromSpan.textContent = from.text;
-                const arrow = document.createElement('span');
-                arrow.className = 'link-arrow';
-                arrow.textContent = '→';
-                const toSpan = document.createElement('span');
-                toSpan.textContent = to.text;
-
-                item.appendChild(fromSpan);
-                item.appendChild(arrow);
-                item.appendChild(toSpan);
-
-                if (link.label) {
-                    const descSpan = document.createElement('span');
-                    descSpan.className = 'link-desc';
-                    descSpan.textContent = `(${link.label})`;
-                    item.appendChild(descSpan);
-                }
-
-                const actions = document.createElement('div');
-                actions.className = 'link-actions';
-
-                const editBtn = document.createElement('button');
-                editBtn.className = 'link-action-btn edit-link';
-                editBtn.textContent = '✎';
-                editBtn.title = '編輯文字';
-                editBtn.addEventListener('click', (e) => { e.stopPropagation(); editLinkDescription(link.id); });
-
-                const delBtn = document.createElement('button');
-                delBtn.className = 'link-action-btn del-link';
-                delBtn.textContent = '✕';
-                delBtn.title = '刪除連結';
-                delBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteCrossLink(link.id); });
-
-                actions.appendChild(editBtn);
-                actions.appendChild(delBtn);
-                item.appendChild(actions);
-
-                item.addEventListener('click', () => {
-                    const mx = (from.x + to.x) / 2, my = (from.y + to.y) / 2;
-                    animateTo(-mx * scale + canvasArea.offsetWidth / 2, -my * scale + canvasArea.offsetHeight / 2, scale);
-                });
-
-                list.appendChild(item);
-            });
-        }
-
-        // ====== PAN & ZOOM ANIMATION ======
-        function panToNode(node) {
-            const el = document.getElementById(`node-${node.id}`);
-            if (!el) return;
-            const targetTx = -(node.x + el.offsetWidth / 2) * scale + canvasArea.offsetWidth / 2;
-            const targetTy = -(node.y + el.offsetHeight / 2) * scale + canvasArea.offsetHeight / 2;
-            animateTo(targetTx, targetTy, scale);
-        }
-
-        function animateTo(targetTx, targetTy, targetScale, duration = 300) {
-            if (animating) return;
-            animating = true;
-            const startTx = tx, startTy = ty, startScale = scale;
-            const startTime = performance.now();
-            function step(now) {
-                const t = Math.min((now - startTime) / duration, 1);
-                const ease = 1 - Math.pow(1 - t, 3);
-                tx = startTx + (targetTx - startTx) * ease;
-                ty = startTy + (targetTy - startTy) * ease;
-                scale = startScale + (targetScale - startScale) * ease;
-                updateTransform();
-                if (t < 1) requestAnimationFrame(step);
-                else animating = false;
-            }
-            requestAnimationFrame(step);
-        }
-
-        function backToCenter() {
-            const root = nodes.find(n => n.parentId === null || n.parentId === undefined);
-            if (!root) return;
-            const el = document.getElementById(`node-${root.id}`);
-            const targetTx = -(root.x + (el ? el.offsetWidth / 2 : 50)) + canvasArea.offsetWidth / 2;
-            const targetTy = -(root.y + (el ? el.offsetHeight / 2 : 18)) + canvasArea.offsetHeight / 2;
-            animateTo(targetTx, targetTy, 1, 400);
-        }
-
+        // 畫布框選 (Box Select) 與拖拽 (Group Move)
         canvasArea.addEventListener('mousedown', (e) => {
-            if (dragNode || linkMode) return;
-            isPanning = true;
-            panStartX = e.clientX - tx;
-            panStartY = e.clientY - ty;
+            if (e.target !== canvasArea && e.target !== treeCanvas && e.target !== svg) return;
+
+            if (e.button === 0) {
+                isBoxSelecting = true;
+                boxStart = { x: e.clientX, y: e.clientY };
+                selectionBox.style.left = e.clientX + 'px';
+                selectionBox.style.top = e.clientY + 'px';
+                selectionBox.style.width = '0px';
+                selectionBox.style.height = '0px';
+                selectionBox.style.display = 'block';
+
+                if (!e.shiftKey) clearSelection();
+            }
         });
 
         document.addEventListener('mousemove', (e) => {
-            if (dragNode) {
-                const rect = canvasArea.getBoundingClientRect();
-                const newX = (e.clientX - rect.left - tx) / scale - dragOffsetX;
-                const newY = (e.clientY - rect.top - ty) / scale - dragOffsetY;
-                dragNode.x = newX;
-                dragNode.y = newY;
-                const el = document.getElementById(`node-${dragNode.id}`);
-                if (el) {
-                    el.style.left = newX + 'px';
-                    el.style.top = newY + 'px';
-                }
+            // 1. 群組一起移動 (Group Move)
+            if (isDraggingGroup) {
+                const dx = (e.clientX - dragStartPos.x) / scale;
+                const dy = (e.clientY - dragStartPos.y) / scale;
+
+                initialNodePositions.forEach(item => {
+                    item.node.x = item.startX + dx;
+                    item.node.y = item.startY + dy;
+                    const el = document.getElementById(`node-${item.node.id}`);
+                    if (el) { el.style.left = item.node.x + 'px'; el.style.top = item.node.y + 'px'; }
+                });
                 drawLines();
                 return;
             }
-            if (!isPanning) return;
-            tx = e.clientX - panStartX;
-            ty = e.clientY - panStartY;
-            updateTransform();
+
+            // 2. 畫布精準拉框框選 (正確計算 Translate/Scale)
+            if (isBoxSelecting) {
+                const currentX = e.clientX;
+                const currentY = e.clientY;
+
+                const left = Math.min(boxStart.x, currentX);
+                const top = Math.min(boxStart.y, currentY);
+                const width = Math.abs(currentX - boxStart.x);
+                const height = Math.abs(currentY - boxStart.y);
+
+                selectionBox.style.left = left + 'px';
+                selectionBox.style.top = top + 'px';
+                selectionBox.style.width = width + 'px';
+                selectionBox.style.height = height + 'px';
+
+                const rectCanvas = canvasArea.getBoundingClientRect();
+                const sel = {
+                    left: (left - rectCanvas.left - tx) / scale,
+                    top: (top - rectCanvas.top - ty) / scale,
+                    right: (left + width - rectCanvas.left - tx) / scale,
+                    bottom: (top + height - rectCanvas.top - ty) / scale
+                };
+
+                nodes.forEach(node => {
+                    const el = document.getElementById(`node-${node.id}`);
+                    if (!el) return;
+                    const w = el.offsetWidth, h = el.offsetHeight;
+                    const inBox = !(node.x > sel.right || (node.x + w) < sel.left || node.y > sel.bottom || (node.y + h) < sel.top);
+                    if (inBox) {
+                        selectedIds.add(node.id);
+                        el.classList.add('multi-selected');
+                    }
+                });
+            }
         });
 
         document.addEventListener('mouseup', () => {
-            if (dragNode) saveState();
-            isPanning = false;
-            dragNode = null;
-        });
-
-        canvasArea.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            const factor = e.deltaY > 0 ? 0.92 : 1.08;
-            scale = Math.max(0.2, Math.min(4, scale * factor));
-            updateTransform();
-        });
-
-        function updateTransform() {
-            treeCanvas.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
-            document.getElementById('zoom-label').textContent = Math.round(scale * 100) + '%';
-        }
-
-        function zoomIn() { scale = Math.min(4, scale * 1.2); updateTransform(); }
-        function zoomOut() { scale = Math.max(0.2, scale * 0.8); updateTransform(); }
-        function resetView() { backToCenter(); }
-
-        function updateCount() {
-            document.getElementById('node-count').textContent = nodes.length + ' 個節點';
-            document.getElementById('link-count-bar').textContent = crossLinks.length + ' 個連結';
-        }
-
-        function exportJSON() {
-            const data = JSON.stringify({ nodes, crossLinks, nextId, nextLinkId }, null, 2);
-            const blob = new Blob([data], { type: 'application/json' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'mindmap.json';
-            a.click();
-        }
-
-        function importJSON() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = (e) => {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    saveState();
-                    const data = JSON.parse(ev.target.result);
-                    treeCanvas.querySelectorAll('.node').forEach(el => el.remove());
-                    nodes = data.nodes || [];
-                    crossLinks = data.crossLinks || [];
-                    nextId = data.nextId || 0;
-                    nextLinkId = data.nextLinkId || 0;
-                    nodes.forEach(n => renderNode(n));
-                    drawLines();
-                    renderOutline();
-                    renderLinkList();
-                    updateCount();
-                    selectedId = null;
-                    selectedInfo.style.display = 'none';
-                };
-                reader.readAsText(e.target.files[0]);
-            };
-            input.click();
-        }
-
-        // Keyboard Shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
-
-            if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
-                e.preventDefault();
-                if (e.shiftKey) redo();
-                else undo();
-                return;
-            }
-            if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')) {
-                e.preventDefault();
-                redo();
-                return;
-            }
-
-            if (e.shiftKey && (e.key === 'L' || e.key === 'l')) {
-                e.preventDefault();
-                quickConnectFromSelected();
-                return;
-            }
-
-            if (e.key === 'Tab') { e.preventDefault(); addChildToSelected(); }
-            if (e.key === 'Enter') { e.preventDefault(); addSibling(); }
-            if (e.key === 'Delete' || e.key === 'Backspace') {
-                e.preventDefault();
-                deleteSelected();
-            }
-            if ((e.key === 'l' || e.key === 'L') && !e.shiftKey) { toggleLinkMode(); }
-            if (e.key === 'Escape') {
-                if (reparentMode) toggleReparentMode();
-                if (linkMode) toggleLinkMode();
+            isDraggingGroup = false;
+            if (isBoxSelecting) {
+                isBoxSelecting = false;
+                selectionBox.style.display = 'none';
             }
         });
 
-        canvasArea.addEventListener('click', (e) => {
-            if (e.target === canvasArea || e.target === treeCanvas || e.target === svg) {
-                if (selectedId !== null && !linkMode) {
-                    const prev = document.getElementById(`node-${selectedId}`);
-                    if (prev) prev.classList.remove('selected');
-                    selectedId = null;
-                    selectedInfo.style.display = 'none';
-                    renderOutline();
+        // 分支配色與 SAVE
+        function saveNodeColor() {
+            const bg = document.getElementById('main-bg').value;
+            const border = document.getElementById('main-border').value;
+            selectedIds.forEach(id => {
+                const n = nodes.find(item => item.id === id);
+                if (n) { n.bg = bg; n.border = border; const el = document.getElementById(`node-${id}`); if(el){ el.style.background = bg; el.style.border = `2px solid ${border}`; } }
+            });
+            drawLines();
+        }
+
+        function saveBranchColor() {
+            const bg = document.getElementById('main-bg').value;
+            const border = document.getElementById('main-border').value;
+            selectedIds.forEach(rootId => {
+                function applyRec(id) {
+                    const n = nodes.find(item => item.id === id);
+                    if (n) { n.bg = bg; n.border = border; const el = document.getElementById(`node-${id}`); if(el){ el.style.background = bg; el.style.border = `2px solid ${border}`; } }
+                    nodes.filter(c => c.parentId === id).forEach(c => applyRec(c.id));
                 }
-            }
-        });
+                applyRec(rootId);
+            });
+            drawLines();
+        }
+
+        function updateTransform() { treeCanvas.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`; }
+        function drawLines() {
+            svg.innerHTML = '';
+            nodes.forEach(node => {
+                if (node.parentId === null) return;
+                const p = nodes.find(n => n.id === node.parentId);
+                if (!p) return;
+                const pEl = document.getElementById(`node-${p.id}`), cEl = document.getElementById(`node-${node.id}`);
+                if (!pEl || !cEl) return;
+                const px = p.x + pEl.offsetWidth / 2, py = p.y + pEl.offsetHeight / 2;
+                const cx = node.x + cEl.offsetWidth / 2, cy = node.y + cEl.offsetHeight / 2, mx = (px + cx) / 2;
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', `M${px},${py} C${mx},${py} ${mx},${cy} ${cx},${cy}`);
+                path.setAttribute('stroke', node.border); path.setAttribute('stroke-width', '2.5'); path.setAttribute('fill', 'none');
+                svg.appendChild(path);
+            });
+        }
+
+        function addChild() {
+            const parentId = Array.from(selectedIds)[0] || (nodes[0] ? nodes[0].id : null);
+            if (parentId === null) return;
+            const p = nodes.find(n => n.id === parentId);
+            const id = createNode('新子節點', p.x + 180, p.y + 50, parentId, p.bg, p.border);
+            clearSelection(); selectNode(id);
+        }
+        function addSibling() {
+            const selId = Array.from(selectedIds)[0];
+            if (!selId) return;
+            const n = nodes.find(item => item.id === selId);
+            if (!n || n.parentId === null) { addChild(); return; }
+            const id = createNode('新同級節點', n.x, n.y + 60, n.parentId, n.bg, n.border);
+            clearSelection(); selectNode(id);
+        }
+        function deleteSelected() {
+            selectedIds.forEach(id => {
+                document.getElementById(`node-${id}`)?.remove();
+                nodes = nodes.filter(n => n.id !== id);
+            });
+            clearSelection(); drawLines();
+        }
+
+        function RGBToHex(rgbStr) {
+            if (!rgbStr || rgbStr.startsWith('#')) return rgbStr;
+            const res = rgbStr.match(/\d+/g);
+            if (!res || res.length < 3) return '#37474f';
+            return "#" + ((1 << 24) + (parseInt(res[0]) << 16) + (parseInt(res[1]) << 8) + parseInt(res[2])).toString(16).slice(1);
+        }
 
         init();
     </script>
