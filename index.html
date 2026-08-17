@@ -2,8 +2,12 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mind Map Pro - Ultra</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+    >
+    <title>Mind Map Pro - 多行、縮放、語音修復及關係編輯版</title>
+
     <style>
         * {
             margin: 0;
@@ -11,121 +15,61 @@
             box-sizing: border-box;
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            transition: background 0.3s;
+        :root {
+            color-scheme: light;
         }
 
-        /* Theme Variables */
-        body.theme-light {
+        body {
             --bg: #f5f5f5;
             --sidebar-bg: #ffffff;
             --sidebar-border: #e0e0e0;
             --text: #1a1a1a;
-            --text-sub: #666;
-            --text-muted: #999;
+            --text-sub: #666666;
             --btn-bg: #f0f0f0;
-            --btn-border: #ddd;
+            --btn-border: #dddddd;
             --btn-hover: #e4e4e4;
-            --input-bg: #f8f8f8;
-            --input-border: #ddd;
+            --input-bg: #ffffff;
             --input-focus: #4285f4;
             --canvas-bg: #fafafa;
-            --node-shadow: rgba(0,0,0,0.08);
+            --node-shadow: rgba(0, 0, 0, 0.14);
             --accent: #4285f4;
-            --danger: #d32f2f;
+
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            position: relative;
+            background: var(--bg);
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Arial,
+                sans-serif;
         }
 
-        body.theme-dark {
-            --bg: #0f0f1a;
-            --sidebar-bg: #16162a;
-            --sidebar-border: #2a2a4a;
-            --text: #ffffff;
-            --text-sub: #aaa;
-            --text-muted: #555;
-            --btn-bg: #1e1e3a;
-            --btn-border: #2a2a4a;
-            --btn-hover: #2a2a4a;
-            --input-bg: #1e1e3a;
-            --input-border: #2a2a4a;
-            --input-focus: #5c7cfa;
-            --canvas-bg: #0f0f1a;
-            --node-shadow: rgba(0,0,0,0.3);
-            --accent: #5c7cfa;
-            --danger: #f44336;
+        button,
+        input,
+        textarea {
+            font: inherit;
         }
 
-        body.theme-warm {
-            --bg: #fef9f3;
-            --sidebar-bg: #fff8f0;
-            --sidebar-border: #f0dcc8;
-            --text: #3d2c1e;
-            --text-sub: #8b6f56;
-            --text-muted: #c4a882;
-            --btn-bg: #fdf2e6;
-            --btn-border: #f0dcc8;
-            --btn-hover: #f5e6d4;
-            --input-bg: #fef9f3;
-            --input-border: #f0dcc8;
-            --input-focus: #e67e22;
-            --canvas-bg: #fefbf7;
-            --node-shadow: rgba(139,95,52,0.08);
-            --accent: #e67e22;
-            --danger: #c0392b;
+        button {
+            -webkit-tap-highlight-color: transparent;
         }
 
-        body.theme-ocean {
-            --bg: #f0f7fa;
-            --sidebar-bg: #f5fafc;
-            --sidebar-border: #c8e3ed;
-            --text: #1a3a4a;
-            --text-sub: #4a7a8a;
-            --text-muted: #8ab5c4;
-            --btn-bg: #e8f4f8;
-            --btn-border: #c8e3ed;
-            --btn-hover: #d5ecf4;
-            --input-bg: #f0f7fa;
-            --input-border: #c8e3ed;
-            --input-focus: #0288d1;
-            --canvas-bg: #f5fafc;
-            --node-shadow: rgba(2,136,209,0.08);
-            --accent: #0288d1;
-            --danger: #d32f2f;
-        }
+        /* =========================
+           Sidebar
+        ========================= */
 
-        body.theme-forest {
-            --bg: #f2f7f2;
-            --sidebar-bg: #f7faf7;
-            --sidebar-border: #c8ddc8;
-            --text: #1a3a1a;
-            --text-sub: #4a7a4a;
-            --text-muted: #8ab58a;
-            --btn-bg: #e8f2e8;
-            --btn-border: #c8ddc8;
-            --btn-hover: #d5e8d5;
-            --input-bg: #f2f7f2;
-            --input-border: #c8ddc8;
-            --input-focus: #2e7d32;
-            --canvas-bg: #f5faf5;
-            --node-shadow: rgba(46,125,50,0.08);
-            --accent: #2e7d32;
-            --danger: #c62828;
-        }
-
-        body { background: var(--bg); position: relative; }
-
-        /* Sidebar Toggle Button */
         .sidebar-toggle-btn {
             position: absolute;
             top: 15px;
             left: 270px;
-            z-index: 101;
-            width: 32px;
-            height: 32px;
+            z-index: 301;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             background: var(--sidebar-bg);
             border: 1px solid var(--sidebar-border);
@@ -137,52 +81,65 @@
             box-shadow: 0 2px 8px var(--node-shadow);
             transition: left 0.3s, transform 0.2s;
         }
-        .sidebar-toggle-btn:hover { transform: scale(1.1); }
 
-        /* Sidebar */
+        .sidebar-toggle-btn:hover {
+            transform: scale(1.06);
+        }
+
         .sidebar {
             width: 260px;
             background: var(--sidebar-bg);
             border-right: 1px solid var(--sidebar-border);
             display: flex;
             flex-direction: column;
-            z-index: 100;
+            z-index: 300;
             flex-shrink: 0;
             overflow-y: auto;
-            transition: transform 0.3s ease, margin-left 0.3s ease;
+            transition: margin-left 0.3s;
         }
 
-        .sidebar.collapsed { margin-left: -260px; }
-        .sidebar.collapsed + .sidebar-toggle-btn { left: 10px; }
+        .sidebar.collapsed {
+            margin-left: -260px;
+        }
+
+        .sidebar.collapsed + .sidebar-toggle-btn {
+            left: 10px;
+        }
 
         .sidebar-header {
-            padding: 20px;
+            padding: 18px;
             border-bottom: 1px solid var(--sidebar-border);
         }
-        .sidebar-header h1 { color: var(--text); font-size: 20px; font-weight: 700; }
-        .sidebar-header p { color: var(--text-muted); font-size: 12px; margin-top: 4px; }
+
+        .sidebar-header h1 {
+            color: var(--text);
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .sidebar-header p {
+            margin-top: 4px;
+            color: var(--text-sub);
+            font-size: 11px;
+            line-height: 1.5;
+        }
 
         .sidebar-section {
-            padding: 16px 20px;
+            padding: 14px 18px;
             border-bottom: 1px solid var(--sidebar-border);
         }
+
         .sidebar-section h3 {
             color: var(--text-sub);
             font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
+            margin-bottom: 10px;
         }
-        .sidebar-section.collapsed .section-content { display: none; }
 
         .action-btn {
             width: 100%;
-            padding: 9px 12px;
+            min-height: 36px;
+            padding: 8px 12px;
             margin-bottom: 6px;
             background: var(--btn-bg);
             border: 1px solid var(--btn-border);
@@ -190,1361 +147,3679 @@
             color: var(--text);
             font-size: 13px;
             cursor: pointer;
-            text-align: left;
             display: flex;
             align-items: center;
             gap: 8px;
-            transition: all 0.15s;
-        }
-        .action-btn:hover { background: var(--btn-hover); border-color: var(--text-muted); }
-        .action-btn.active { border-color: var(--accent); background: rgba(66, 133, 244, 0.12); }
-
-        .action-btn .icon {
-            width: 22px; height: 22px; border-radius: 6px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 12px; flex-shrink: 0;
-        }
-        .action-btn .icon.green { background: #e8f5e9; color: #2e7d32; }
-        .action-btn .icon.red { background: #fce4ec; color: #c62828; }
-        .action-btn .icon.blue { background: #e3f2fd; color: #1565c0; }
-        .action-btn .icon.purple { background: #f3e5f5; color: #6a1b9a; }
-        .action-btn .icon.orange { background: #fff3e0; color: #e65100; }
-
-        .selected-info { padding: 16px 20px; border-bottom: 1px solid var(--sidebar-border); }
-        .selected-info .label { color: var(--text-sub); font-size: 11px; text-transform: uppercase; margin-bottom: 8px; }
-        .input-with-mic { display: flex; gap: 6px; align-items: center; }
-        .selected-info .node-name {
-            color: var(--text); font-size: 14px; font-weight: 600; padding: 8px 10px;
-            background: var(--input-bg); border: 1px solid var(--input-border);
-            border-radius: 8px; width: 100%; outline: none;
-        }
-        .selected-info .node-name:focus { border-color: var(--input-focus); }
-
-        .parent-select {
-            width: 100%; padding: 8px; margin-top: 8px;
-            background: var(--input-bg); border: 1px solid var(--input-border);
-            border-radius: 8px; color: var(--text); font-size: 12px; outline: none;
+            text-align: left;
         }
 
-        .mic-btn {
-            width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--btn-border);
-            background: var(--btn-bg); color: var(--text); cursor: pointer;
-            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        }
-        .mic-btn.recording { background: rgba(234,67,53,0.2); border-color: var(--danger); color: var(--danger); }
-
-        /* Color Palette Grid */
-        .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-        .color-swatch { aspect-ratio: 1; border-radius: 6px; cursor: pointer; border: 2px solid transparent; }
-        .color-swatch:hover { transform: scale(1.1); }
-
-        .theme-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-        .theme-swatch { aspect-ratio: 1; border-radius: 6px; cursor: pointer; border: 2px solid transparent; }
-        .theme-swatch.active { border-color: var(--text); box-shadow: 0 0 0 2px var(--input-focus); }
-
-        /* Tree Outline */
-        .outline-mini-btn { font-size: 9px; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-sub); cursor: pointer; }
-        .outline-panel { max-height: 150px; overflow-y: auto; }
-        .tree-item { display: flex; align-items: center; padding: 4px 6px; cursor: pointer; border-radius: 6px; }
-        .tree-item:hover { background: var(--btn-hover); }
-        .tree-item.active { background: rgba(66, 133, 244, 0.15); }
-        .tree-toggle { width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: var(--text-muted); cursor: pointer; }
-        .tree-toggle.expanded { transform: rotate(90deg); }
-        .tree-toggle.empty { visibility: hidden; }
-        .tree-dot { width: 6px; height: 6px; border-radius: 50%; margin: 0 6px; flex-shrink: 0; }
-        .tree-text { font-size: 12px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* Links Section */
-        .link-list { max-height: 120px; overflow-y: auto; }
-        .link-item { display: flex; align-items: center; gap: 4px; padding: 4px 6px; border-radius: 6px; font-size: 11px; color: var(--text-sub); }
-        .link-item:hover { background: var(--btn-hover); }
-
-        .node-count {
-            margin-top: auto; padding: 14px 20px; border-top: 1px solid var(--sidebar-border);
-            color: var(--text-muted); font-size: 12px; display: flex; justify-content: space-between;
+        .action-btn:hover {
+            background: var(--btn-hover);
         }
 
-        /* Canvas */
+        .permission-status {
+            padding: 8px 10px;
+            border-radius: 8px;
+            background: #f5f5f5;
+            color: var(--text-sub);
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .permission-status.granted {
+            background: #e8f5e9;
+            color: #1b5e20;
+        }
+
+        .permission-status.denied {
+            background: #ffebee;
+            color: #b71c1c;
+        }
+
+        /* =========================
+           Canvas
+        ========================= */
+
         #canvas-area {
-            flex: 1; position: relative; overflow: hidden; cursor: grab; background: var(--canvas-bg);
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
+            background: var(--canvas-bg);
         }
-        #canvas-area:active { cursor: grabbing; }
-        #canvas-area.link-cursor { cursor: crosshair; }
+
+        #canvas-area.panning {
+            cursor: grabbing;
+        }
+
+        #canvas-area.linking {
+            cursor: crosshair !important;
+        }
 
         #tree-canvas {
-            position: absolute; top: 0; left: 0; width: 8000px; height: 8000px; transform-origin: 0 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 8000px;
+            height: 8000px;
+            transform-origin: 0 0;
         }
+
         #lines-svg {
-            position: absolute; top: 0; left: 0; width: 8000px; height: 8000px; pointer-events: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 8000px;
+            height: 8000px;
+            pointer-events: none;
+            z-index: 5;
+            overflow: visible;
         }
 
-        #selection-box {
-            position: absolute; border: 1px dashed var(--accent); background: rgba(66, 133, 244, 0.15);
-            pointer-events: none; display: none; z-index: 90;
+        .branch-line {
+            stroke-width: 2.5;
+            fill: none;
         }
 
-        .branch-line { stroke-width: 2.5; fill: none; opacity: 0.55; }
-        .cross-link { stroke-width: 2; fill: none; opacity: 0.8; stroke-dasharray: 6 4; }
-
-        /* Node Styling & Floating Mini Toolbar */
-        .node {
-            position: absolute; border-radius: 12px; padding: 10px 18px; color: #fff;
-            font-size: 14px; cursor: pointer; min-width: 100px; text-align: center;
-            user-select: none; transition: box-shadow 0.2s, transform 0.1s; font-weight: 500;
-            box-shadow: 0 2px 8px var(--node-shadow);
-        }
-        .node.selected { box-shadow: 0 0 0 3px var(--input-focus), 0 8px 25px var(--node-shadow); transform: scale(1.02); }
-        .node.multi-selected { box-shadow: 0 0 0 3px #ff9800, 0 8px 25px rgba(255,152,0,0.3); }
-        .node.link-hover { box-shadow: 0 0 0 3px #00f2fe; transform: scale(1.05); }
-
-        /* Small Edit Pencil Logo on Top Right of Node */
-        .node-pencil-btn {
-            position: absolute; top: -8px; right: -8px; width: 22px; height: 22px;
-            border-radius: 50%; background: var(--sidebar-bg); border: 1px solid var(--sidebar-border);
-            color: var(--text); font-size: 11px; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15); opacity: 0.8; transition: opacity 0.2s, transform 0.2s;
-            cursor: pointer; z-index: 5;
-        }
-        .node:hover .node-pencil-btn, .node.selected .node-pencil-btn { opacity: 1; transform: scale(1.1); }
-
-        /* Floating Toolbar Above Node */
-        .node-toolbar {
-            position: absolute; top: -42px; left: 50%; transform: translateX(-50%);
-            background: var(--sidebar-bg); border: 1px solid var(--sidebar-border);
-            border-radius: 20px; padding: 3px 8px; display: none; gap: 4px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 20;
-        }
-        .node:hover .node-toolbar, .node.selected .node-toolbar { display: flex; }
-
-        .node-toolbar button {
-            width: 26px; height: 26px; border-radius: 50%; border: none;
-            background: var(--btn-bg); color: var(--text); font-size: 12px;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: background 0.15s, transform 0.15s;
-        }
-        .node-toolbar button:hover { background: var(--btn-hover); transform: scale(1.15); }
-        .node-toolbar button.danger:hover { background: #fce4ec; color: var(--danger); }
-
-        /* Inline Text Editor inside Node */
-        .node-text-input {
-            background: transparent; border: none; color: inherit; font: inherit;
-            text-align: center; outline: none; width: 100%; min-width: 80px;
+        .cross-link {
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 6 4;
         }
 
-        /* Link Box Styling (On Canvas In-Place Drag & Type) */
+        /* =========================
+           Node / Link Box 共用
+        ========================= */
+
+        .node,
         .link-box {
-            position: absolute; background: var(--sidebar-bg); color: var(--text);
-            border: 1.5px dashed var(--accent); border-radius: 8px; padding: 6px 12px;
-            font-size: 13px; box-shadow: 0 4px 12px var(--node-shadow); cursor: move;
-            user-select: none; display: flex; align-items: center; justify-content: center;
-            min-width: 80px; max-width: 260px; z-index: 10; transition: border-color 0.2s;
-        }
-        .link-box:hover { border-style: solid; }
-
-        .link-box-input {
-            background: transparent; border: none; color: var(--text); font: inherit;
-            text-align: center; outline: none; width: 100%; resize: none;
+            position: absolute;
+            user-select: none;
+            touch-action: none;
+            overflow: visible;
         }
 
-        /* Hover Plus Icon on Link Box to Add unlimited boxes */
-        .link-box-add-btn {
-            position: absolute; right: -12px; top: 50%; transform: translateY(-50%);
-            width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
-            color: #fff; font-size: 14px; display: none; align-items: center; justify-content: center;
-            cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: transform 0.15s;
-        }
-        .link-box:hover .link-box-add-btn { display: flex; }
-        .link-box-add-btn:hover { transform: translateY(-50%) scale(1.2); }
-
-        .link-box-del-btn {
-            position: absolute; top: -8px; right: -8px; width: 18px; height: 18px;
-            border-radius: 50%; background: var(--danger); color: #fff; font-size: 10px;
-            display: none; align-items: center; justify-content: center; cursor: pointer;
-        }
-        .link-box:hover .link-box-del-btn { display: flex; }
-
-        .link-box-color-btn {
-            position: absolute; top: -8px; left: -8px; width: 18px; height: 18px;
-            border-radius: 50%; background: var(--sidebar-bg); border: 1px solid var(--sidebar-border);
-            color: var(--text); font-size: 10px; display: none; align-items: center; justify-content: center; cursor: pointer;
-        }
-        .link-box:hover .link-box-color-btn { display: flex; }
-
-        /* Floating Mini Color Picker Popup */
-        .mini-color-pop {
-            position: absolute; top: -38px; left: 50%; transform: translateX(-50%);
-            background: var(--sidebar-bg); border: 1px solid var(--sidebar-border);
-            border-radius: 12px; padding: 4px 6px; display: flex; gap: 4px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 100;
-        }
-        .mini-color-dot { width: 18px; height: 18px; border-radius: 50%; cursor: pointer; }
-
-        .link-banner {
-            position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
-            background: var(--sidebar-bg); border: 1px solid var(--accent);
-            border-radius: 20px; padding: 8px 20px; font-size: 12px;
-            color: var(--accent); z-index: 50; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        .node-content,
+        .link-box-content {
+            width: 100%;
+            height: 100%;
+            min-width: 0;
+            min-height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+            scrollbar-width: thin;
         }
 
-        /* Controls (Right Center) */
+        .node-text,
+        .link-box-text {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            text-align: center;
+            line-height: 1.4;
+            pointer-events: none;
+        }
+
+        .node.editing .node-content,
+        .link-box.editing .link-box-content {
+            overflow: hidden;
+        }
+
+        .text-editor {
+            width: 100%;
+            height: 100%;
+            min-width: 0;
+            min-height: 0;
+            resize: none;
+            outline: none;
+            border-radius: 5px;
+            padding: 4px 6px;
+            line-height: 1.4;
+            text-align: left;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            overflow: auto;
+            user-select: text;
+            touch-action: auto;
+        }
+
+        /* =========================
+           Node
+        ========================= */
+
+        .node {
+            min-width: 90px;
+            min-height: 40px;
+            padding: 8px 18px;
+            border-radius: 10px;
+            color: #ffffff;
+            font-size: 14px;
+            cursor: move;
+            box-shadow: 0 4px 12px var(--node-shadow);
+            z-index: 20;
+        }
+
+        .node:hover {
+            box-shadow: 0 7px 18px rgba(0, 0, 0, 0.18);
+        }
+
+        .node.selected {
+            box-shadow:
+                0 0 0 3px var(--input-focus),
+                0 8px 20px var(--node-shadow);
+        }
+
+        .node.linking-source {
+            animation: pulse 0.8s infinite alternate;
+        }
+
+        .node .text-editor {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+        }
+
+        .node .text-editor::selection {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        @keyframes pulse {
+            from {
+                transform: scale(1);
+                box-shadow: 0 0 0 3px #ff9800;
+            }
+
+            to {
+                transform: scale(1.06);
+                box-shadow: 0 0 0 8px rgba(255, 152, 0, 0.4);
+            }
+        }
+
+        /* =========================
+           Link Box
+        ========================= */
+
+        .link-box {
+            min-width: 80px;
+            min-height: 32px;
+            padding: 5px 9px;
+            border-radius: 7px;
+            color: #333333;
+            font-size: 12px;
+            cursor: move;
+            box-shadow: 0 2px 9px rgba(0, 0, 0, 0.16);
+            z-index: 25;
+        }
+
+        .link-box:hover {
+            box-shadow: 0 5px 14px rgba(0, 0, 0, 0.2);
+        }
+
+        .link-box.selected {
+            box-shadow:
+                0 0 0 3px rgba(255, 152, 0, 0.45),
+                0 5px 14px rgba(0, 0, 0, 0.2);
+        }
+
+        .link-box .text-editor {
+            color: #333333;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid #ff9800;
+        }
+
+        /* =========================
+           Resize Handles
+        ========================= */
+
+        .resize-handle {
+            position: absolute;
+            z-index: 45;
+            display: none;
+        }
+
+        .node:hover .resize-handle,
+        .node.selected .resize-handle,
+        .link-box:hover .resize-handle,
+        .link-box.selected .resize-handle {
+            display: block;
+        }
+
+        .resize-handle.n,
+        .resize-handle.s {
+            left: 12px;
+            right: 12px;
+            height: 7px;
+            cursor: ns-resize;
+        }
+
+        .resize-handle.n {
+            top: -4px;
+        }
+
+        .resize-handle.s {
+            bottom: -4px;
+        }
+
+        .resize-handle.e,
+        .resize-handle.w {
+            top: 10px;
+            bottom: 10px;
+            width: 7px;
+            cursor: ew-resize;
+        }
+
+        .resize-handle.e {
+            right: -4px;
+        }
+
+        .resize-handle.w {
+            left: -4px;
+        }
+
+        .resize-handle.ne,
+        .resize-handle.nw,
+        .resize-handle.se,
+        .resize-handle.sw {
+            width: 11px;
+            height: 11px;
+            border-radius: 3px;
+            background: #ffffff;
+            border: 2px solid #4285f4;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+        }
+
+        .link-box .resize-handle.ne,
+        .link-box .resize-handle.nw,
+        .link-box .resize-handle.se,
+        .link-box .resize-handle.sw {
+            border-color: #ff9800;
+        }
+
+        .resize-handle.ne {
+            top: -6px;
+            right: -6px;
+            cursor: nesw-resize;
+        }
+
+        .resize-handle.nw {
+            top: -6px;
+            left: -6px;
+            cursor: nwse-resize;
+        }
+
+        .resize-handle.se {
+            right: -6px;
+            bottom: -6px;
+            cursor: nwse-resize;
+        }
+
+        .resize-handle.sw {
+            left: -6px;
+            bottom: -6px;
+            cursor: nesw-resize;
+        }
+
+        /* =========================
+           Node Controls
+        ========================= */
+
+        .node-quick-add {
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%) scale(0.8);
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #ffffff;
+            border: none;
+            font-size: 17px;
+            font-weight: bold;
+            line-height: 23px;
+            text-align: center;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+            z-index: 50;
+        }
+
+        .node:hover .node-quick-add,
+        .node.selected .node-quick-add {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(-50%) scale(1);
+        }
+
+        .node-quick-add:hover {
+            transform: translateY(-50%) scale(1.15) !important;
+            background: #2b6cb0;
+        }
+
+        .inplace-menu-trigger,
+        .box-color-trigger,
+        .speech-btn {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--sidebar-bg);
+            border: 1px solid var(--sidebar-border);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 55;
+        }
+
+        .inplace-menu-trigger,
+        .box-color-trigger {
+            top: -10px;
+            right: -10px;
+            font-size: 11px;
+        }
+
+        .speech-btn {
+            left: -10px;
+            bottom: -10px;
+            font-size: 11px;
+        }
+
+        .speech-btn:hover,
+        .inplace-menu-trigger:hover,
+        .box-color-trigger:hover {
+            transform: scale(1.1);
+        }
+
+        .speech-btn.listening {
+            color: #ffffff;
+            background: #e53935;
+            border-color: #b71c1c;
+            animation: microphonePulse 0.75s infinite alternate;
+        }
+
+        @keyframes microphonePulse {
+            from {
+                box-shadow: 0 0 0 2px rgba(229, 57, 53, 0.3);
+            }
+
+            to {
+                box-shadow: 0 0 0 7px rgba(229, 57, 53, 0.14);
+            }
+        }
+
+        .inplace-action-menu {
+            position: absolute;
+            top: -48px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--sidebar-bg);
+            border: 1px solid var(--sidebar-border);
+            border-radius: 20px;
+            padding: 4px 8px;
+            display: none;
+            gap: 4px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+            z-index: 100;
+            white-space: nowrap;
+        }
+
+        .inplace-action-menu.active {
+            display: flex;
+            align-items: center;
+        }
+
+        .inplace-btn {
+            background: var(--btn-bg);
+            border: 1px solid var(--btn-border);
+            color: var(--text);
+            width: 27px;
+            height: 27px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .inplace-btn:hover {
+            background: var(--btn-hover);
+            transform: scale(1.08);
+        }
+
+        /* =========================
+           Adobe Picker
+        ========================= */
+
+        .adobe-picker-popover {
+            position: absolute;
+            z-index: 500;
+            width: 230px;
+            background: var(--sidebar-bg);
+            border: 1px solid var(--sidebar-border);
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text);
+        }
+
+        .adobe-picker-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+        }
+
+        .picker-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--btn-bg);
+            padding: 2px;
+            border-radius: 6px;
+        }
+
+        .picker-tab {
+            flex: 1;
+            text-align: center;
+            padding: 4px 0;
+            font-size: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            color: var(--text-sub);
+        }
+
+        .picker-tab.active {
+            background: var(--accent);
+            color: #ffffff;
+        }
+
+        .picker-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* =========================
+           Controls / Banner
+        ========================= */
+
         .zoom-controls {
-            position: absolute; top: 50%; right: 20px; transform: translateY(-50%);
-            display: flex; flex-direction: column; gap: 6px; z-index: 50;
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 200;
         }
-        .zoom-btn {
-            width: 38px; height: 38px; background: var(--sidebar-bg); border: 1px solid var(--sidebar-border);
-            border-radius: 8px; color: var(--text); font-size: 18px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px var(--node-shadow);
-        }
-        .zoom-btn:hover { background: var(--btn-hover); transform: scale(1.05); }
-        .zoom-label { text-align: center; color: var(--text-muted); font-size: 11px; }
 
-        @media (max-width: 768px) {
-            .sidebar { width: 210px; }
-            .sidebar.collapsed { margin-left: -210px; }
-            .sidebar-toggle-btn { left: 220px; }
+        .zoom-btn {
+            width: 36px;
+            height: 36px;
+            background: var(--sidebar-bg);
+            border: 1px solid var(--sidebar-border);
+            border-radius: 8px;
+            color: var(--text);
+            cursor: pointer;
+            box-shadow: 0 2px 7px rgba(0, 0, 0, 0.08);
+        }
+
+        .zoom-btn:hover {
+            background: var(--btn-hover);
+        }
+
+        .tip-banner {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.82);
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 190;
+            display: flex;
+            gap: 12px;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 760px) {
+            .tip-banner {
+                display: none;
+            }
+
+            .zoom-controls {
+                right: 10px;
+            }
+        }
+
+        /* 轉父節點／取消連結模式 */
+        .node.relationship-source {
+            box-shadow:
+                0 0 0 4px #9c27b0,
+                0 0 0 10px rgba(156, 39, 176, 0.22),
+                0 8px 20px var(--node-shadow);
+            animation: relationshipPulse 0.8s infinite alternate;
+        }
+
+        @keyframes relationshipPulse {
+            from {
+                transform: scale(1);
+            }
+
+            to {
+                transform: scale(1.04);
+            }
+        }
+
+        .relationship-mode-banner {
+            position: absolute;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 260;
+            display: none;
+            max-width: min(560px, calc(100vw - 40px));
+            padding: 10px 18px;
+            border: 2px solid #9c27b0;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.97);
+            color: #4a148c;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.18);
+        }
+
+        .relationship-mode-banner.active {
+            display: block;
         }
     </style>
 </head>
-<body class="theme-light">
 
-    <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" title="展開/收合選單" onclick="toggleSidebar()">◀</button>
-
+<body>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h1>🌿 Mind Map</h1>
-            <p>撳節點選取 / 頂部快捷小筆編輯</p>
+            <h1>🌿 Mind Map Pro</h1>
+            <p>
+                雙擊文字編輯、多行換行、八方向縮放及語音輸入版本
+            </p>
         </div>
 
-        <div class="selected-info" id="selected-info" style="display:none;">
-            <div class="label">選取中</div>
-            <div class="input-with-mic">
-                <input class="node-name" id="node-name-input" placeholder="輸入名稱..." />
-                <button class="mic-btn" id="mic-btn-node" title="語音輸入">🎤</button>
+        <div class="sidebar-section">
+            <h3>快捷思考指令</h3>
+
+            <button class="action-btn" onclick="addChildToSelected(true)">
+                ＋ 子節點（Tab）
+            </button>
+
+            <button class="action-btn" onclick="addSiblingToSelected(true)">
+                ↔ 同級節點（Enter）
+            </button>
+
+            <button class="action-btn" onclick="startReparentSelected()">
+                ⇆ 轉父節點
+            </button>
+
+            <button class="action-btn" onclick="startUnlinkSelected()">
+                ⛓ 取消兩點連結
+            </button>
+
+            <button class="action-btn" onclick="deleteSelected()">
+                ✕ 刪除所選項目（Delete）
+            </button>
+
+            <div style="display:flex; gap:6px; margin-top:6px;">
+                <button class="action-btn" onclick="undo()">⟲ Undo</button>
+                <button class="action-btn" onclick="redo()">⟳ Redo</button>
             </div>
-            <div class="label" style="margin-top: 10px;">父節點 (變更關聯)</div>
-            <select class="parent-select" id="parent-node-select" onchange="changeParentNode(this.value)"></select>
-            <button class="action-btn" id="reparent-mode-btn" onclick="toggleReparentMode()" style="margin-top:6px;">
-                <span class="icon orange">🎯</span> 撳目標節點設為新父級
+        </div>
+
+        <div class="sidebar-section">
+            <h3>語音輸入</h3>
+
+            <button class="action-btn" onclick="requestPermanentMicrophonePermission()">
+                🎤 啟用咪高峰權限
+            </button>
+
+            <div class="permission-status" id="permission-status">
+                正在檢查咪高峰權限……
+            </div>
+
+            <p style="font-size:10px; color:var(--text-sub); margin-top:8px; line-height:1.5;">
+                權限是否永久保留由瀏覽器控制。請選擇「允許」，並使用 HTTPS 或 localhost。
+            </p>
+        </div>
+
+        <div class="sidebar-section">
+            <h3>檔案備份</h3>
+
+            <button class="action-btn" onclick="exportJSON()">
+                ↓ 匯出 JSON
+            </button>
+
+            <button class="action-btn" onclick="importJSON()">
+                ↑ 匯入 JSON
             </button>
         </div>
 
-        <div class="sidebar-section" id="sec-ops">
-            <h3 onclick="toggleSection('sec-ops')">操作 <span>▼</span></h3>
-            <div class="section-content">
-                <button class="action-btn" onclick="addChildToSelected()">
-                    <span class="icon green">＋</span> 加子節點
-                </button>
-                <button class="action-btn" onclick="addSibling()">
-                    <span class="icon blue">↔</span> 加同級節點
-                </button>
-                <button class="action-btn" onclick="deleteSelected()">
-                    <span class="icon red">✕</span> 刪除節點
-                </button>
-                <div style="display: flex; gap: 6px; margin-top: 6px;">
-                    <button class="action-btn" onclick="undo()" style="margin-bottom:0;">
-                        <span class="icon purple">⟲</span> Undo (Ctrl+Z)
-                    </button>
-                    <button class="action-btn" onclick="redo()" style="margin-bottom:0;">
-                        <span class="icon orange">⟳</span> Redo
-                    </button>
-                </div>
-            </div>
-        </div>
+        <div class="sidebar-section">
+            <h3>編輯方法</h3>
 
-        <div class="sidebar-section" id="sec-outline">
-            <h3 onclick="toggleSection('sec-outline')">
-                結構
-                <div>
-                    <button class="outline-mini-btn" onclick="event.stopPropagation(); expandAllOutline();">展開</button>
-                    <button class="outline-mini-btn" onclick="event.stopPropagation(); collapseAllOutline();">收合</button>
-                </div>
-            </h3>
-            <div class="section-content">
-                <div class="outline-panel" id="outline-panel"></div>
+            <div style="font-size:11px; color:var(--text-sub); line-height:1.7;">
+                • 雙擊節點或 Link Box 編輯<br>
+                • Enter：文字換行<br>
+                • Ctrl/Cmd + Enter：完成編輯<br>
+                • Escape：取消編輯<br>
+                • 拉動邊框控制點：改變大小<br>
+                • 雙擊縮放控制點：自動配合文字高度
             </div>
-        </div>
-
-        <div class="sidebar-section" id="sec-links">
-            <h3 onclick="toggleSection('sec-links')">
-                連結 <span id="link-count-title">(0)</span>
-                <button class="outline-mini-btn" id="link-mode-btn" onclick="event.stopPropagation(); toggleLinkMode();">🔗 Link</button>
-            </h3>
-            <div class="section-content">
-                <button class="action-btn" onclick="quickConnectFromSelected()">
-                    <span class="icon blue">⚡</span> 快速轉接/連線 (Shift+L)
-                </button>
-                <div class="link-list" id="link-list">
-                    <div style="font-size:11px; color:var(--text-muted); text-align:center; padding:6px 0;">撳 Link → 選兩個節點建立連結</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="sidebar-section" id="sec-theme">
-            <h3 onclick="toggleSection('sec-theme')">主題色 <span>▼</span></h3>
-            <div class="section-content">
-                <div class="theme-grid">
-                    <div class="theme-swatch active" style="background: linear-gradient(135deg, #f5f5f5, #fff);" onclick="setTheme('light', this)"></div>
-                    <div class="theme-swatch" style="background: linear-gradient(135deg, #0f0f1a, #16162a);" onclick="setTheme('dark', this)"></div>
-                    <div class="theme-swatch" style="background: linear-gradient(135deg, #fef9f3, #f0dcc8);" onclick="setTheme('warm', this)"></div>
-                    <div class="theme-swatch" style="background: linear-gradient(135deg, #f0f7fa, #c8e3ed);" onclick="setTheme('ocean', this)"></div>
-                    <div class="theme-swatch" style="background: linear-gradient(135deg, #f2f7f2, #c8ddc8);" onclick="setTheme('forest', this)"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="sidebar-section" id="sec-color">
-            <h3 onclick="toggleSection('sec-color')">調色盤 <span>▼</span></h3>
-            <div class="section-content">
-                <div class="color-grid">
-                    <div class="color-swatch" style="background: #2e7d32;" onclick="setNodeColor('#2e7d32','#43a047')"></div>
-                    <div class="color-swatch" style="background: #1565c0;" onclick="setNodeColor('#1565c0','#1e88e5')"></div>
-                    <div class="color-swatch" style="background: #6a1b9a;" onclick="setNodeColor('#6a1b9a','#8e24aa')"></div>
-                    <div class="color-swatch" style="background: #e65100;" onclick="setNodeColor('#e65100','#f4511e')"></div>
-                    <div class="color-swatch" style="background: #c62828;" onclick="setNodeColor('#c62828','#e53935')"></div>
-                </div>
-                <button class="action-btn" onclick="autoColorizeNodes()" style="margin-top:10px;">
-                    <span class="icon purple">🎨</span> 分支自動配色
-                </button>
-            </div>
-        </div>
-
-        <div class="sidebar-section" id="sec-files">
-            <h3 onclick="toggleSection('sec-files')">檔案 <span>▼</span></h3>
-            <div class="section-content">
-                <button class="action-btn" onclick="exportJSON()">
-                    <span class="icon purple">↓</span> 匯出 JSON
-                </button>
-                <button class="action-btn" onclick="importJSON()">
-                    <span class="icon orange">↑</span> 匯入 JSON
-                </button>
-            </div>
-        </div>
-
-        <div class="node-count">
-            <span id="node-count">0 個節點</span>
-            <span id="link-count-bar">0 個連結</span>
         </div>
     </div>
 
+    <button
+        class="sidebar-toggle-btn"
+        id="sidebar-toggle-btn"
+        onclick="toggleSidebar()"
+        title="開啟／收起側欄"
+    >
+        ◀
+    </button>
+
     <div id="canvas-area">
-        <div id="selection-box"></div>
+        <div class="relationship-mode-banner" id="relationship-mode-banner"></div>
         <div id="tree-canvas">
-            <svg id="lines-svg"></svg>
+            <svg id="lines-svg">
+                <line
+                    id="temp-link-line"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="0"
+                    stroke="#ff9800"
+                    stroke-width="2.5"
+                    stroke-dasharray="6,4"
+                    style="display:none;"
+                ></line>
+            </svg>
         </div>
 
-        <div class="link-banner" id="link-banner">🔗 Link 模式：撳第一個節點，再撳目標節點 (ESC 退出)</div>
-        <div class="link-banner" id="reparent-banner">🎯 更變模式：撳目標節點設為新父級 (ESC 退出)</div>
+        <div class="tip-banner">
+            <span>💡 雙擊：多行編輯</span>
+            <span>🎤 語音輸入</span>
+            <span>↘ 拉動控制點：自由縮放</span>
+        </div>
 
         <div class="zoom-controls">
-            <button class="zoom-btn" onclick="zoomIn()">+</button>
-            <div class="zoom-label" id="zoom-label">100%</div>
-            <button class="zoom-btn" onclick="zoomOut()">−</button>
-            <button class="zoom-btn" onclick="backToCenter()" style="margin-top:4px; font-size:14px;" title="回到中心 (Space)">⟲</button>
+            <button class="zoom-btn" onclick="zoomIn()" title="放大">＋</button>
+            <button class="zoom-btn" onclick="zoomOut()" title="縮小">−</button>
+            <button class="zoom-btn" onclick="backToCenter()" title="返回中心">⟲</button>
+        </div>
+    </div>
+
+    <div class="adobe-picker-popover" id="adobe-picker">
+        <div class="adobe-picker-header">
+            <span>🎨 調色盤</span>
+
+            <button
+                style="background:none; border:none; color:var(--text); cursor:pointer;"
+                onclick="closeAdobePicker()"
+            >
+                ✕
+            </button>
+        </div>
+
+        <div class="picker-tabs">
+            <div
+                class="picker-tab active"
+                id="tab-solid"
+                onclick="setPickerMode('solid')"
+            >
+                單色
+            </div>
+
+            <div
+                class="picker-tab"
+                id="tab-gradient"
+                onclick="setPickerMode('gradient')"
+            >
+                漸變
+            </div>
+
+            <div
+                class="picker-tab"
+                id="tab-sharp"
+                onclick="setPickerMode('sharp')"
+            >
+                尖邊
+            </div>
+        </div>
+
+        <div class="picker-row">
+            <span>主色：</span>
+            <input
+                type="color"
+                id="picker-c1"
+                value="#1565c0"
+                oninput="applyColorPicker()"
+            >
+        </div>
+
+        <div class="picker-row">
+            <span>次色：</span>
+            <input
+                type="color"
+                id="picker-c2"
+                value="#1e88e5"
+                oninput="applyColorPicker()"
+            >
+        </div>
+
+        <div class="picker-row">
+            <span>角度：</span>
+            <input
+                type="range"
+                id="picker-angle"
+                min="0"
+                max="360"
+                value="135"
+                style="width:90px;"
+                oninput="applyColorPicker()"
+            >
+        </div>
+
+        <div class="picker-row">
+            <span>透明度：</span>
+            <input
+                type="range"
+                id="picker-alpha"
+                min="10"
+                max="100"
+                value="100"
+                style="width:90px;"
+                oninput="applyColorPicker()"
+            >
         </div>
     </div>
 
     <script>
+        "use strict";
+
+        /* =========================
+           Main data
+        ========================= */
+
         let nodes = [];
-        let crossLinks = []; // { id, fromId, toId, boxes: [{ id, text, x, y, bg, border }] }
+        let crossLinks = [];
+
         let nextId = 0;
         let nextLinkId = 0;
         let nextBoxId = 0;
+
         let selectedId = null;
-        let selectedIds = new Set();
-        let scale = 1, tx = 0, ty = 0;
-        let isPanning = false, panStartX, panStartY;
-        let dragNode = null, dragBox = null;
-        let dragGroupPositions = [];
-        let dragMouseStartX = 0, dragMouseStartY = 0;
-        let animating = false;
-        let linkMode = false, linkFromId = null;
-        let reparentMode = false;
-        let collapsedNodes = new Set();
-        let activeColorPop = null;
+        let selectedBoxId = null;
 
-        // Box Selection
-        let isBoxSelecting = false;
-        let boxStartX = 0, boxStartY = 0;
+        let scale = 1;
+        let tx = 0;
+        let ty = 0;
 
-        // Undo / Redo Stacks
         let undoStack = [];
         let redoStack = [];
-        let isPerformingUndoRedo = false;
+        let isRestoringHistory = false;
 
-        // Speech recognition
-        let recognition = null;
-        let isRecording = false;
+        let isPanning = false;
+        let panStartX = 0;
+        let panStartY = 0;
 
-        const canvasArea = document.getElementById('canvas-area');
-        const treeCanvas = document.getElementById('tree-canvas');
-        const svg = document.getElementById('lines-svg');
-        const selectionBox = document.getElementById('selection-box');
-        const nameInput = document.getElementById('node-name-input');
-        const parentSelect = document.getElementById('parent-node-select');
-        const selectedInfo = document.getElementById('selected-info');
-        const outlinePanel = document.getElementById('outline-panel');
-        const linkBanner = document.getElementById('link-banner');
-        const micBtnNode = document.getElementById('mic-btn-node');
-        const sidebar = document.getElementById('sidebar');
+        let dragTarget = null;
+        let resizeTarget = null;
+        let gestureSnapshot = null;
 
-        function setTheme(theme, el) {
-            document.body.className = 'theme-' + theme;
-            document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
-            if (el) el.classList.add('active');
+        let dragMouseX = 0;
+        let dragMouseY = 0;
+        let gestureStartClientX = 0;
+        let gestureStartClientY = 0;
+
+        let linkMode = false;
+        let linkFromId = null;
+        
+        let relationshipMode = null;
+        /*
+        relationshipMode:
+        null       = 普通模式
+        "reparent" = 轉父節點模式
+        "unlink"   = 取消兩點連結模式
+        */
+        let relationshipSourceId = null;
+
+        let editingTarget = null;
+
+        let activePickerTarget = null;
+        let pickerStartSnapshot = null;
+
+        let activeRecognition = null;
+        let activeSpeechButton = null;
+        let speechSession = null;
+
+        const MIN_NODE_WIDTH = 90;
+        const MIN_NODE_HEIGHT = 40;
+        const MIN_BOX_WIDTH = 80;
+        const MIN_BOX_HEIGHT = 32;
+
+        const canvasArea = document.getElementById("canvas-area");
+        const treeCanvas = document.getElementById("tree-canvas");
+        const svg = document.getElementById("lines-svg");
+        const tempLinkLine = document.getElementById("temp-link-line");
+        const adobePicker = document.getElementById("adobe-picker");
+        const permissionStatus = document.getElementById("permission-status");
+        const relationshipModeBanner = document.getElementById("relationship-mode-banner");
+
+        /* =========================
+           Startup
+        ========================= */
+
+        window.addEventListener("load", () => {
+            const cx = 4000;
+            const cy = 4000;
+
+            const rootId = createNode(
+                "中心主題",
+                cx - 65,
+                cy - 22,
+                null,
+                false,
+                false
+            );
+
+            tx = -cx + canvasArea.offsetWidth / 2;
+            ty = -cy + canvasArea.offsetHeight / 2;
+
+            updateTransform();
+            setupCanvasEvents();
+            setupKeyboardShortcuts();
+            checkMicrophonePermission();
+
+            selectNode(rootId);
+            drawLines();
+        });
+
+        /* =========================
+           History
+        ========================= */
+
+        function captureState() {
+            return JSON.stringify({
+                nodes,
+                crossLinks,
+                nextId,
+                nextLinkId,
+                nextBoxId
+            });
         }
 
-        function toggleSidebar() {
-            sidebar.classList.toggle('collapsed');
-            const btn = document.getElementById('sidebar-toggle-btn');
-            btn.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
-        }
+        function pushHistorySnapshot(snapshot) {
+            if (isRestoringHistory || !snapshot) return;
 
-        function toggleSection(secId) {
-            const sec = document.getElementById(secId);
-            if (sec) sec.classList.toggle('collapsed');
-        }
+            const current = captureState();
 
-        // ====== AUTO EXIT ALL MODES ======
-        function exitAllModes() {
-            reparentMode = false;
-            linkMode = false;
-            linkFromId = null;
-            document.getElementById('reparent-mode-btn')?.classList.remove('active');
-            document.getElementById('link-mode-btn')?.classList.remove('active');
-            document.getElementById('reparent-banner').style.display = 'none';
-            document.getElementById('link-banner').style.display = 'none';
-            canvasArea.classList.remove('link-cursor');
-            closeColorPop();
-            clearSelection();
-            renderOutline();
-        }
+            if (snapshot === current) return;
 
-        // ====== UNDO / REDO HISTORY SYSTEM ======
-        function saveState() {
-            if (isPerformingUndoRedo) return;
-            const state = JSON.stringify({ nodes, crossLinks, nextId, nextLinkId, nextBoxId });
-            undoStack.push(state);
-            if (undoStack.length > 50) undoStack.shift();
+            undoStack.push(snapshot);
+
+            if (undoStack.length > 60) {
+                undoStack.shift();
+            }
+
             redoStack = [];
         }
 
+        function recordCurrentStateBeforeChange() {
+            return captureState();
+        }
+
         function undo() {
-            if (undoStack.length === 0) return;
-            isPerformingUndoRedo = true;
-            redoStack.push(JSON.stringify({ nodes, crossLinks, nextId, nextLinkId, nextBoxId }));
-            restoreState(JSON.parse(undoStack.pop()));
-            isPerformingUndoRedo = false;
+            finishCurrentEditing();
+
+            if (!undoStack.length) return;
+
+            isRestoringHistory = true;
+
+            redoStack.push(captureState());
+
+            const previous = JSON.parse(undoStack.pop());
+            restoreState(previous);
+
+            isRestoringHistory = false;
         }
 
         function redo() {
-            if (redoStack.length === 0) return;
-            isPerformingUndoRedo = true;
-            undoStack.push(JSON.stringify({ nodes, crossLinks, nextId, nextLinkId, nextBoxId }));
-            restoreState(JSON.parse(redoStack.pop()));
-            isPerformingUndoRedo = false;
+            finishCurrentEditing();
+
+            if (!redoStack.length) return;
+
+            isRestoringHistory = true;
+
+            undoStack.push(captureState());
+
+            const next = JSON.parse(redoStack.pop());
+            restoreState(next);
+
+            isRestoringHistory = false;
         }
 
         function restoreState(state) {
-            treeCanvas.querySelectorAll('.node, .link-box').forEach(el => el.remove());
-            nodes = state.nodes || [];
-            crossLinks = state.crossLinks || [];
-            nextId = state.nextId || 0;
-            nextLinkId = state.nextLinkId || 0;
-            nextBoxId = state.nextBoxId || 0;
+            stopSpeechRecognition(false);
 
-            renderAll();
-            clearSelection();
-        }
+            editingTarget = null;
+            dragTarget = null;
+            resizeTarget = null;
+            gestureSnapshot = null;
 
-        function init() {
-            const cx = 4000, cy = 4000;
-            createNode('中心主題', cx - 60, cy - 20, null, '#1565c0', '#1e88e5');
-            tx = -cx + canvasArea.offsetWidth / 2;
-            ty = -cy + canvasArea.offsetHeight / 2;
-            updateTransform();
-            setupSpeechRecognition();
-        }
+            treeCanvas
+                .querySelectorAll(".node, .link-box")
+                .forEach((element) => element.remove());
 
-        function setupSpeechRecognition() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) return;
+            nodes = Array.isArray(state.nodes) ? state.nodes : [];
+            crossLinks = Array.isArray(state.crossLinks)
+                ? state.crossLinks
+                : [];
 
-            recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = true;
-            recognition.lang = 'zh-HK';
+            normaliseImportedData();
 
-            recognition.onresult = (event) => {
-                let transcript = '';
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    transcript += event.results[i][0].transcript;
-                }
-                nameInput.value = transcript;
-                if (selectedId !== null) {
-                    saveState();
-                    const node = nodes.find(n => n.id === selectedId);
-                    if (node) {
-                        node.text = transcript;
-                        renderAll();
-                    }
-                }
-            };
-            recognition.onend = () => stopRecording();
-            recognition.onerror = () => stopRecording();
-        }
+            nextId = Number.isFinite(state.nextId)
+                ? state.nextId
+                : getNextNodeId();
 
-        function toggleRecording() {
-            if (!recognition) { alert('請使用 Chrome 或 Edge 瀏覽器。'); return; }
-            if (isRecording) { recognition.stop(); stopRecording(); }
-            else { isRecording = true; recognition.start(); micBtnNode.classList.add('recording'); }
-        }
-        function stopRecording() { isRecording = false; micBtnNode.classList.remove('recording'); }
-        micBtnNode.addEventListener('click', toggleRecording);
+            nextLinkId = Number.isFinite(state.nextLinkId)
+                ? state.nextLinkId
+                : getNextLinkId();
 
-        // ====== NODES & QUICK TOOLBAR (小筆 Logo) ======
-        function createNode(text, x, y, parentId, bgColor, borderColor) {
-            saveState();
-            const id = nextId++;
-            nodes.push({ id, text, x, y, parentId, bg: bgColor || '#37474f', border: borderColor || '#546e7a' });
-            renderNode(nodes[nodes.length - 1]);
+            nextBoxId = Number.isFinite(state.nextBoxId)
+                ? state.nextBoxId
+                : getNextBoxId();
+
+            selectedId = null;
+            selectedBoxId = null;
+
+            nodes.forEach(renderNode);
+            renderLinkBoxes();
             drawLines();
-            renderOutline();
-            updateCount();
-            return id;
+        }
+
+        function normaliseImportedData() {
+            nodes.forEach((node) => {
+                node.width = Number(node.width) || 130;
+                node.height = Number(node.height) || 44;
+                node.text = String(node.text ?? "新節點");
+                node.opacity = node.opacity ?? 1;
+                node.color1 = node.color1 || "#1565c0";
+                node.color2 = node.color2 || "#1e88e5";
+                node.colorType = node.colorType || "gradient";
+                node.deg = Number(node.deg) || 135;
+            });
+
+            crossLinks.forEach((link) => {
+                if (!Array.isArray(link.boxes)) {
+                    link.boxes = [];
+                }
+
+                link.boxes.forEach((box) => {
+                    box.width = Number(box.width) || 110;
+                    box.height = Number(box.height) || 34;
+                    box.text = String(box.text ?? "連結");
+                    box.opacity = box.opacity ?? 0.95;
+                    box.color1 = box.color1 || "#ffffff";
+                    box.color2 = box.color2 || "#ffffff";
+                    box.colorType = box.colorType || "solid";
+                    box.deg = Number(box.deg) || 135;
+                });
+            });
+        }
+
+        function getNextNodeId() {
+            return nodes.reduce(
+                (maximum, node) => Math.max(maximum, Number(node.id) + 1),
+                0
+            );
+        }
+
+        function getNextLinkId() {
+            return crossLinks.reduce(
+                (maximum, link) => Math.max(maximum, Number(link.id) + 1),
+                0
+            );
+        }
+
+        function getNextBoxId() {
+            let maximum = 0;
+
+            crossLinks.forEach((link) => {
+                link.boxes.forEach((box) => {
+                    maximum = Math.max(maximum, Number(box.id) + 1);
+                });
+            });
+
+            return maximum;
+        }
+
+        /* =========================
+           Sidebar
+        ========================= */
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById("sidebar");
+            const toggleButton = document.getElementById("sidebar-toggle-btn");
+
+            sidebar.classList.toggle("collapsed");
+
+            toggleButton.textContent = sidebar.classList.contains("collapsed")
+                ? "▶"
+                : "◀";
+        }
+
+        /* =========================
+           Node creation/rendering
+        ========================= */
+
+        function createNode(
+            text,
+            x,
+            y,
+            parentId,
+            autoEdit = false,
+            recordHistory = true
+        ) {
+            const historySnapshot = recordHistory
+                ? recordCurrentStateBeforeChange()
+                : null;
+
+            const parent = nodes.find((node) => node.id === parentId);
+
+            const node = {
+                id: nextId++,
+                text: String(text ?? "新節點"),
+                x,
+                y,
+                parentId,
+                width: 130,
+                height: 44,
+                color1: parent ? parent.color1 : "#1565c0",
+                color2: parent ? parent.color2 : "#1e88e5",
+                colorType: parent ? parent.colorType : "gradient",
+                opacity: parent ? parent.opacity : 1,
+                deg: parent ? parent.deg : 135
+            };
+
+            nodes.push(node);
+            renderNode(node);
+            drawLines();
+
+            if (historySnapshot) {
+                pushHistorySnapshot(historySnapshot);
+            }
+
+            if (autoEdit) {
+                window.setTimeout(() => {
+                    startTextEdit("node", node.id);
+                }, 40);
+            }
+
+            return node.id;
         }
 
         function renderNode(node) {
-            let el = document.getElementById(`node-${node.id}`);
-            if (!el) {
-                el = document.createElement('div');
-                el.className = 'node';
-                el.id = `node-${node.id}`;
-                treeCanvas.appendChild(el);
-            }
+            node.width = Number(node.width) || 130;
+            node.height = Number(node.height) || 44;
 
-            el.style.left = node.x + 'px';
-            el.style.top = node.y + 'px';
-            el.style.background = node.bg;
-            el.style.border = `2px solid ${node.border}`;
+            const element = document.createElement("div");
 
-            el.innerHTML = `
-                <div class="node-pencil-btn" title="快速選單">✎</div>
-                <div class="node-toolbar">
-                    <button title="加子節點" onclick="event.stopPropagation(); addChildToNode(${node.id})">＋</button>
-                    <button title="加同級節點" onclick="event.stopPropagation(); addSiblingToNode(${node.id})">↔</button>
-                    <button title="建立連結" onclick="event.stopPropagation(); startLinkFromNode(${node.id})">🔗</button>
-                    <button title="換顏色" onclick="event.stopPropagation(); openMiniColorPicker('node', ${node.id}, event)">🎨</button>
-                    <button title="刪除節點" class="danger" onclick="event.stopPropagation(); deleteNodeById(${node.id})">✕</button>
-                </div>
-                <span class="node-text">${escapeHtml(node.text)}</span>
+            element.className = "node";
+            element.id = `node-${node.id}`;
+            element.dataset.nodeId = node.id;
+
+            setElementGeometry(element, node);
+            applyStyle(element, node);
+
+            const content = document.createElement("div");
+            content.className = "node-content";
+
+            const text = document.createElement("span");
+            text.className = "node-text";
+            text.textContent = node.text;
+
+            content.appendChild(text);
+            element.appendChild(content);
+
+            const quickAdd = document.createElement("button");
+            quickAdd.type = "button";
+            quickAdd.className = "node-quick-add";
+            quickAdd.textContent = "+";
+            quickAdd.title = "新增子節點";
+
+            quickAdd.addEventListener("mousedown", stopInteractiveEvent);
+
+            quickAdd.addEventListener("click", (event) => {
+                event.stopPropagation();
+                addChildTo(node.id, true);
+            });
+
+            element.appendChild(quickAdd);
+
+            const menuTrigger = document.createElement("button");
+            menuTrigger.type = "button";
+            menuTrigger.className = "inplace-menu-trigger";
+            menuTrigger.textContent = "✎";
+            menuTrigger.title = "開啟節點選單";
+
+            menuTrigger.addEventListener("mousedown", stopInteractiveEvent);
+
+            menuTrigger.addEventListener("click", (event) => {
+                event.stopPropagation();
+                toggleInplaceMenu(node.id);
+            });
+
+            element.appendChild(menuTrigger);
+
+            const speechButton = createSpeechButton("node", node.id);
+            element.appendChild(speechButton);
+
+            const menu = document.createElement("div");
+            menu.className = "inplace-action-menu";
+            menu.id = `menu-${node.id}`;
+
+            menu.innerHTML = `
+                <button
+                    type="button"
+                    class="inplace-btn"
+                    title="加子節點"
+                    onclick="event.stopPropagation(); addChildTo(${node.id}, true)"
+                >＋</button>
+
+                <button
+                    type="button"
+                    class="inplace-btn"
+                    title="加同級節點"
+                    onclick="event.stopPropagation(); addSiblingTo(${node.id}, true)"
+                >↔</button>
+
+                <button
+                    type="button"
+                    class="inplace-btn"
+                    title="轉父節點：選擇新父節點"
+                    onclick="event.stopPropagation(); startReparent(${node.id})"
+                >⇆</button>
+
+                <button
+                    type="button"
+                    class="inplace-btn"
+                    title="取消同另一節點嘅直接連線"
+                    onclick="event.stopPropagation(); startUnlink(${node.id})"
+                >⛓</button>
+
+                <button
+                    type="button"
+                    class="inplace-btn"
+                    title="跨節點連線"
+                    onclick="event.stopPropagation(); startLink(${node.id})"
+                >🔗</button>
+
+                <button
+                    type="button"
+                    class="inplace-btn"
+                    title="調色盤"
+                    onclick="event.stopPropagation(); openPickerForNode(event, ${node.id})"
+                >🎨</button>
+
+                <button
+                    type="button"
+                    class="inplace-btn"
+                    title="開始文字編輯"
+                    onclick="event.stopPropagation(); startTextEdit('node', ${node.id})"
+                >⌨</button>
+
+                <button
+                    type="button"
+                    class="inplace-btn"
+                    title="刪除"
+                    onclick="event.stopPropagation(); deleteNodeById(${node.id})"
+                >✕</button>
             `;
 
-            // 雙擊直接在畫布即打即鎖定 (No Pop-out)
-            const textSpan = el.querySelector('.node-text');
-            textSpan.addEventListener('dblclick', (e) => {
-                e.stopPropagation();
-                makeEditableNode(node, textSpan);
-            });
+            menu.addEventListener("mousedown", stopInteractiveEvent);
+            element.appendChild(menu);
 
-            // Single Mouse Down: Selection & Drag
-            el.addEventListener('mousedown', (e) => {
-                if (linkMode || reparentMode) return;
-                e.stopPropagation();
+            addResizeHandles(element, "node", node);
 
-                if (e.shiftKey) {
-                    toggleMultiSelectNode(node.id);
-                } else if (!selectedIds.has(node.id)) {
-                    selectNode(node.id);
+            element.addEventListener("mousedown", (event) => {
+                if (isInteractiveTarget(event.target)) return;
+                if (editingTarget) return;
+
+                event.stopPropagation();
+
+                /*
+                轉父節點／取消連結模式
+                */
+                if (relationshipMode) {
+                    if (relationshipSourceId === node.id) {
+                        return;
+                    }
+
+                    if (relationshipMode === "reparent") {
+                        completeReparent(node.id);
+                    } else if (relationshipMode === "unlink") {
+                        completeUnlink(node.id);
+                    }
+
+                    return;
                 }
 
-                dragNode = node;
-                const rect = canvasArea.getBoundingClientRect();
-                dragMouseStartX = (e.clientX - rect.left - tx) / scale;
-                dragMouseStartY = (e.clientY - rect.top - ty) / scale;
+                /*
+                跨節點連線模式
+                */
+                if (linkMode) {
+                    if (
+                        linkFromId !== null &&
+                        linkFromId !== node.id
+                    ) {
+                        completeLink(node.id);
+                    }
 
-                dragGroupPositions = [];
-                selectedIds.forEach(id => {
-                    const n = nodes.find(item => item.id === id);
-                    if (n) dragGroupPositions.push({ node: n, startX: n.x, startY: n.y });
-                });
+                    return;
+                }
+
+                selectNode(node.id);
+                beginDrag(event, "node", node, element);
             });
 
-            // Click Handlers for Link / Reparent
-            el.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (reparentMode) { handleReparentClick(node.id); return; }
-                if (linkMode) { handleLinkClick(node.id); return; }
+            element.addEventListener("dblclick", (event) => {
+                if (isInteractiveTarget(event.target)) return;
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                if (!linkMode) {
+                    startTextEdit("node", node.id);
+                }
             });
 
-            el.addEventListener('mouseenter', () => {
-                if (linkMode && linkFromId !== null && linkFromId !== node.id) el.classList.add('link-hover');
-            });
-            el.addEventListener('mouseleave', () => el.classList.remove('link-hover'));
+            treeCanvas.appendChild(element);
         }
 
-        function makeEditableNode(node, spanEl) {
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'node-text-input';
-            input.value = node.text;
-            spanEl.replaceWith(input);
-            input.focus();
-            input.select();
+        /* =========================
+           Link boxes
+        ========================= */
 
-            const save = () => {
-                if (input.value.trim() !== node.text) {
-                    saveState();
-                    node.text = input.value.trim() || '節點';
+        function renderLinkBoxes() {
+            treeCanvas
+                .querySelectorAll(".link-box")
+                .forEach((element) => element.remove());
+
+            crossLinks.forEach((link) => {
+                link.boxes.forEach((box) => renderSingleLinkBox(box));
+            });
+        }
+
+        function renderSingleLinkBox(box) {
+            box.width = Number(box.width) || 110;
+            box.height = Number(box.height) || 34;
+
+            const element = document.createElement("div");
+
+            element.className = "link-box";
+            element.id = `box-${box.id}`;
+            element.dataset.boxId = box.id;
+
+            setElementGeometry(element, box);
+            applyStyle(element, box);
+
+            const content = document.createElement("div");
+            content.className = "link-box-content";
+
+            const text = document.createElement("span");
+            text.className = "link-box-text";
+            text.textContent = box.text;
+
+            content.appendChild(text);
+            element.appendChild(content);
+
+            const colorButton = document.createElement("button");
+            colorButton.type = "button";
+            colorButton.className = "box-color-trigger";
+            colorButton.textContent = "🎨";
+            colorButton.title = "設定 Link Box 顏色";
+
+            colorButton.addEventListener("mousedown", stopInteractiveEvent);
+
+            colorButton.addEventListener("click", (event) => {
+                event.stopPropagation();
+                openPickerForBox(event, box.id);
+            });
+
+            element.appendChild(colorButton);
+
+            const speechButton = createSpeechButton("box", box.id);
+            element.appendChild(speechButton);
+
+            addResizeHandles(element, "box", box);
+
+            element.addEventListener("mousedown", (event) => {
+                if (isInteractiveTarget(event.target)) return;
+                if (editingTarget) return;
+
+                event.stopPropagation();
+
+                selectBox(box.id);
+                beginDrag(event, "box", box, element);
+            });
+
+            element.addEventListener("dblclick", (event) => {
+                if (isInteractiveTarget(event.target)) return;
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                startTextEdit("box", box.id);
+            });
+
+            treeCanvas.appendChild(element);
+        }
+
+        function findBoxById(boxId) {
+            for (const link of crossLinks) {
+                const box = link.boxes.find((item) => item.id === boxId);
+
+                if (box) return box;
+            }
+
+            return null;
+        }
+
+        /* =========================
+           Multiline text editing
+        ========================= */
+
+        function startTextEdit(type, id) {
+            if (editingTarget) {
+                if (
+                    editingTarget.type === type &&
+                    editingTarget.id === id
+                ) {
+                    editingTarget.textarea.focus();
+                    return;
                 }
-                renderAll();
+
+                finishCurrentEditing();
+            }
+
+            stopSpeechRecognition(true);
+
+            const item = type === "node"
+                ? nodes.find((node) => node.id === id)
+                : findBoxById(id);
+
+            const element = document.getElementById(
+                type === "node" ? `node-${id}` : `box-${id}`
+            );
+
+            if (!item || !element) return;
+
+            if (type === "node") {
+                selectNode(id);
+            } else {
+                selectBox(id);
+            }
+
+            const content = element.querySelector(
+                type === "node"
+                    ? ".node-content"
+                    : ".link-box-content"
+            );
+
+            const textElement = content.querySelector(
+                type === "node"
+                    ? ".node-text"
+                    : ".link-box-text"
+            );
+
+            const textarea = document.createElement("textarea");
+            textarea.className = "text-editor";
+            textarea.value = item.text;
+            textarea.spellcheck = true;
+            textarea.setAttribute(
+                "aria-label",
+                type === "node" ? "節點文字" : "連結文字"
+            );
+
+            textElement.style.display = "none";
+            content.appendChild(textarea);
+            element.classList.add("editing");
+
+            editingTarget = {
+                type,
+                id,
+                item,
+                element,
+                content,
+                textElement,
+                textarea,
+                originalState: captureState(),
+                originalItem: JSON.parse(JSON.stringify(item)),
+                finished: false
             };
 
-            input.addEventListener('blur', save);
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') { input.blur(); }
-                if (e.key === 'Escape') { input.value = node.text; input.blur(); }
+            textarea.addEventListener("mousedown", (event) => {
+                event.stopPropagation();
+            });
+
+            textarea.addEventListener("dblclick", (event) => {
+                event.stopPropagation();
+            });
+
+            textarea.addEventListener("input", () => {
+                if (!editingTarget) return;
+
+                item.text = textarea.value;
+
+                autoGrowWhileEditing(
+                    item,
+                    element,
+                    textarea,
+                    type
+                );
+
+                drawLines();
+            });
+
+            textarea.addEventListener("keydown", (event) => {
+                event.stopPropagation();
+
+                if (
+                    event.key === "Enter" &&
+                    (event.ctrlKey || event.metaKey)
+                ) {
+                    event.preventDefault();
+                    finishCurrentEditing();
+                    return;
+                }
+
+                if (event.key === "Escape") {
+                    event.preventDefault();
+                    cancelCurrentEditing();
+                    return;
+                }
+
+                if (event.key === "Tab") {
+                    event.preventDefault();
+
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const value = textarea.value;
+
+                    textarea.value =
+                        value.slice(0, start) +
+                        "    " +
+                        value.slice(end);
+
+                    textarea.selectionStart =
+                        textarea.selectionEnd =
+                            start + 4;
+
+                    textarea.dispatchEvent(new Event("input"));
+                }
+            });
+
+            textarea.addEventListener("blur", () => {
+                window.setTimeout(() => {
+                    if (
+                        editingTarget &&
+                        editingTarget.textarea === textarea &&
+                        !element.contains(document.activeElement)
+                    ) {
+                        finishCurrentEditing();
+                    }
+                }, 0);
+            });
+
+            window.setTimeout(() => {
+                textarea.focus();
+                textarea.select();
+            }, 0);
+        }
+
+        function autoGrowWhileEditing(
+            item,
+            element,
+            textarea,
+            type
+        ) {
+            const minimumHeight = type === "node"
+                ? MIN_NODE_HEIGHT
+                : MIN_BOX_HEIGHT;
+
+            textarea.style.height = "1px";
+
+            const verticalPadding = type === "node" ? 18 : 12;
+            const requiredHeight =
+                textarea.scrollHeight + verticalPadding;
+
+            if (requiredHeight > item.height) {
+                item.height = Math.max(
+                    minimumHeight,
+                    requiredHeight
+                );
+
+                element.style.height = `${item.height}px`;
+            }
+
+            textarea.style.height = "100%";
+        }
+
+        function finishCurrentEditing() {
+            if (!editingTarget || editingTarget.finished) return;
+
+            const session = editingTarget;
+            session.finished = true;
+
+            let newText = session.textarea.value;
+
+            if (!newText.trim()) {
+                newText = session.type === "node"
+                    ? "新節點"
+                    : "連結";
+            }
+
+            session.item.text = newText;
+            session.textElement.textContent = newText;
+            session.textElement.style.display = "";
+
+            session.textarea.remove();
+            session.element.classList.remove("editing");
+
+            editingTarget = null;
+
+            autoFitHeight(
+                session.type,
+                session.id,
+                false
+            );
+
+            drawLines();
+
+            pushHistorySnapshot(session.originalState);
+        }
+
+        function cancelCurrentEditing() {
+            if (!editingTarget) return;
+
+            const session = editingTarget;
+            const original = session.originalItem;
+
+            Object.keys(session.item).forEach((key) => {
+                delete session.item[key];
+            });
+
+            Object.assign(session.item, original);
+
+            session.textElement.textContent = session.item.text;
+            session.textElement.style.display = "";
+
+            session.textarea.remove();
+            session.element.classList.remove("editing");
+
+            setElementGeometry(session.element, session.item);
+            applyStyle(session.element, session.item);
+
+            editingTarget = null;
+
+            drawLines();
+        }
+
+        /* =========================
+           Auto fit text height
+        ========================= */
+
+        function autoFitHeight(type, id, recordHistory = true) {
+            const item = type === "node"
+                ? nodes.find((node) => node.id === id)
+                : findBoxById(id);
+
+            const element = document.getElementById(
+                type === "node" ? `node-${id}` : `box-${id}`
+            );
+
+            if (!item || !element) return;
+
+            const snapshot = recordHistory
+                ? captureState()
+                : null;
+
+            const content = element.querySelector(
+                type === "node"
+                    ? ".node-content"
+                    : ".link-box-content"
+            );
+
+            const minimumHeight = type === "node"
+                ? MIN_NODE_HEIGHT
+                : MIN_BOX_HEIGHT;
+
+            const verticalPadding = type === "node" ? 18 : 12;
+
+            const oldHeight = element.style.height;
+
+            element.style.height = `${minimumHeight}px`;
+            item.height = minimumHeight;
+
+            const requiredHeight = Math.max(
+                minimumHeight,
+                content.scrollHeight + verticalPadding
+            );
+
+            item.height = requiredHeight;
+            element.style.height = `${requiredHeight}px`;
+
+            if (!requiredHeight) {
+                element.style.height = oldHeight;
+            }
+
+            drawLines();
+
+            if (snapshot) {
+                pushHistorySnapshot(snapshot);
+            }
+        }
+
+        /* =========================
+           Resize
+        ========================= */
+
+        function addResizeHandles(element, type, item) {
+            const directions = [
+                "n",
+                "s",
+                "e",
+                "w",
+                "ne",
+                "nw",
+                "se",
+                "sw"
+            ];
+
+            directions.forEach((direction) => {
+                const handle = document.createElement("div");
+
+                handle.className = `resize-handle ${direction}`;
+                handle.dataset.resizeDirection = direction;
+                handle.title =
+                    "拖曳改變大小；雙擊自動配合文字高度";
+
+                handle.addEventListener("mousedown", (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    if (editingTarget) {
+                        finishCurrentEditing();
+                    }
+
+                    beginResize(
+                        event,
+                        type,
+                        item,
+                        element,
+                        direction
+                    );
+                });
+
+                handle.addEventListener("dblclick", (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    autoFitHeight(type, item.id, true);
+                });
+
+                element.appendChild(handle);
             });
         }
+
+        function beginResize(
+            event,
+            type,
+            item,
+            element,
+            direction
+        ) {
+            if (type === "node") {
+                selectNode(item.id);
+            } else {
+                selectBox(item.id);
+            }
+
+            gestureSnapshot = captureState();
+
+            gestureStartClientX = event.clientX;
+            gestureStartClientY = event.clientY;
+
+            resizeTarget = {
+                type,
+                item,
+                element,
+                direction,
+                startX: item.x,
+                startY: item.y,
+                startWidth: item.width,
+                startHeight: item.height,
+                moved: false
+            };
+        }
+
+        function updateResize(event) {
+            if (!resizeTarget) return;
+
+            const target = resizeTarget;
+            const dx =
+                (event.clientX - gestureStartClientX) / scale;
+            const dy =
+                (event.clientY - gestureStartClientY) / scale;
+
+            const direction = target.direction;
+
+            const minimumWidth = target.type === "node"
+                ? MIN_NODE_WIDTH
+                : MIN_BOX_WIDTH;
+
+            const minimumHeight = target.type === "node"
+                ? MIN_NODE_HEIGHT
+                : MIN_BOX_HEIGHT;
+
+            let newX = target.startX;
+            let newY = target.startY;
+            let newWidth = target.startWidth;
+            let newHeight = target.startHeight;
+
+            if (direction.includes("e")) {
+                newWidth = Math.max(
+                    minimumWidth,
+                    target.startWidth + dx
+                );
+            }
+
+            if (direction.includes("s")) {
+                newHeight = Math.max(
+                    minimumHeight,
+                    target.startHeight + dy
+                );
+            }
+
+            if (direction.includes("w")) {
+                newWidth = Math.max(
+                    minimumWidth,
+                    target.startWidth - dx
+                );
+
+                newX =
+                    target.startX +
+                    target.startWidth -
+                    newWidth;
+            }
+
+            if (direction.includes("n")) {
+                newHeight = Math.max(
+                    minimumHeight,
+                    target.startHeight - dy
+                );
+
+                newY =
+                    target.startY +
+                    target.startHeight -
+                    newHeight;
+            }
+
+            target.item.x = newX;
+            target.item.y = newY;
+            target.item.width = newWidth;
+            target.item.height = newHeight;
+
+            setElementGeometry(target.element, target.item);
+
+            if (
+                Math.abs(event.clientX - gestureStartClientX) > 1 ||
+                Math.abs(event.clientY - gestureStartClientY) > 1
+            ) {
+                target.moved = true;
+            }
+
+            drawLines();
+        }
+
+        /* =========================
+           Dragging
+        ========================= */
+
+        function beginDrag(event, type, item, element) {
+            const rect = canvasArea.getBoundingClientRect();
+
+            gestureSnapshot = captureState();
+
+            gestureStartClientX = event.clientX;
+            gestureStartClientY = event.clientY;
+
+            dragMouseX =
+                (event.clientX - rect.left - tx) / scale -
+                item.x;
+
+            dragMouseY =
+                (event.clientY - rect.top - ty) / scale -
+                item.y;
+
+            dragTarget = {
+                type,
+                item,
+                element,
+                moved: false
+            };
+        }
+
+        function updateDrag(mouseX, mouseY, event) {
+            if (!dragTarget) return;
+
+            dragTarget.item.x = mouseX - dragMouseX;
+            dragTarget.item.y = mouseY - dragMouseY;
+
+            dragTarget.element.style.left =
+                `${dragTarget.item.x}px`;
+
+            dragTarget.element.style.top =
+                `${dragTarget.item.y}px`;
+
+            if (
+                Math.abs(event.clientX - gestureStartClientX) > 2 ||
+                Math.abs(event.clientY - gestureStartClientY) > 2
+            ) {
+                dragTarget.moved = true;
+            }
+
+            drawLines();
+        }
+
+        function finishGesture() {
+            const moved =
+                (dragTarget && dragTarget.moved) ||
+                (resizeTarget && resizeTarget.moved);
+
+            if (moved && gestureSnapshot) {
+                pushHistorySnapshot(gestureSnapshot);
+            }
+
+            dragTarget = null;
+            resizeTarget = null;
+            gestureSnapshot = null;
+        }
+
+        /* =========================
+           Selection
+        ========================= */
 
         function selectNode(id) {
-            clearSelection();
             selectedId = id;
-            selectedIds.add(id);
+            selectedBoxId = null;
 
-            const el = document.getElementById(`node-${id}`);
-            if (el) el.classList.add('selected');
+            document
+                .querySelectorAll(".node")
+                .forEach((element) => {
+                    element.classList.remove("selected");
+                });
 
-            const node = nodes.find(n => n.id === id);
-            if (node) {
-                selectedInfo.style.display = 'block';
-                nameInput.value = node.text;
-                updateParentSelectOptions(node);
-            }
-            renderOutline();
+            document
+                .querySelectorAll(".link-box")
+                .forEach((element) => {
+                    element.classList.remove("selected");
+                });
+
+            document
+                .getElementById(`node-${id}`)
+                ?.classList.add("selected");
         }
 
-        function toggleMultiSelectNode(id) {
-            if (selectedIds.has(id)) {
-                selectedIds.delete(id);
-                const el = document.getElementById(`node-${id}`);
-                if (el) { el.classList.remove('selected'); el.classList.remove('multi-selected'); }
-            } else {
-                selectedIds.add(id);
-                const el = document.getElementById(`node-${id}`);
-                if (el) el.classList.add('multi-selected');
-            }
-            if (selectedIds.size === 1) selectNode(Array.from(selectedIds)[0]);
-            else { selectedId = null; selectedInfo.style.display = 'none'; }
-        }
-
-        function clearSelection() {
-            selectedIds.forEach(id => {
-                const el = document.getElementById(`node-${id}`);
-                if (el) { el.classList.remove('selected'); el.classList.remove('multi-selected'); }
-            });
-            selectedIds.clear();
+        function selectBox(id) {
+            selectedBoxId = id;
             selectedId = null;
-            selectedInfo.style.display = 'none';
+
+            document
+                .querySelectorAll(".node")
+                .forEach((element) => {
+                    element.classList.remove("selected");
+                });
+
+            document
+                .querySelectorAll(".link-box")
+                .forEach((element) => {
+                    element.classList.remove("selected");
+                });
+
+            document
+                .getElementById(`box-${id}`)
+                ?.classList.add("selected");
         }
 
-        // ====== QUICK TOOLBAR NODE ACTIONS ======
-        function addChildToNode(parentId) {
-            const parent = nodes.find(n => n.id === parentId);
+        /* =========================
+           Add node
+        ========================= */
+
+        function addChildTo(parentId, autoEdit = false) {
+            finishCurrentEditing();
+
+            const parent = nodes.find(
+                (node) => node.id === parentId
+            );
+
             if (!parent) return;
-            const children = nodes.filter(n => n.parentId === parentId);
-            const count = children.length;
-            const angle = (-90 + (count - 1) * 45 + count * 40) * Math.PI / 180;
-            const x = parent.x + Math.cos(angle) * 180;
-            const y = parent.y + Math.sin(angle) * 180;
-            collapsedNodes.delete(parentId);
-            const newId = createNode('新節點', x, y, parentId, parent.bg, parent.border);
+
+            const siblings = nodes.filter(
+                (node) => node.parentId === parentId
+            );
+
+            const newX =
+                parent.x +
+                parent.width +
+                80;
+
+            const newY =
+                parent.y +
+                siblings.length * 65;
+
+            const newId = createNode(
+                "新節點",
+                newX,
+                newY,
+                parentId,
+                autoEdit,
+                true
+            );
+
             selectNode(newId);
         }
 
-        function addSiblingToNode(nodeId) {
-            const node = nodes.find(n => n.id === nodeId);
-            if (!node || node.parentId === null) { addChildToNode(nodeId); return; }
-            const newId = createNode('新節點', node.x, node.y + 70, node.parentId, node.bg, node.border);
+        function addSiblingTo(id, autoEdit = false) {
+            finishCurrentEditing();
+
+            const node = nodes.find(
+                (item) => item.id === id
+            );
+
+            if (!node) return;
+
+            if (node.parentId === null || node.parentId === undefined) {
+                addChildTo(id, autoEdit);
+                return;
+            }
+
+            const newId = createNode(
+                "新節點",
+                node.x,
+                node.y + node.height + 20,
+                node.parentId,
+                autoEdit,
+                true
+            );
+
             selectNode(newId);
+        }
+
+        function addChildToSelected(autoEdit = false) {
+            if (selectedId !== null) {
+                addChildTo(selectedId, autoEdit);
+            }
+        }
+
+        function addSiblingToSelected(autoEdit = false) {
+            if (selectedId !== null) {
+                addSiblingTo(selectedId, autoEdit);
+            }
+        }
+
+        /* =========================
+           Delete
+        ========================= */
+
+        function getDescendantIds(parentId) {
+            const result = [];
+            const children = nodes.filter(
+                (node) => node.parentId === parentId
+            );
+
+            children.forEach((child) => {
+                result.push(child.id);
+                result.push(...getDescendantIds(child.id));
+            });
+
+            return result;
         }
 
         function deleteNodeById(id) {
-            saveState();
-            const toDelete = new Set();
-            function gather(targetId) {
-                toDelete.add(targetId);
-                nodes.filter(n => n.parentId === targetId).forEach(c => gather(c.id));
-            }
-            gather(id);
+            finishCurrentEditing();
 
-            toDelete.forEach(delId => {
-                document.getElementById(`node-${delId}`)?.remove();
+            const snapshot = captureState();
+            const idsToDelete = new Set([
+                id,
+                ...getDescendantIds(id)
+            ]);
+
+            nodes = nodes.filter(
+                (node) => !idsToDelete.has(node.id)
+            );
+
+            crossLinks = crossLinks.filter((link) => {
+                return (
+                    !idsToDelete.has(link.fromId) &&
+                    !idsToDelete.has(link.toId)
+                );
             });
-            nodes = nodes.filter(n => !toDelete.has(n.id));
-            crossLinks = crossLinks.filter(l => !toDelete.has(l.fromId) && !toDelete.has(l.toId));
-            clearSelection();
-            renderAll();
-        }
 
-        function startLinkFromNode(nodeId) {
-            linkMode = true;
-            linkFromId = nodeId;
-            document.getElementById('link-mode-btn')?.classList.add('active');
-            linkBanner.style.display = 'block';
-            linkBanner.textContent = '🔗 已選起點 → 撳目標節點 (ESC 退出)';
-            canvasArea.classList.add('link-cursor');
-            const el = document.getElementById(`node-${nodeId}`);
-            if (el) el.classList.add('link-hover');
-        }
+            selectedId = null;
 
-        function addChildToSelected() { addChildToNode(selectedId !== null ? selectedId : (nodes[0]?.id)); }
-        function addSibling() { if (selectedId !== null) addSiblingToNode(selectedId); }
-        function deleteSelected() { if (selectedId !== null) deleteNodeById(selectedId); }
+            treeCanvas
+                .querySelectorAll(".node, .link-box")
+                .forEach((element) => element.remove());
 
-        // ====== REPARENTING & AUTOMATIC EXIT ======
-        function updateParentSelectOptions(currentNode) {
-            parentSelect.innerHTML = '';
-            const descendants = new Set();
-            function getDescendants(id) {
-                nodes.filter(n => n.parentId === id).forEach(child => {
-                    descendants.add(child.id); getDescendants(child.id);
-                });
-            }
-            getDescendants(currentNode.id);
-
-            const rootOpt = document.createElement('option');
-            rootOpt.value = 'null'; rootOpt.textContent = '(無 - 獨立成為根節點)';
-            if (currentNode.parentId === null) rootOpt.selected = true;
-            parentSelect.appendChild(rootOpt);
-
-            nodes.forEach(n => {
-                if (n.id !== currentNode.id && !descendants.has(n.id)) {
-                    const opt = document.createElement('option');
-                    opt.value = n.id; opt.textContent = n.text || `節點 ${n.id}`;
-                    if (currentNode.parentId === n.id) opt.selected = true;
-                    parentSelect.appendChild(opt);
-                }
-            });
-        }
-
-        function changeParentNode(newParentValue) {
-            if (selectedId === null) return;
-            const node = nodes.find(n => n.id === selectedId);
-            if (!node) return;
-            const newParentId = newParentValue === 'null' ? null : parseInt(newParentValue, 10);
-            if (node.parentId === newParentId) return;
-
-            saveState();
-            node.parentId = newParentId;
+            nodes.forEach(renderNode);
+            renderLinkBoxes();
             drawLines();
-            renderOutline();
+
+            pushHistorySnapshot(snapshot);
         }
 
-        function toggleReparentMode() {
-            if (selectedId === null) { alert('請先選取要更變父級嘅節點！'); return; }
-            reparentMode = !reparentMode;
-            document.getElementById('reparent-mode-btn')?.classList.toggle('active', reparentMode);
-            document.getElementById('reparent-banner').style.display = reparentMode ? 'block' : 'none';
-            canvasArea.classList.toggle('link-cursor', reparentMode);
-            if (reparentMode && linkMode) toggleLinkMode();
+        function deleteBoxById(boxId) {
+            finishCurrentEditing();
+
+            const snapshot = captureState();
+
+            crossLinks.forEach((link) => {
+                link.boxes = link.boxes.filter(
+                    (box) => box.id !== boxId
+                );
+            });
+
+            selectedBoxId = null;
+
+            document.getElementById(`box-${boxId}`)?.remove();
+
+            pushHistorySnapshot(snapshot);
         }
 
-        function handleReparentClick(targetId) {
-            if (targetId === selectedId) return;
-            const node = nodes.find(n => n.id === selectedId);
+        function deleteSelected() {
+            if (selectedId !== null) {
+                deleteNodeById(selectedId);
+                return;
+            }
+
+            if (selectedBoxId !== null) {
+                deleteBoxById(selectedBoxId);
+            }
+        }
+
+        /* =========================
+           Cross links
+        ========================= */
+
+        function startLink(id) {
+            finishCurrentEditing();
+            
+            cancelRelationshipMode();
+
+            linkMode = true;
+            linkFromId = id;
+
+            canvasArea.classList.add("linking");
+
+            document
+                .querySelectorAll(".node")
+                .forEach((node) => {
+                    node.classList.remove("linking-source");
+                });
+
+            document
+                .getElementById(`node-${id}`)
+                ?.classList.add("linking-source");
+
+            const fromNode = nodes.find(
+                (node) => node.id === id
+            );
+
+            if (!fromNode) return;
+
+            const centerX =
+                fromNode.x + fromNode.width / 2;
+
+            const centerY =
+                fromNode.y + fromNode.height / 2;
+
+            tempLinkLine.setAttribute("x1", centerX);
+            tempLinkLine.setAttribute("y1", centerY);
+            tempLinkLine.setAttribute("x2", centerX);
+            tempLinkLine.setAttribute("y2", centerY);
+            tempLinkLine.style.display = "block";
+        }
+
+        function completeLink(targetId) {
+            if (
+                linkFromId === null ||
+                targetId === linkFromId
+            ) {
+                return;
+            }
+
+            const from = nodes.find(
+                (node) => node.id === linkFromId
+            );
+
+            const to = nodes.find(
+                (node) => node.id === targetId
+            );
+
+            if (!from || !to) {
+                cancelLinkMode();
+                return;
+            }
+
+            const duplicate = crossLinks.some((link) => {
+                return (
+                    (link.fromId === from.id &&
+                        link.toId === to.id) ||
+                    (link.fromId === to.id &&
+                        link.toId === from.id)
+                );
+            });
+
+            if (duplicate) {
+                cancelLinkMode();
+                return;
+            }
+
+            const snapshot = captureState();
+
+            const box = {
+                id: nextBoxId++,
+                text: "連結",
+                x:
+                    (
+                        from.x +
+                        from.width / 2 +
+                        to.x +
+                        to.width / 2
+                    ) / 2 -
+                    55,
+                y:
+                    (
+                        from.y +
+                        from.height / 2 +
+                        to.y +
+                        to.height / 2
+                    ) / 2 -
+                    17,
+                width: 110,
+                height: 34,
+                color1: "#ffffff",
+                color2: "#ffffff",
+                colorType: "solid",
+                opacity: 0.96,
+                deg: 135
+            };
+
+            crossLinks.push({
+                id: nextLinkId++,
+                fromId: from.id,
+                toId: to.id,
+                boxes: [box]
+            });
+
+            cancelLinkMode();
+            renderSingleLinkBox(box);
+            drawLines();
+
+            pushHistorySnapshot(snapshot);
+
+            window.setTimeout(() => {
+                startTextEdit("box", box.id);
+            }, 30);
+        }
+
+        function cancelLinkMode() {
+            linkMode = false;
+            linkFromId = null;
+
+            canvasArea.classList.remove("linking");
+
+            tempLinkLine.style.display = "none";
+
+            document
+                .querySelectorAll(".node")
+                .forEach((node) => {
+                    node.classList.remove("linking-source");
+                });
+        }
+        
+        /* =========================
+           轉父節點／取消指定連結
+        ========================= */
+
+        function startReparentSelected() {
+            if (selectedId === null) {
+                alert("請先選擇需要轉換父節點嘅節點。");
+                return;
+            }
+
+            startReparent(selectedId);
+        }
+
+        function startUnlinkSelected() {
+            if (selectedId === null) {
+                alert("請先選擇連線其中一個節點。");
+                return;
+            }
+
+            startUnlink(selectedId);
+        }
+
+        /*
+        使用方式：
+        選擇 B → startReparent(B) → 點擊 X
+        結果：B.parentId 變成 X
+        B 下面全部子節點都會保留
+        */
+        function startReparent(nodeId) {
+            finishCurrentEditing();
+            stopSpeechRecognition(true);
+
+            if (linkMode) {
+                cancelLinkMode();
+            }
+
+            cancelRelationshipMode();
+
+            const node = nodes.find((item) => item.id === nodeId);
+
             if (!node) return;
 
-            saveState();
-            node.parentId = targetId;
+            relationshipMode = "reparent";
+            relationshipSourceId = nodeId;
 
-            // 自動退出 Reparent 模式
-            exitAllModes();
-            selectNode(node.id);
+            selectNode(nodeId);
+
+            document
+                .getElementById(`node-${nodeId}`)
+                ?.classList.add("relationship-source");
+
+            showRelationshipMessage(
+                `⇆ 轉父節點：請撳新父節點。正在移動「${node.text}」；按 Esc 取消。`
+            );
         }
 
-        // ====== LINK & LINK BOX (支援多 Box / 自由 Drag / 即打即鎖定) ======
-        function toggleLinkMode() {
-            if (linkMode) { exitAllModes(); return; }
-            linkMode = true;
-            linkFromId = null;
-            document.getElementById('link-mode-btn')?.classList.add('active');
-            linkBanner.style.display = 'block';
-            linkBanner.textContent = '🔗 Link 模式：撳第一個節點，再撳目標節點 (ESC 退出)';
-            canvasArea.classList.add('link-cursor');
-        }
+        /*
+        選擇 A → startUnlink(A) → 點擊 B
+        只取消 A、B 之間嘅直接連線
+        */
+        function startUnlink(nodeId) {
+            finishCurrentEditing();
+            stopSpeechRecognition(true);
 
-        function handleLinkClick(nodeId) {
-            if (linkFromId === null) {
-                linkFromId = nodeId;
-                linkBanner.textContent = '🔗 已選起點 → 撳目標節點 (ESC 退出)';
-                document.getElementById(`node-${nodeId}`)?.classList.add('link-hover');
-            } else {
-                if (linkFromId === nodeId) return;
-
-                saveState();
-                const fromNode = nodes.find(n => n.id === linkFromId);
-                const toNode = nodes.find(n => n.id === nodeId);
-                const defaultX = (fromNode.x + toNode.x) / 2;
-                const defaultY = (fromNode.y + toNode.y) / 2;
-
-                const newLink = {
-                    id: nextLinkId++,
-                    fromId: linkFromId,
-                    toId: nodeId,
-                    boxes: [
-                        { id: nextBoxId++, text: '連結說明', x: defaultX, y: defaultY, bg: 'var(--sidebar-bg)', border: 'var(--accent)' }
-                    ]
-                };
-                crossLinks.push(newLink);
-
-                // 自動退出 Link 模式
-                exitAllModes();
-                renderAll();
+            if (linkMode) {
+                cancelLinkMode();
             }
+
+            cancelRelationshipMode();
+
+            const node = nodes.find((item) => item.id === nodeId);
+
+            if (!node) return;
+
+            relationshipMode = "unlink";
+            relationshipSourceId = nodeId;
+
+            selectNode(nodeId);
+
+            document
+                .getElementById(`node-${nodeId}`)
+                ?.classList.add("relationship-source");
+
+            showRelationshipMessage(
+                `⛓ 取消連結：請撳另一個節點。只會取消同「${node.text}」之間嘅直接連線；按 Esc 取消。`
+            );
         }
 
-        function renderLinkBoxes() {
-            treeCanvas.querySelectorAll('.link-box').forEach(el => el.remove());
+        /*
+        完成轉父節點
+        */
+        function completeReparent(newParentId) {
+            const movingNodeId = relationshipSourceId;
 
-            crossLinks.forEach(link => {
-                link.boxes.forEach((box, bIdx) => {
-                    const el = document.createElement('div');
-                    el.className = 'link-box';
-                    el.id = `link-box-${box.id}`;
-                    el.style.left = box.x + 'px';
-                    el.style.top = box.y + 'px';
-                    if (box.bg) el.style.background = box.bg;
-                    if (box.border) el.style.borderColor = box.border;
+            const movingNode = nodes.find(
+                (item) => item.id === movingNodeId
+            );
 
-                    el.innerHTML = `
-                        <div class="link-box-color-btn" title="色盤" onclick="event.stopPropagation(); openMiniColorPicker('box', ${box.id}, event)">🎨</div>
-                        <div class="link-box-del-btn" title="刪除此 Box" onclick="event.stopPropagation(); deleteBoxFromLink(${link.id}, ${box.id})">✕</div>
-                        <div class="link-box-add-btn" title="加 Box" onclick="event.stopPropagation(); addBoxToLink(${link.id}, ${bIdx})">＋</div>
-                        <span class="box-text">${escapeHtml(box.text)}</span>
-                    `;
+            const newParent = nodes.find(
+                (item) => item.id === newParentId
+            );
 
-                    // Drag Box
-                    el.addEventListener('mousedown', (e) => {
-                        if (e.target.classList.contains('link-box-add-btn') ||
-                            e.target.classList.contains('link-box-del-btn') ||
-                            e.target.classList.contains('link-box-color-btn')) return;
-                        e.stopPropagation();
+            if (!movingNode || !newParent) {
+                cancelRelationshipMode();
+                return;
+            }
 
-                        dragBox = box;
-                        const rect = canvasArea.getBoundingClientRect();
-                        dragMouseStartX = (e.clientX - rect.left - tx) / scale - box.x;
-                        dragMouseStartY = (e.clientY - rect.top - ty) / scale - box.y;
-                    });
+            if (movingNodeId === newParentId) {
+                alert("一個節點唔可以成為自己嘅父節點。");
+                return;
+            }
 
-                    // Inline Type & Preview (即打即鎖定)
-                    const boxText = el.querySelector('.box-text');
-                    boxText.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        makeEditableBox(box, boxText);
-                    });
+            /*
+            防止循環：
+            例如 A → B → C
+            唔可以將 A 放落 C 下面，
+            否則會變成 A → B → C → A
+            */
+            if (isNodeInsideSubtree(newParentId, movingNodeId)) {
+                alert(
+                    "無法轉換：新父節點係目前節點嘅子節點，咁樣會造成循環連線。"
+                );
+                return;
+            }
 
-                    treeCanvas.appendChild(el);
-                });
-            });
+            if (movingNode.parentId === newParentId) {
+                cancelRelationshipMode();
+                selectNode(movingNodeId);
+                return;
+            }
+
+            const snapshot = captureState();
+
+            /*
+            只修改 parentId：
+            唔會刪除 movingNode，
+            亦唔會刪除 movingNode 下面嘅任何子節點。
+            */
+            movingNode.parentId = newParentId;
+
+            drawLines();
+
+            pushHistorySnapshot(snapshot);
+
+            cancelRelationshipMode();
+            selectNode(movingNodeId);
         }
 
-        function makeEditableBox(box, spanEl) {
-            const input = document.createElement('textarea');
-            input.className = 'link-box-input';
-            input.value = box.text;
-            spanEl.replaceWith(input);
-            input.focus();
+        /*
+        檢查 candidateId 係咪 rootId 子樹內嘅節點
+        */
+        function isNodeInsideSubtree(candidateId, rootId) {
+            let currentId = candidateId;
+            const checkedIds = new Set();
 
-            const save = () => {
-                if (input.value.trim() !== box.text) {
-                    saveState();
-                    box.text = input.value.trim() || '說明';
+            while (
+                currentId !== null &&
+                currentId !== undefined
+            ) {
+                if (currentId === rootId) {
+                    return true;
                 }
-                renderAll();
-            };
 
-            input.addEventListener('blur', save);
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); input.blur(); }
-                if (e.key === 'Escape') { input.value = box.text; input.blur(); }
-            });
-        }
+                if (checkedIds.has(currentId)) {
+                    return true;
+                }
 
-        function addBoxToLink(linkId, boxIndex) {
-            saveState();
-            const link = crossLinks.find(l => l.id === linkId);
-            if (!link) return;
+                checkedIds.add(currentId);
 
-            const prevBox = link.boxes[boxIndex];
-            const newBox = {
-                id: nextBoxId++,
-                text: '加載說明',
-                x: prevBox.x + 110,
-                y: prevBox.y + 40,
-                bg: prevBox.bg || 'var(--sidebar-bg)',
-                border: prevBox.border || 'var(--accent)'
-            };
-            link.boxes.splice(boxIndex + 1, 0, newBox);
-            renderAll();
-        }
+                const currentNode = nodes.find(
+                    (item) => item.id === currentId
+                );
 
-        function deleteBoxFromLink(linkId, boxId) {
-            saveState();
-            const link = crossLinks.find(l => l.id === linkId);
-            if (!link) return;
+                if (!currentNode) {
+                    return false;
+                }
 
-            link.boxes = link.boxes.filter(b => b.id !== boxId);
-            if (link.boxes.length === 0) {
-                crossLinks = crossLinks.filter(l => l.id !== linkId);
+                currentId = currentNode.parentId;
             }
-            renderAll();
+
+            return false;
         }
 
-        // ====== MINI COLOR PICKER POPUP ======
-        function openMiniColorPicker(type, targetId, event) {
-            closeColorPop();
-            const colors = ['#2e7d32', '#1565c0', '#6a1b9a', '#e65100', '#c62828', '#37474f'];
-            const pop = document.createElement('div');
-            pop.className = 'mini-color-pop';
+        /*
+        完成取消兩點連結
 
-            colors.forEach(c => {
-                const dot = document.createElement('div');
-                dot.className = 'mini-color-dot';
-                dot.style.background = c;
-                dot.onclick = (e) => {
-                    e.stopPropagation();
-                    saveState();
-                    if (type === 'node') {
-                        const n = nodes.find(item => item.id === targetId);
-                        if (n) { n.bg = c; n.border = c; }
-                    } else if (type === 'box') {
-                        crossLinks.forEach(l => {
-                            const b = l.boxes.find(item => item.id === targetId);
-                            if (b) { b.bg = 'var(--sidebar-bg)'; b.border = c; }
-                        });
-                    }
-                    closeColorPop();
-                    renderAll();
-                };
-                pop.appendChild(dot);
+        處理次序：
+        1. 如果兩點之間有橙色 Cross Link，先移除 Cross Link
+        2. 如果冇 Cross Link，就移除父子關係線
+        */
+        function completeUnlink(targetId) {
+            const sourceId = relationshipSourceId;
+
+            if (
+                sourceId === null ||
+                sourceId === targetId
+            ) {
+                return;
+            }
+
+            const sourceNode = nodes.find(
+                (item) => item.id === sourceId
+            );
+
+            const targetNode = nodes.find(
+                (item) => item.id === targetId
+            );
+
+            if (!sourceNode || !targetNode) {
+                cancelRelationshipMode();
+                return;
+            }
+
+            const snapshot = captureState();
+            let removed = false;
+            let removedType = "";
+
+            /*
+            先檢查兩點之間有冇橙色跨節點連線
+            */
+            const matchingCrossLinks = crossLinks.filter((link) => {
+                return (
+                    (
+                        link.fromId === sourceId &&
+                        link.toId === targetId
+                    ) ||
+                    (
+                        link.fromId === targetId &&
+                        link.toId === sourceId
+                    )
+                );
             });
 
-            const parentEl = event.currentTarget.parentElement;
-            parentEl.appendChild(pop);
-            activeColorPop = pop;
+            if (matchingCrossLinks.length > 0) {
+                const matchingIds = new Set(
+                    matchingCrossLinks.map((link) => link.id)
+                );
+
+                crossLinks = crossLinks.filter(
+                    (link) => !matchingIds.has(link.id)
+                );
+
+                removed = true;
+                removedType = "cross-link";
+
+                /*
+                Cross Link 被刪除後，
+                其附屬 Link Box 亦會移除。
+                */
+                renderLinkBoxes();
+            } else if (targetNode.parentId === sourceId) {
+                /*
+                A → B：
+                B.parentId 由 A 改成 null。
+                B 下面嘅子節點全部保留。
+                */
+                targetNode.parentId = null;
+                removed = true;
+                removedType = "parent-link";
+            } else if (sourceNode.parentId === targetId) {
+                /*
+                B → A：
+                A.parentId 由 B 改成 null。
+                A 下面嘅子節點全部保留。
+                */
+                sourceNode.parentId = null;
+                removed = true;
+                removedType = "parent-link";
+            }
+
+            if (!removed) {
+                cancelRelationshipMode();
+
+                alert(
+                    `「${sourceNode.text}」同「${targetNode.text}」之間冇直接連線。`
+                );
+
+                return;
+            }
+
+            drawLines();
+            pushHistorySnapshot(snapshot);
+
+            cancelRelationshipMode();
+
+            if (removedType === "parent-link") {
+                /*
+                保持被取消父子關係嘅節點仍然存在
+                */
+                if (targetNode.parentId === null) {
+                    selectNode(targetNode.id);
+                } else if (sourceNode.parentId === null) {
+                    selectNode(sourceNode.id);
+                }
+            } else {
+                selectNode(sourceId);
+            }
         }
 
-        function closeColorPop() {
-            if (activeColorPop) { activeColorPop.remove(); activeColorPop = null; }
+        function cancelRelationshipMode() {
+            relationshipMode = null;
+            relationshipSourceId = null;
+
+            document
+                .querySelectorAll(".node")
+                .forEach((element) => {
+                    element.classList.remove("relationship-source");
+                });
+
+            hideRelationshipMessage();
         }
 
-        // ====== DRAW SVG LINES ======
+        function showRelationshipMessage(message) {
+            if (!relationshipModeBanner) return;
+
+            relationshipModeBanner.textContent = message;
+            relationshipModeBanner.classList.add("active");
+        }
+
+        function hideRelationshipMessage() {
+            if (!relationshipModeBanner) return;
+
+            relationshipModeBanner.textContent = "";
+            relationshipModeBanner.classList.remove("active");
+        }
+
+        /* =========================
+           Draw lines
+        ========================= */
+
         function drawLines() {
-            svg.innerHTML = '';
+            Array.from(svg.children).forEach((child) => {
+                if (child.id !== "temp-link-line") {
+                    child.remove();
+                }
+            });
 
-            // 1. Branch Lines
-            nodes.forEach(node => {
-                if (node.parentId === null || node.parentId === undefined) return;
-                const parent = nodes.find(n => n.id === node.parentId);
+            nodes.forEach((node) => {
+                if (
+                    node.parentId === null ||
+                    node.parentId === undefined
+                ) {
+                    return;
+                }
+
+                const parent = nodes.find(
+                    (item) => item.id === node.parentId
+                );
+
                 if (!parent) return;
-                const pEl = document.getElementById(`node-${parent.id}`);
-                const cEl = document.getElementById(`node-${node.id}`);
-                if (!pEl || !cEl) return;
 
-                const px = parent.x + pEl.offsetWidth / 2, py = parent.y + pEl.offsetHeight / 2;
-                const cx = node.x + cEl.offsetWidth / 2, cy = node.y + cEl.offsetHeight / 2;
-                const mx = (px + cx) / 2;
+                const startX =
+                    parent.x + parent.width;
 
-                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                path.setAttribute('d', `M${px},${py} C${mx},${py} ${mx},${cy} ${cx},${cy}`);
-                path.setAttribute('class', 'branch-line');
-                path.setAttribute('stroke', node.border);
+                const startY =
+                    parent.y + parent.height / 2;
+
+                const endX = node.x;
+                const endY =
+                    node.y + node.height / 2;
+
+                const controlX =
+                    (startX + endX) / 2;
+
+                const path = document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "path"
+                );
+
+                path.setAttribute(
+                    "d",
+                    `M ${startX} ${startY}
+                     C ${controlX} ${startY},
+                       ${controlX} ${endY},
+                       ${endX} ${endY}`
+                );
+
+                path.setAttribute("class", "branch-line");
+                path.setAttribute(
+                    "stroke",
+                    node.color1 || "#4285f4"
+                );
+
                 svg.appendChild(path);
             });
 
-            // 2. Cross Links Path through all link boxes
-            crossLinks.forEach(link => {
-                const fromNode = nodes.find(n => n.id === link.fromId);
-                const toNode = nodes.find(n => n.id === link.toId);
-                if (!fromNode || !toNode) return;
+            crossLinks.forEach((link) => {
+                const from = nodes.find(
+                    (node) => node.id === link.fromId
+                );
 
-                const fEl = document.getElementById(`node-${fromNode.id}`);
-                const tEl = document.getElementById(`node-${toNode.id}`);
-                if (!fEl || !tEl) return;
+                const to = nodes.find(
+                    (node) => node.id === link.toId
+                );
 
-                const pts = [];
-                pts.push({ x: fromNode.x + fEl.offsetWidth / 2, y: fromNode.y + fEl.offsetHeight / 2 });
+                if (!from || !to) return;
 
-                link.boxes.forEach(b => {
-                    const bEl = document.getElementById(`link-box-${b.id}`);
-                    const bw = bEl ? bEl.offsetWidth : 90;
-                    const bh = bEl ? bEl.offsetHeight : 30;
-                    pts.push({ x: b.x + bw / 2, y: b.y + bh / 2 });
+                const startX =
+                    from.x + from.width / 2;
+
+                const startY =
+                    from.y + from.height / 2;
+
+                const endX =
+                    to.x + to.width / 2;
+
+                const endY =
+                    to.y + to.height / 2;
+
+                const middleX =
+                    (startX + endX) / 2;
+
+                const middleY =
+                    (startY + endY) / 2 - 40;
+
+                const path = document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "path"
+                );
+
+                path.setAttribute(
+                    "d",
+                    `M ${startX} ${startY}
+                     Q ${middleX} ${middleY}
+                       ${endX} ${endY}`
+                );
+
+                path.setAttribute("class", "cross-link");
+                path.setAttribute("stroke", "#ff9800");
+
+                svg.appendChild(path);
+            });
+        }
+
+        /* =========================
+           Speech input
+        ========================= */
+
+        function createSpeechButton(type, id) {
+            const button = document.createElement("button");
+
+            button.type = "button";
+            button.className = "speech-btn";
+            button.textContent = "🎤";
+            button.title = "語音輸入；再按一次停止";
+
+            button.addEventListener("mousedown", stopInteractiveEvent);
+
+            button.addEventListener("click", async (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                await startSpeechFor(type, id, button);
+            });
+
+            return button;
+        }
+
+        async function requestPermanentMicrophonePermission() {
+            try {
+                if (
+                    !navigator.mediaDevices ||
+                    !navigator.mediaDevices.getUserMedia
+                ) {
+                    throw new Error(
+                        "瀏覽器不支援咪高峰權限功能"
+                    );
+                }
+
+                const stream =
+                    await navigator.mediaDevices.getUserMedia({
+                        audio: true
+                    });
+
+                stream
+                    .getTracks()
+                    .forEach((track) => track.stop());
+
+                localStorage.setItem(
+                    "mindmap-microphone-enabled",
+                    "true"
+                );
+
+                updatePermissionStatus(
+                    "granted",
+                    "✅ 咪高峰權限已允許。瀏覽器會按照網站權限設定保留。"
+                );
+            } catch (error) {
+                console.error(error);
+
+                updatePermissionStatus(
+                    "denied",
+                    "❌ 未能取得咪高峰權限。請在瀏覽器網站設定內改為「允許」。"
+                );
+
+                alert(
+                    "未能取得咪高峰權限。\n\n" +
+                    "請確認：\n" +
+                    "1. 網頁使用 HTTPS 或 localhost\n" +
+                    "2. 瀏覽器網站權限已允許咪高峰\n" +
+                    "3. 裝置有可用咪高峰"
+                );
+            }
+        }
+
+        async function ensureMicrophonePermission() {
+            if (
+                !navigator.mediaDevices ||
+                !navigator.mediaDevices.getUserMedia
+            ) {
+                return true;
+            }
+
+            try {
+                const stream =
+                    await navigator.mediaDevices.getUserMedia({
+                        audio: true
+                    });
+
+                stream
+                    .getTracks()
+                    .forEach((track) => track.stop());
+
+                localStorage.setItem(
+                    "mindmap-microphone-enabled",
+                    "true"
+                );
+
+                updatePermissionStatus(
+                    "granted",
+                    "✅ 咪高峰權限已允許"
+                );
+
+                return true;
+            } catch (error) {
+                updatePermissionStatus(
+                    "denied",
+                    "❌ 咪高峰權限被拒絕"
+                );
+
+                return false;
+            }
+        }
+
+        async function checkMicrophonePermission() {
+            if (!navigator.permissions?.query) {
+                const remembered =
+                    localStorage.getItem(
+                        "mindmap-microphone-enabled"
+                    ) === "true";
+
+                updatePermissionStatus(
+                    remembered ? "granted" : "prompt",
+                    remembered
+                        ? "✅ 此網站之前已啟用咪高峰"
+                        : "按上方按鈕啟用咪高峰權限"
+                );
+
+                return;
+            }
+
+            try {
+                const status =
+                    await navigator.permissions.query({
+                        name: "microphone"
+                    });
+
+                updatePermissionFromState(status.state);
+
+                status.addEventListener("change", () => {
+                    updatePermissionFromState(status.state);
+                });
+            } catch (error) {
+                updatePermissionStatus(
+                    "prompt",
+                    "按上方按鈕啟用咪高峰權限"
+                );
+            }
+        }
+
+        function updatePermissionFromState(state) {
+            if (state === "granted") {
+                updatePermissionStatus(
+                    "granted",
+                    "✅ 咪高峰權限已允許"
+                );
+            } else if (state === "denied") {
+                updatePermissionStatus(
+                    "denied",
+                    "❌ 咪高峰權限已被瀏覽器封鎖"
+                );
+            } else {
+                updatePermissionStatus(
+                    "prompt",
+                    "尚未設定咪高峰權限"
+                );
+            }
+        }
+
+        function updatePermissionStatus(type, message) {
+            permissionStatus.className = "permission-status";
+
+            if (type === "granted") {
+                permissionStatus.classList.add("granted");
+            }
+
+            if (type === "denied") {
+                permissionStatus.classList.add("denied");
+            }
+
+            permissionStatus.textContent = message;
+        }
+
+        async function startSpeechFor(type, id, button) {
+            if (
+                activeRecognition &&
+                activeSpeechButton === button
+            ) {
+                stopSpeechRecognition(true);
+                return;
+            }
+
+            stopSpeechRecognition(true);
+            finishCurrentEditing();
+
+            const SpeechRecognition =
+                window.SpeechRecognition ||
+                window.webkitSpeechRecognition;
+
+            if (!SpeechRecognition) {
+                alert(
+                    "此瀏覽器不支援 Web Speech Recognition。\n\n" +
+                    "建議使用最新版 Chrome 或 Edge。"
+                );
+                return;
+            }
+
+            const allowed =
+                await ensureMicrophonePermission();
+
+            if (!allowed) {
+                alert(
+                    "咪高峰權限未允許，無法開始語音輸入。"
+                );
+                return;
+            }
+
+            const item = type === "node"
+                ? nodes.find((node) => node.id === id)
+                : findBoxById(id);
+
+            if (!item) return;
+
+            const originalSnapshot = captureState();
+            const originalText = item.text || "";
+
+            const recognition = new SpeechRecognition();
+
+            recognition.lang = "zh-HK";
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.maxAlternatives = 1;
+
+            activeRecognition = recognition;
+            activeSpeechButton = button;
+
+            speechSession = {
+                type,
+                id,
+                item,
+                originalSnapshot,
+                originalText,
+                changed: false
+            };
+
+            button.classList.add("listening");
+            button.textContent = "⏹";
+            button.title = "停止語音輸入";
+
+            recognition.onresult = (event) => {
+                let finalText = "";
+                let interimText = "";
+
+                for (
+                    let index = 0;
+                    index < event.results.length;
+                    index++
+                ) {
+                    const transcript =
+                        event.results[index][0].transcript;
+
+                    if (event.results[index].isFinal) {
+                        finalText += transcript;
+                    } else {
+                        interimText += transcript;
+                    }
+                }
+
+                const separator =
+                    originalText &&
+                    !/\s$/.test(originalText)
+                        ? " "
+                        : "";
+
+                item.text =
+                    originalText +
+                    separator +
+                    finalText +
+                    interimText;
+
+                speechSession.changed =
+                    item.text !== originalText;
+
+                updateItemTextDisplay(type, id, item.text);
+                autoFitHeight(type, id, false);
+                drawLines();
+            };
+
+            recognition.onerror = (event) => {
+                console.warn(
+                    "Speech recognition error:",
+                    event.error
+                );
+
+                if (event.error === "not-allowed") {
+                    updatePermissionStatus(
+                        "denied",
+                        "❌ 語音辨識權限被拒絕"
+                    );
+                }
+            };
+
+            recognition.onend = () => {
+                finishSpeechSession();
+            };
+
+            try {
+                recognition.start();
+            } catch (error) {
+                console.error(error);
+                finishSpeechSession();
+            }
+        }
+
+        function stopSpeechRecognition(commit = true) {
+            if (!activeRecognition) {
+                if (!commit && speechSession) {
+                    speechSession.item.text =
+                        speechSession.originalText;
+                }
+
+                return;
+            }
+
+            try {
+                activeRecognition.stop();
+            } catch (error) {
+                console.warn(error);
+            }
+        }
+
+        function finishSpeechSession() {
+            if (activeSpeechButton) {
+                activeSpeechButton.classList.remove("listening");
+                activeSpeechButton.textContent = "🎤";
+                activeSpeechButton.title =
+                    "語音輸入；再按一次停止";
+            }
+
+            if (
+                speechSession &&
+                speechSession.changed
+            ) {
+                pushHistorySnapshot(
+                    speechSession.originalSnapshot
+                );
+            }
+
+            activeRecognition = null;
+            activeSpeechButton = null;
+            speechSession = null;
+        }
+
+        function updateItemTextDisplay(type, id, text) {
+            const element = document.getElementById(
+                type === "node" ? `node-${id}` : `box-${id}`
+            );
+
+            if (!element) return;
+
+            const textElement = element.querySelector(
+                type === "node"
+                    ? ".node-text"
+                    : ".link-box-text"
+            );
+
+            if (textElement) {
+                textElement.textContent = text;
+            }
+        }
+
+        /* =========================
+           Colour picker
+        ========================= */
+
+        function openPickerForNode(event, nodeId) {
+            commitPickerHistory();
+
+            const node = nodes.find(
+                (item) => item.id === nodeId
+            );
+
+            if (!node) return;
+
+            activePickerTarget = {
+                type: "node",
+                id: nodeId
+            };
+
+            popPicker(event, node);
+        }
+
+        function openPickerForBox(event, boxId) {
+            commitPickerHistory();
+
+            const box = findBoxById(boxId);
+
+            if (!box) return;
+
+            activePickerTarget = {
+                type: "box",
+                id: boxId
+            };
+
+            popPicker(event, box);
+        }
+
+        function popPicker(event, item) {
+            pickerStartSnapshot = captureState();
+
+            document.getElementById("picker-c1").value =
+                item.color1 || "#1565c0";
+
+            document.getElementById("picker-c2").value =
+                item.color2 || "#1e88e5";
+
+            document.getElementById("picker-angle").value =
+                item.deg ?? 135;
+
+            document.getElementById("picker-alpha").value =
+                Math.round((item.opacity ?? 1) * 100);
+
+            document
+                .querySelectorAll(".picker-tab")
+                .forEach((tab) => {
+                    tab.classList.remove("active");
                 });
 
-                pts.push({ x: toNode.x + tEl.offsetWidth / 2, y: toNode.y + tEl.offsetHeight / 2 });
+            const mode = item.colorType || "solid";
 
-                for (let i = 0; i < pts.length - 1; i++) {
-                    const p1 = pts[i], p2 = pts[i + 1];
-                    const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
-                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                    path.setAttribute('d', `M${p1.x},${p1.y} Q${mx},${my} ${p2.x},${p2.y}`);
-                    path.setAttribute('class', 'cross-link');
-                    path.setAttribute('stroke', '#00f2fe');
-                    svg.appendChild(path);
+            document
+                .getElementById(`tab-${mode}`)
+                ?.classList.add("active");
+
+            adobePicker.style.display = "flex";
+
+            const pickerWidth = 230;
+            const pickerHeight = 250;
+
+            const left = Math.min(
+                window.innerWidth - pickerWidth - 10,
+                event.clientX + 10
+            );
+
+            const top = Math.min(
+                window.innerHeight - pickerHeight - 10,
+                Math.max(10, event.clientY - 10)
+            );
+
+            adobePicker.style.left =
+                `${Math.max(10, left)}px`;
+
+            adobePicker.style.top =
+                `${Math.max(10, top)}px`;
+        }
+
+        function closeAdobePicker() {
+            commitPickerHistory();
+
+            adobePicker.style.display = "none";
+            activePickerTarget = null;
+            pickerStartSnapshot = null;
+        }
+
+        function commitPickerHistory() {
+            if (!pickerStartSnapshot) return;
+
+            pushHistorySnapshot(pickerStartSnapshot);
+            pickerStartSnapshot = null;
+        }
+
+        function getActivePickerItem() {
+            if (!activePickerTarget) return null;
+
+            return activePickerTarget.type === "node"
+                ? nodes.find(
+                    (node) =>
+                        node.id === activePickerTarget.id
+                )
+                : findBoxById(activePickerTarget.id);
+        }
+
+        function applyColorPicker() {
+            const item = getActivePickerItem();
+
+            if (!item) return;
+
+            item.color1 =
+                document.getElementById("picker-c1").value;
+
+            item.color2 =
+                document.getElementById("picker-c2").value;
+
+            item.deg = Number(
+                document.getElementById("picker-angle").value
+            );
+
+            item.opacity =
+                Number(
+                    document.getElementById("picker-alpha").value
+                ) / 100;
+
+            const element = document.getElementById(
+                activePickerTarget.type === "node"
+                    ? `node-${item.id}`
+                    : `box-${item.id}`
+            );
+
+            if (element) {
+                applyStyle(element, item);
+            }
+
+            drawLines();
+        }
+
+        function setPickerMode(mode) {
+            document
+                .querySelectorAll(".picker-tab")
+                .forEach((tab) => {
+                    tab.classList.remove("active");
+                });
+
+            document
+                .getElementById(`tab-${mode}`)
+                ?.classList.add("active");
+
+            const item = getActivePickerItem();
+
+            if (!item) return;
+
+            item.colorType = mode;
+            applyColorPicker();
+        }
+
+        function applyStyle(element, item) {
+            const alpha = item.opacity ?? 1;
+
+            const color1 = hexToRgba(
+                item.color1 || "#1565c0",
+                alpha
+            );
+
+            const color2 = hexToRgba(
+                item.color2 || "#1e88e5",
+                alpha
+            );
+
+            const degree = item.deg ?? 135;
+
+            if (item.colorType === "sharp") {
+                element.style.background =
+                    `linear-gradient(
+                        ${degree}deg,
+                        ${color1} 50%,
+                        ${color2} 50%
+                    )`;
+            } else if (item.colorType === "gradient") {
+                element.style.background =
+                    `linear-gradient(
+                        ${degree}deg,
+                        ${color1},
+                        ${color2}
+                    )`;
+            } else {
+                element.style.background = color1;
+            }
+
+            element.style.border =
+                `2px solid ${item.color1 || "#1565c0"}`;
+        }
+
+        function hexToRgba(hex, alpha) {
+            let value = String(hex).replace("#", "");
+
+            if (value.length === 3) {
+                value = value
+                    .split("")
+                    .map((character) => character + character)
+                    .join("");
+            }
+
+            const number = parseInt(value, 16);
+
+            return `rgba(
+                ${(number >> 16) & 255},
+                ${(number >> 8) & 255},
+                ${number & 255},
+                ${alpha}
+            )`;
+        }
+
+        /* =========================
+           In-place menu
+        ========================= */
+
+        function toggleInplaceMenu(id) {
+            const target =
+                document.getElementById(`menu-${id}`);
+
+            const wasActive =
+                target?.classList.contains("active");
+
+            document
+                .querySelectorAll(".inplace-action-menu")
+                .forEach((menu) => {
+                    menu.classList.remove("active");
+                });
+
+            if (!wasActive) {
+                target?.classList.add("active");
+            }
+        }
+
+        /* =========================
+           Canvas events
+        ========================= */
+
+        function setupCanvasEvents() {
+            canvasArea.addEventListener("mousedown", (event) => {
+                document
+                    .querySelectorAll(".inplace-action-menu")
+                    .forEach((menu) => {
+                        menu.classList.remove("active");
+                    });
+
+                if (!adobePicker.contains(event.target)) {
+                    closeAdobePicker();
+                }
+
+                const isCanvasBackground =
+                    event.target === canvasArea ||
+                    event.target === treeCanvas ||
+                    event.target === svg ||
+                    event.target.tagName?.toLowerCase() === "svg";
+
+                if (
+                    (linkMode || relationshipMode) &&
+                    isCanvasBackground
+                ) {
+                    cancelLinkMode();
+                    cancelRelationshipMode();
+                    return;
+                }
+
+                if (!isCanvasBackground) return;
+
+                finishCurrentEditing();
+
+                selectedId = null;
+                selectedBoxId = null;
+
+                document
+                    .querySelectorAll(".node, .link-box")
+                    .forEach((element) => {
+                        element.classList.remove("selected");
+                    });
+
+                isPanning = true;
+                canvasArea.classList.add("panning");
+
+                panStartX = event.clientX - tx;
+                panStartY = event.clientY - ty;
+            });
+
+            window.addEventListener("mousemove", (event) => {
+                const rect =
+                    canvasArea.getBoundingClientRect();
+
+                const mouseX =
+                    (event.clientX - rect.left - tx) / scale;
+
+                const mouseY =
+                    (event.clientY - rect.top - ty) / scale;
+
+                if (
+                    linkMode &&
+                    linkFromId !== null &&
+                    tempLinkLine
+                ) {
+                    tempLinkLine.setAttribute("x2", mouseX);
+                    tempLinkLine.setAttribute("y2", mouseY);
+                }
+
+                if (resizeTarget) {
+                    updateResize(event);
+                    return;
+                }
+
+                if (dragTarget) {
+                    updateDrag(mouseX, mouseY, event);
+                    return;
+                }
+
+                if (isPanning) {
+                    tx = event.clientX - panStartX;
+                    ty = event.clientY - panStartY;
+
+                    updateTransform();
+                }
+            });
+
+            window.addEventListener("mouseup", () => {
+                finishGesture();
+
+                isPanning = false;
+                canvasArea.classList.remove("panning");
+            });
+
+            canvasArea.addEventListener(
+                "wheel",
+                (event) => {
+                    event.preventDefault();
+
+                    const rect =
+                        canvasArea.getBoundingClientRect();
+
+                    const pointerX =
+                        event.clientX - rect.left;
+
+                    const pointerY =
+                        event.clientY - rect.top;
+
+                    const worldX =
+                        (pointerX - tx) / scale;
+
+                    const worldY =
+                        (pointerY - ty) / scale;
+
+                    const factor =
+                        event.deltaY < 0 ? 1.1 : 0.9;
+
+                    const newScale = Math.max(
+                        0.2,
+                        Math.min(3, scale * factor)
+                    );
+
+                    tx =
+                        pointerX -
+                        worldX * newScale;
+
+                    ty =
+                        pointerY -
+                        worldY * newScale;
+
+                    scale = newScale;
+
+                    updateTransform();
+                },
+                { passive: false }
+            );
+        }
+
+        /* =========================
+           Keyboard shortcuts
+        ========================= */
+
+        function setupKeyboardShortcuts() {
+            window.addEventListener("keydown", (event) => {
+                const activeTag =
+                    document.activeElement?.tagName?.toLowerCase();
+
+                if (
+                    activeTag === "input" ||
+                    activeTag === "textarea" ||
+                    activeTag === "select"
+                ) {
+                    return;
+                }
+
+                if (editingTarget) return;
+
+                if (
+                    (event.ctrlKey || event.metaKey) &&
+                    event.key.toLowerCase() === "z"
+                ) {
+                    event.preventDefault();
+
+                    if (event.shiftKey) {
+                        redo();
+                    } else {
+                        undo();
+                    }
+
+                    return;
+                }
+
+                if (
+                    (event.ctrlKey || event.metaKey) &&
+                    event.key.toLowerCase() === "y"
+                ) {
+                    event.preventDefault();
+                    redo();
+                    return;
+                }
+
+                if (event.key === "Tab") {
+                    event.preventDefault();
+
+                    if (selectedId !== null) {
+                        addChildTo(selectedId, true);
+                    }
+
+                    return;
+                }
+
+                if (event.key === "Enter") {
+                    event.preventDefault();
+
+                    if (selectedId !== null) {
+                        addSiblingTo(selectedId, true);
+                    } else if (selectedBoxId !== null) {
+                        startTextEdit("box", selectedBoxId);
+                    }
+
+                    return;
+                }
+
+                if (
+                    event.key === "Delete" ||
+                    event.key === "Backspace"
+                ) {
+                    event.preventDefault();
+                    deleteSelected();
+                    return;
+                }
+
+                if (event.key === "Escape") {
+                    cancelLinkMode();
+                    cancelRelationshipMode();
+                    closeAdobePicker();
                 }
             });
         }
 
-        function renderAll() {
-            nodes.forEach(n => renderNode(n));
-            renderLinkBoxes();
-            drawLines();
-            renderOutline();
-            renderLinkList();
-            updateCount();
+        /* =========================
+           Geometry/helpers
+        ========================= */
+
+        function setElementGeometry(element, item) {
+            element.style.left = `${item.x}px`;
+            element.style.top = `${item.y}px`;
+            element.style.width = `${item.width}px`;
+            element.style.height = `${item.height}px`;
         }
 
-        // ====== QUICK CONNECT ======
-        function quickConnectFromSelected() {
-            if (selectedId === null) { alert('請先選取起點節點！'); return; }
-            const sourceNode = nodes.find(n => n.id === selectedId);
-            const targetName = prompt(`【快速連線】從「${sourceNode.text}」連線至：\n(輸入目標名稱)`);
-            if (!targetName || !targetName.trim()) return;
-
-            const trimmed = targetName.trim();
-            let targetNode = nodes.find(n => n.text === trimmed && n.id !== selectedId);
-
-            if (!targetNode) {
-                const newId = createNode(trimmed, sourceNode.x + 220, sourceNode.y + 40, sourceNode.parentId, sourceNode.bg, sourceNode.border);
-                targetNode = nodes.find(n => n.id === newId);
-            }
-
-            saveState();
-            crossLinks.push({
-                id: nextLinkId++,
-                fromId: sourceNode.id,
-                toId: targetNode.id,
-                boxes: [{ id: nextBoxId++, text: '連結說明', x: (sourceNode.x + targetNode.x) / 2, y: (sourceNode.y + targetNode.y) / 2 }]
-            });
-
-            exitAllModes();
-            renderAll();
-            panToNode(targetNode);
-            selectNode(targetNode.id);
+        function stopInteractiveEvent(event) {
+            event.stopPropagation();
         }
 
-        // ====== CANVAS PAN & DRAG ======
-        document.addEventListener('mousemove', (e) => {
-            const rect = canvasArea.getBoundingClientRect();
-
-            // 1. Dragging Link Box
-            if (dragBox) {
-                dragBox.x = (e.clientX - rect.left - tx) / scale - dragMouseStartX;
-                dragBox.y = (e.clientY - rect.top - ty) / scale - dragMouseStartY;
-                const el = document.getElementById(`link-box-${dragBox.id}`);
-                if (el) { el.style.left = dragBox.x + 'px'; el.style.top = dragBox.y + 'px'; }
-                drawLines();
-                return;
-            }
-
-            // 2. Dragging Nodes
-            if (dragNode) {
-                const currentX = (e.clientX - rect.left - tx) / scale;
-                const currentY = (e.clientY - rect.top - ty) / scale;
-                const deltaX = currentX - dragMouseStartX;
-                const deltaY = currentY - dragMouseStartY;
-
-                dragGroupPositions.forEach(item => {
-                    item.node.x = item.startX + deltaX;
-                    item.node.y = item.startY + deltaY;
-                    const el = document.getElementById(`node-${item.node.id}`);
-                    if (el) { el.style.left = item.node.x + 'px'; el.style.top = item.node.y + 'px'; }
-                });
-                drawLines();
-                return;
-            }
-
-            // 3. Shift Box Selection
-            if (isBoxSelecting) {
-                const currentX = e.clientX, currentY = e.clientY;
-                const left = Math.min(boxStartX, currentX), top = Math.min(boxStartY, currentY);
-                const width = Math.abs(currentX - boxStartX), height = Math.abs(currentY - boxStartY);
-
-                selectionBox.style.left = left + 'px'; selectionBox.style.top = top + 'px';
-                selectionBox.style.width = width + 'px'; selectionBox.style.height = height + 'px';
-
-                const selLeft = (left - rect.left - tx) / scale;
-                const selTop = (top - rect.top - ty) / scale;
-                const selRight = (left + width - rect.left - tx) / scale;
-                const selBottom = (top + height - rect.top - ty) / scale;
-
-                nodes.forEach(node => {
-                    const el = document.getElementById(`node-${node.id}`);
-                    if (!el) return;
-                    const isIntersecting = !(node.x > selRight || (node.x + el.offsetWidth) < selLeft || node.y > selBottom || (node.y + el.offsetHeight) < selTop);
-                    if (isIntersecting) { selectedIds.add(node.id); el.classList.add('multi-selected'); }
-                    else if (!e.shiftKey) { selectedIds.delete(node.id); el.classList.remove('multi-selected'); }
-                });
-                return;
-            }
-
-            // 4. Pan Canvas
-            if (!isPanning) return;
-            tx = e.clientX - panStartX;
-            ty = e.clientY - panStartY;
-            updateTransform();
-        });
-
-        canvasArea.addEventListener('mousedown', (e) => {
-            if (dragNode || dragBox || linkMode || reparentMode) return;
-            closeColorPop();
-
-            if (e.shiftKey) {
-                isBoxSelecting = true; boxStartX = e.clientX; boxStartY = e.clientY;
-                selectionBox.style.left = boxStartX + 'px'; selectionBox.style.top = boxStartY + 'px';
-                selectionBox.style.width = '0px'; selectionBox.style.height = '0px';
-                selectionBox.style.display = 'block';
-                return;
-            }
-
-            if (e.target === canvasArea || e.target === treeCanvas || e.target === svg) {
-                isPanning = true;
-                panStartX = e.clientX - tx;
-                panStartY = e.clientY - ty;
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (dragNode || dragBox) saveState();
-            if (isBoxSelecting) {
-                isBoxSelecting = false; selectionBox.style.display = 'none';
-                if (selectedIds.size === 1) selectNode(Array.from(selectedIds)[0]);
-            }
-            isPanning = false; dragNode = null; dragBox = null;
-        });
-
-        // ====== KEYBOARD SHORTCUTS & ESC EXIT ======
-        document.addEventListener('keydown', (e) => {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-            // ANYTIME ESC -> Exit Modes & back to canvas
-            if (e.key === 'Escape') {
-                exitAllModes();
-                return;
-            }
-
-            // Space -> Back to Center or Unselect
-            if (e.code === 'Space' || e.key === ' ') {
-                e.preventDefault();
-                if (selectedIds.size > 0) clearSelection();
-                else backToCenter();
-                return;
-            }
-
-            if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
-                e.preventDefault(); if (e.shiftKey) redo(); else undo(); return;
-            }
-            if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')) {
-                e.preventDefault(); redo(); return;
-            }
-
-            if (e.shiftKey && (e.key === 'L' || e.key === 'l')) { e.preventDefault(); quickConnectFromSelected(); return; }
-            if (e.key === 'Tab') { e.preventDefault(); addChildToSelected(); }
-            if (e.key === 'Enter') { e.preventDefault(); addSibling(); }
-            if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteSelected(); }
-            if ((e.key === 'l' || e.key === 'L') && !e.shiftKey) toggleLinkMode();
-        });
-
-        canvasArea.addEventListener('click', (e) => {
-            if (e.target === canvasArea || e.target === treeCanvas || e.target === svg) {
-                exitAllModes();
-            }
-        });
-
-        // ====== OUTLINE & LINK LIST ======
-        function renderOutline() {
-            outlinePanel.innerHTML = '';
-            nodes.filter(n => n.parentId === null).forEach(r => renderOutlineItem(r, 0));
+        function isInteractiveTarget(target) {
+            return Boolean(
+                target.closest(
+                    "button, input, textarea, select, " +
+                    ".resize-handle, .inplace-action-menu"
+                )
+            );
         }
 
-        function renderOutlineItem(node, depth) {
-            const children = nodes.filter(n => n.parentId === node.id);
-            const hasChildren = children.length > 0;
-            const isCollapsed = collapsedNodes.has(node.id);
+        /* =========================
+           Zoom
+        ========================= */
 
-            const item = document.createElement('div');
-            item.className = 'tree-item' + (selectedId === node.id ? ' active' : '');
-            item.style.paddingLeft = (6 + depth * 12) + 'px';
-
-            const toggle = document.createElement('div');
-            toggle.className = 'tree-toggle' + (!hasChildren ? ' empty' : '') + (!isCollapsed && hasChildren ? ' expanded' : '');
-            toggle.textContent = '▶';
-            if (hasChildren) {
-                toggle.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (collapsedNodes.has(node.id)) collapsedNodes.delete(node.id);
-                    else collapsedNodes.add(node.id);
-                    renderOutline();
-                });
-            }
-
-            const dot = document.createElement('div');
-            dot.className = 'tree-dot'; dot.style.background = node.bg;
-            const text = document.createElement('div');
-            text.className = 'tree-text'; text.textContent = node.text;
-
-            item.appendChild(toggle); item.appendChild(dot); item.appendChild(text);
-            item.addEventListener('click', () => { selectNode(node.id); panToNode(node); });
-            outlinePanel.appendChild(item);
-
-            if (hasChildren && !isCollapsed) {
-                children.forEach(c => renderOutlineItem(c, depth + 1));
-            }
-        }
-
-        function expandAllOutline() { collapsedNodes.clear(); renderOutline(); }
-        function collapseAllOutline() {
-            nodes.forEach(n => { if (nodes.some(c => c.parentId === n.id)) collapsedNodes.add(n.id); });
-            renderOutline();
-        }
-
-        function renderLinkList() {
-            const list = document.getElementById('link-list');
-            list.innerHTML = '';
-            document.getElementById('link-count-title').textContent = `(${crossLinks.length})`;
-
-            if (crossLinks.length === 0) {
-                list.innerHTML = '<div style="font-size:11px; color:var(--text-muted); text-align:center; padding:6px 0;">撳 Link → 選兩個節點建立連結</div>';
-                return;
-            }
-
-            crossLinks.forEach(link => {
-                const from = nodes.find(n => n.id === link.fromId);
-                const to = nodes.find(n => n.id === link.toId);
-                if (!from || !to) return;
-
-                const item = document.createElement('div');
-                item.className = 'link-item';
-                item.innerHTML = `<span>${escapeHtml(from.text)}</span><span style="color:var(--accent);">→</span><span>${escapeHtml(to.text)}</span>`;
-                list.appendChild(item);
-            });
-        }
-
-        // ====== ZOOM & PAN UTILS ======
         function updateTransform() {
-            treeCanvas.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
-            document.getElementById('zoom-label').textContent = Math.round(scale * 100) + '%';
-        }
-        function zoomIn() { scale = Math.min(4, scale * 1.2); updateTransform(); }
-        function zoomOut() { scale = Math.max(0.2, scale * 0.8); updateTransform(); }
-        function backToCenter() {
-            const root = nodes.find(n => n.parentId === null);
-            if (!root) return;
-            const el = document.getElementById(`node-${root.id}`);
-            animateTo(-(root.x + (el ? el.offsetWidth / 2 : 50)) * scale + canvasArea.offsetWidth / 2, -(root.y + (el ? el.offsetHeight / 2 : 18)) * scale + canvasArea.offsetHeight / 2, 1);
+            treeCanvas.style.transform =
+                `translate(${tx}px, ${ty}px) scale(${scale})`;
         }
 
-        function panToNode(node) {
-            const el = document.getElementById(`node-${node.id}`);
-            if (!el) return;
-            animateTo(-(node.x + el.offsetWidth / 2) * scale + canvasArea.offsetWidth / 2, -(node.y + el.offsetHeight / 2) * scale + canvasArea.offsetHeight / 2, scale);
-        }
-
-        function animateTo(targetTx, targetTy, targetScale, duration = 300) {
-            if (animating) return;
-            animating = true;
-            const startTx = tx, startTy = ty, startScale = scale;
-            const startTime = performance.now();
-            function step(now) {
-                const t = Math.min((now - startTime) / duration, 1);
-                const ease = 1 - Math.pow(1 - t, 3);
-                tx = startTx + (targetTx - startTx) * ease;
-                ty = startTy + (targetTy - startTy) * ease;
-                scale = startScale + (targetScale - startScale) * ease;
-                updateTransform();
-                if (t < 1) requestAnimationFrame(step);
-                else animating = false;
-            }
-            requestAnimationFrame(step);
-        }
-
-        canvasArea.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            scale = Math.max(0.2, Math.min(4, scale * (e.deltaY > 0 ? 0.92 : 1.08)));
+        function zoomIn() {
+            scale = Math.min(3, scale * 1.2);
             updateTransform();
-        });
-
-        function updateCount() {
-            document.getElementById('node-count').textContent = nodes.length + ' 個節點';
-            document.getElementById('link-count-bar').textContent = crossLinks.length + ' 個連結';
         }
 
-        function setNodeColor(bg, border) {
-            if (selectedIds.size === 0) return;
-            saveState();
-            selectedIds.forEach(id => {
-                const n = nodes.find(item => item.id === id);
-                if (n) { n.bg = bg; n.border = border; }
-            });
-            renderAll();
+        function zoomOut() {
+            scale = Math.max(0.2, scale * 0.8);
+            updateTransform();
         }
 
-        function autoColorizeNodes() {
-            saveState();
-            const palette = [
-                { bg: '#2e7d32', border: '#43a047' }, { bg: '#1565c0', border: '#1e88e5' },
-                { bg: '#6a1b9a', border: '#8e24aa' }, { bg: '#e65100', border: '#f4511e' },
-                { bg: '#c62828', border: '#e53935' }
-            ];
-            const roots = nodes.filter(n => n.parentId === null);
-            roots.forEach(r => {
-                const mainBranches = nodes.filter(n => n.parentId === r.id);
-                mainBranches.forEach((b, idx) => {
-                    const c = palette[idx % palette.length];
-                    assignColorSubtree(b.id, c.bg, c.border);
-                });
-            });
-            renderAll();
+        function backToCenter() {
+            tx = -4000 + canvasArea.offsetWidth / 2;
+            ty = -4000 + canvasArea.offsetHeight / 2;
+            scale = 1;
+
+            updateTransform();
         }
 
-        function assignColorSubtree(id, bg, border) {
-            const node = nodes.find(n => n.id === id);
-            if (node) {
-                node.bg = bg; node.border = border;
-                nodes.filter(n => n.parentId === id).forEach(child => assignColorSubtree(child.id, bg, border));
-            }
-        }
+        /* =========================
+           Import / Export
+        ========================= */
 
         function exportJSON() {
-            const data = JSON.stringify({ nodes, crossLinks, nextId, nextLinkId, nextBoxId }, null, 2);
-            const blob = new Blob([data], { type: 'application/json' });
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-            a.download = 'mindmap.json'; a.click();
+            finishCurrentEditing();
+
+            const data = {
+                version: 2,
+                exportedAt: new Date().toISOString(),
+                nodes,
+                crossLinks,
+                nextId,
+                nextLinkId,
+                nextBoxId
+            };
+
+            const blob = new Blob(
+                [JSON.stringify(data, null, 2)],
+                { type: "application/json;charset=utf-8" }
+            );
+
+            const url = URL.createObjectURL(blob);
+            const anchor = document.createElement("a");
+
+            anchor.href = url;
+            anchor.download = "mindmap-pro.json";
+
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+
+            URL.revokeObjectURL(url);
         }
 
         function importJSON() {
-            const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
-            input.onchange = (e) => {
+            finishCurrentEditing();
+
+            const input = document.createElement("input");
+
+            input.type = "file";
+            input.accept = ".json,application/json";
+
+            input.addEventListener("change", () => {
+                const file = input.files?.[0];
+
+                if (!file) return;
+
                 const reader = new FileReader();
-                reader.onload = (ev) => {
-                    saveState();
-                    const data = JSON.parse(ev.target.result);
-                    nodes = data.nodes || []; crossLinks = data.crossLinks || [];
-                    nextId = data.nextId || 0; nextLinkId = data.nextLinkId || 0; nextBoxId = data.nextBoxId || 0;
-                    renderAll();
-                };
-                reader.readAsText(e.target.files[0]);
-            };
+
+                reader.addEventListener("load", () => {
+                    try {
+                        const data = JSON.parse(
+                            String(reader.result)
+                        );
+
+                        const snapshot = captureState();
+
+                        restoreState({
+                            nodes: data.nodes || [],
+                            crossLinks: data.crossLinks || [],
+                            nextId:
+                                Number.isFinite(data.nextId)
+                                    ? data.nextId
+                                    : undefined,
+                            nextLinkId:
+                                Number.isFinite(data.nextLinkId)
+                                    ? data.nextLinkId
+                                    : undefined,
+                            nextBoxId:
+                                Number.isFinite(data.nextBoxId)
+                                    ? data.nextBoxId
+                                    : undefined
+                        });
+
+                        pushHistorySnapshot(snapshot);
+                    } catch (error) {
+                        console.error(error);
+
+                        alert(
+                            "匯入失敗：JSON 檔案格式不正確。"
+                        );
+                    }
+                });
+
+                reader.readAsText(file);
+            });
+
             input.click();
         }
-
-        function escapeHtml(str) {
-            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-        }
-
-        init();
     </script>
 </body>
 </html>
