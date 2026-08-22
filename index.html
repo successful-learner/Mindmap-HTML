@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>Mind Map Pro - 全功能增強版</title>
+    <title>Mind Map Pro - 全功能增強版 (GAS & 媒體支援)</title>
 
     <style>
         * {
@@ -247,10 +247,28 @@
             width: 100%; height: 100%;
             min-width: 0; min-height: 0;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             overflow: auto;
             scrollbar-width: thin;
+        }
+
+        /* 媒體嵌入樣式 */
+        .node-content img, .node-content video, .node-content iframe {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 6px;
+            display: block;
+            margin: 4px auto;
+            pointer-events: auto;
+        }
+
+        .node-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
         .node-text, .link-box-text {
@@ -416,7 +434,7 @@
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h1>🌿 Mind Map Pro</h1>
-            <p>雙擊文字編輯、多樹架構、獨立 Link Box 及 Adobe 調色盤版</p>
+            <p>雙擊文字編輯、多樹架構、多媒體嵌入與 Google Drive 同步版</p>
         </div>
 
         <div class="sidebar-section">
@@ -523,7 +541,13 @@
         </div>
 
         <div class="sidebar-section">
-            <h3>檔案備份</h3>
+            <h3>Google Drive 雲端同步</h3>
+            <button class="action-btn" onclick="saveToDrive()">☁️ 儲存至 Google Drive</button>
+            <button class="action-btn" onclick="loadFromDrive()">📂 從 Google Drive 載入</button>
+        </div>
+
+        <div class="sidebar-section">
+            <h3>檔案備份 (本地)</h3>
             <button class="action-btn" onclick="exportJSON()">↓ 匯出 JSON</button>
             <button class="action-btn" onclick="importJSON()">↑ 匯入 JSON</button>
         </div>
@@ -633,7 +657,7 @@
 
         let selectedId = null;
         let selectedBoxId = null;
-        let clipboardData = null; // Ctrl+C / Ctrl+V 複製貼上快取
+        let clipboardData = null;
 
         let multiTreeEnabled = false;
         let currentCanvasBg = "bg-default";
@@ -684,6 +708,46 @@
             drawLines();
         });
 
+        /* ================= Google Apps Script (GAS) 雲端儲存與載入 ================= */
+        function saveToDrive() {
+            finishCurrentEditing();
+            const data = captureState();
+            if (typeof google !== 'undefined' && google.script && google.script.run) {
+                google.script.run
+                    .withSuccessHandler(res => alert("✅ 已成功儲存至 Google Drive！"))
+                    .withFailureHandler(err => alert("❌ 儲存失敗：" + err))
+                    .saveMindMapToDrive(data);
+            } else {
+                alert("⚠️ 目前不在 Apps Script 環境中運行，預設儲存至 LocalStorage。");
+                localStorage.setItem("mindmap_backup", data);
+            }
+        }
+
+        function loadFromDrive() {
+            finishCurrentEditing();
+            if (typeof google !== 'undefined' && google.script && google.script.run) {
+                google.script.run
+                    .withSuccessHandler(data => {
+                        if (data) {
+                            restoreState(JSON.parse(data));
+                            alert("✅ 已成功從 Google Drive 載入！");
+                        } else {
+                            alert("⚠️ Google Drive 尚未有備份紀錄。");
+                        }
+                    })
+                    .withFailureHandler(err => alert("❌ 載入失敗：" + err))
+                    .loadMindMapFromDrive();
+            } else {
+                const data = localStorage.getItem("mindmap_backup");
+                if (data) {
+                    restoreState(JSON.parse(data));
+                    alert("✅ 已從 LocalStorage 載入！");
+                } else {
+                    alert("⚠️ 找不到本地備份。");
+                }
+            }
+        }
+
         /* Multi Tree 模式切換 */
         function toggleMultiTree(enabled) {
             multiTreeEnabled = enabled;
@@ -727,7 +791,7 @@
                 const newNode = {
                     ...item,
                     id: newId,
-                    parentId: null, // 貼上後成為獨立 Box / Node
+                    parentId: null,
                     x: item.x + 40,
                     y: item.y + 40,
                     text: item.text + " (副本)"
@@ -921,6 +985,8 @@
             menu.innerHTML = `
                 <button class="inplace-btn" title="加子節點" onclick="event.stopPropagation(); addChildTo(${node.id}, true)">＋</button>
                 <button class="inplace-btn" title="加同級節點" onclick="event.stopPropagation(); addSiblingTo(${node.id}, true)">↔</button>
+                <button class="inplace-btn" title="上載圖片" onclick="event.stopPropagation(); uploadNodeImage(${node.id})">🖼️</button>
+                <button class="inplace-btn" title="嵌入影片" onclick="event.stopPropagation(); embedNodeVideo(${node.id})">🎥</button>
                 <button class="inplace-btn" title="轉父節點" onclick="event.stopPropagation(); startReparent(${node.id})">⇆</button>
                 <button class="inplace-btn" title="取消連結" onclick="event.stopPropagation(); startUnlink(${node.id})">⛓</button>
                 <button class="inplace-btn" title="跨節點連線" onclick="event.stopPropagation(); startLink(${node.id})">🔗</button>
@@ -958,6 +1024,95 @@
             });
 
             treeCanvas.appendChild(element);
+            renderNodeMedia(node);
+        }
+
+        /* ================= 圖片上載與影片嵌入功能 ================= */
+        function uploadNodeImage(id) {
+            const node = nodes.find(n => n.id === id);
+            if (!node) return;
+
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = "image/*";
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    const snapshot = captureState();
+                    node.image = evt.target.result; // 保存 Base64 圖片數據
+                    node.width = Math.max(node.width, 220);
+                    node.height = Math.max(node.height, 160);
+
+                    renderNodeMedia(node);
+                    pushHistorySnapshot(snapshot);
+                };
+                reader.readAsDataURL(file);
+            };
+            input.click();
+        }
+
+        function embedNodeVideo(id) {
+            const node = nodes.find(n => n.id === id);
+            if (!node) return;
+
+            const url = prompt("請輸入影片網址 (例如 MP4 連結 或 YouTube 網址):");
+            if (!url) return;
+
+            const snapshot = captureState();
+
+            if (url.includes("youtube.com") || url.includes("youtu.be")) {
+                let videoId = "";
+                if (url.includes("youtu.be")) {
+                    videoId = url.split("/").pop();
+                } else {
+                    const urlParams = new URLSearchParams(new URL(url).search);
+                    videoId = urlParams.get("v");
+                }
+                node.videoUrl = `https://www.youtube.com/embed/${videoId}`;
+                node.isVideoEmbed = true;
+            } else {
+                node.videoUrl = url;
+                node.isVideoEmbed = false;
+            }
+
+            node.width = Math.max(node.width, 280);
+            node.height = Math.max(node.height, 200);
+
+            renderNodeMedia(node);
+            pushHistorySnapshot(snapshot);
+        }
+
+        function renderNodeMedia(node) {
+            const el = document.getElementById(`node-${node.id}`);
+            if (!el) return;
+
+            const content = el.querySelector(".node-content");
+            content.querySelectorAll("img, video, iframe").forEach(m => m.remove());
+
+            if (node.image) {
+                const img = document.createElement("img");
+                img.src = node.image;
+                content.appendChild(img);
+            } else if (node.videoUrl) {
+                if (node.isVideoEmbed) {
+                    const iframe = document.createElement("iframe");
+                    iframe.src = node.videoUrl;
+                    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+                    iframe.allowFullscreen = true;
+                    content.appendChild(iframe);
+                } else {
+                    const video = document.createElement("video");
+                    video.src = node.videoUrl;
+                    video.controls = true;
+                    content.appendChild(video);
+                }
+            }
+
+            setElementGeometry(el, node);
+            drawLines();
         }
 
         /* Link Box 渲染與 Attached 解除 */
@@ -987,7 +1142,6 @@
             content.appendChild(text);
             element.appendChild(content);
 
-            /* Attached Link Box 直接解除整條 Cross Link 按鈕 */
             if (!isStandalone && parentLinkId !== null) {
                 const unlinkBtn = document.createElement("button");
                 unlinkBtn.className = "box-unlink-btn";
@@ -1608,15 +1762,11 @@
             permissionStatus.textContent = "請按上方按鈕啟用咪高峰權限";
         }
 
-        /* 匯出／匯入保存新設定 */
+        /* 匯出／匯入保存設定 */
         function exportJSON() {
             finishCurrentEditing();
-            const data = {
-                version: "3.0", exportedAt: new Date().toISOString(),
-                nodes, crossLinks, standaloneBoxes, nextId, nextLinkId, nextBoxId,
-                multiTreeEnabled, currentCanvasBg
-            };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const data = captureState();
+            const blob = new Blob([data], { type: "application/json" });
             const a = document.createElement("a");
             a.href = URL.createObjectURL(blob);
             a.download = "mindmap-pro-backup.json";
