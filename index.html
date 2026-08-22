@@ -541,7 +541,17 @@
         </div>
 
         <div class="sidebar-section">
-            <h3>Google Drive 雲端同步</h3>
+            <h3>項目管理 & Google Drive 同步</h3>
+            <div class="style-row">
+                <span>當前項目:</span>
+                <select id="project-selector" style="flex:1;">
+                    <option value="Default">Default</option>
+                </select>
+            </div>
+            <div style="display:flex; gap:6px; margin-bottom:6px;">
+                <button class="action-btn" onclick="createNewProject()" style="flex:1;">➕ 新項目</button>
+                <button class="action-btn" onclick="refreshProjectList()" style="flex:1;">🔄 刷新列表</button>
+            </div>
             <button class="action-btn" onclick="saveToDrive()">☁️ 儲存至 Google Drive</button>
             <button class="action-btn" onclick="loadFromDrive()">📂 從 Google Drive 載入</button>
         </div>
@@ -706,23 +716,32 @@
 
             selectNode(rootId);
             drawLines();
+
+            refreshProjectList();
         });
 
-        /* ================= Google Drive 雲端同步（fetch 版） ================= */
+        /* ================= Google Drive 雲端同步 & 項目管理 ================= */
         const GAS_URL = "https://script.google.com/macros/s/AKfycby_8wGX3bDydGURkL5LvtDy_IQpfAZpfScorO1ZDBI-7K-uvZxT4U5cGF-nW5z0PgAnWg/exec";
         const GAS_TOKEN = "mySecret2026";
 
+        let currentProject = "Default";
+
+        function getSelectedProject() {
+            return document.getElementById("project-selector").value || "Default";
+        }
+
         async function saveToDrive() {
             finishCurrentEditing();
+            currentProject = getSelectedProject();
             const data = captureState();
             try {
                 const res = await fetch(GAS_URL, {
                     method: "POST",
                     headers: {"Content-Type": "text/plain"},
-                    body: JSON.stringify({ token: GAS_TOKEN, action: "saveMindMap", data: data })
+                    body: JSON.stringify({ token: GAS_TOKEN, action: "saveMindMap", data: data, project: currentProject })
                 });
                 const result = await res.json();
-                if (result.ok) alert("✅ 已成功儲存至 Google Drive！");
+                if (result.ok) alert("✅ 已儲存「" + currentProject + "」！");
                 else alert("❌ 儲存失敗：" + (result.msg || "未知錯誤"));
             } catch (err) {
                 alert("❌ 網絡錯誤：" + err.message);
@@ -731,17 +750,59 @@
 
         async function loadFromDrive() {
             finishCurrentEditing();
+            currentProject = getSelectedProject();
             try {
-                const res = await fetch(GAS_URL + "?token=" + GAS_TOKEN + "&action=loadMindMap");
+                const res = await fetch(GAS_URL + "?token=" + GAS_TOKEN + "&action=loadMindMap&project=" + encodeURIComponent(currentProject));
                 const result = await res.json();
                 if (result.ok && result.data) {
                     restoreState(JSON.parse(result.data));
-                    alert("✅ 已成功從 Google Drive 載入！");
+                    alert("✅ 已載入「" + currentProject + "」！");
                 } else {
                     alert("⚠️ " + (result.msg || "未有備份"));
                 }
             } catch (err) {
                 alert("❌ 網絡錯誤：" + err.message);
+            }
+        }
+
+        async function refreshProjectList() {
+            try {
+                const res = await fetch(GAS_URL + "?token=" + GAS_TOKEN + "&action=listMindMapProjects");
+                const result = await res.json();
+                if (result.ok) {
+                    const sel = document.getElementById("project-selector");
+                    const current = sel.value;
+                    sel.innerHTML = "";
+                    result.projects.forEach(name => {
+                        const opt = document.createElement("option");
+                        opt.value = name;
+                        opt.textContent = name;
+                        sel.appendChild(opt);
+                    });
+                    if (result.projects.includes(current)) sel.value = current;
+                }
+            } catch (err) {
+                alert("❌ 無法取得項目列表");
+            }
+        }
+
+        function createNewProject() {
+            const name = prompt("輸入新項目名稱（英文或中文皆可）:");
+            if (!name || !name.trim()) return;
+            const sel = document.getElementById("project-selector");
+            const opt = document.createElement("option");
+            opt.value = name.trim();
+            opt.textContent = name.trim();
+            sel.appendChild(opt);
+            sel.value = name.trim();
+            // 清空畫布開始新項目
+            if (confirm("要清空畫布開始新項目嗎？")) {
+                nodes = []; crossLinks = []; standaloneBoxes = [];
+                nextId = 0; nextLinkId = 0; nextBoxId = 0;
+                treeCanvas.querySelectorAll(".node, .link-box").forEach(el => el.remove());
+                const rootId = createNode("新項目：" + name.trim(), 3935, 3978, null, false, false);
+                selectNode(rootId);
+                drawLines();
             }
         }
 
@@ -1789,7 +1850,7 @@
             input.click();
         }
 
-        /* 補回缺少的辅助函数 */
+        /* 輔助函數 */
         function stopSpeechRecognition(notify) {
             if (activeRecognition) {
                 activeRecognition.stop();
