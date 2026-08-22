@@ -48,7 +48,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* 12 款畫布背景樣式 */
         #canvas-area.bg-default { background: #fafafa; }
         #canvas-area.bg-night { background: #1a1a2e; }
         #canvas-area.bg-beige { background: #f5f2eb; }
@@ -70,7 +69,6 @@
         #canvas-area.bg-mint { background: #e8f8f5; }
         #canvas-area.bg-white { background: #ffffff; }
 
-        /* Sidebar */
         .sidebar-toggle-btn {
             position: absolute;
             top: 15px;
@@ -137,7 +135,6 @@
             margin-bottom: 10px;
         }
 
-        /* 置中 Multi Tree Checkbox */
         .multi-tree-container {
             display: flex;
             align-items: center;
@@ -156,6 +153,21 @@
             width: 16px;
             height: 16px;
             cursor: pointer;
+        }
+
+        .multi-tree-info {
+            margin-top: 8px;
+            padding: 6px 10px;
+            background: rgba(66, 133, 244, 0.06);
+            border-radius: 6px;
+            font-size: 11px;
+            color: var(--text-sub);
+            line-height: 1.5;
+            display: none;
+        }
+
+        .multi-tree-info.active {
+            display: block;
         }
 
         .action-btn {
@@ -205,7 +217,6 @@
         .permission-status.granted { background: #e8f5e9; color: #1b5e20; }
         .permission-status.denied { background: #ffebee; color: #b71c1c; }
 
-        /* Canvas */
         #canvas-area {
             flex: 1;
             position: relative;
@@ -235,7 +246,6 @@
         .branch-line { stroke-width: 2.5; fill: none; }
         .cross-link { stroke-width: 2; fill: none; stroke-dasharray: 6 4; }
 
-        /* Node / Link Box */
         .node, .link-box {
             position: absolute;
             user-select: none;
@@ -254,7 +264,6 @@
             scrollbar-width: thin;
         }
 
-        /* 媒體嵌入樣式 */
         .node-content img, .node-content video, .node-content iframe {
             max-width: 100%;
             max-height: 100%;
@@ -321,7 +330,6 @@
             to { transform: scale(1.06); box-shadow: 0 0 0 8px rgba(255, 152, 0, 0.4); }
         }
 
-        /* Control Handles */
         .resize-handle { position: absolute; z-index: 45; display: none; }
         .node:hover .resize-handle, .node.selected .resize-handle,
         .link-box:hover .resize-handle, .link-box.selected .resize-handle { display: block; }
@@ -385,7 +393,18 @@
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* 擴充 Adobe 格式顏色面板 (HEX, RGB, HSB, CMYK, LAB, RGB Code) */
+        .inplace-btn:hover { background: var(--btn-hover); }
+
+        .inplace-btn.danger { color: #d32f2f; }
+        .inplace-btn.danger:hover { background: #ffebee; }
+
+        .inplace-btn.close-menu { color: #999; font-size: 14px; }
+        .inplace-btn.close-menu:hover { background: #f0f0f0; }
+
+        .inplace-separator {
+            width: 1px; height: 20px; background: var(--sidebar-border); margin: 0 2px;
+        }
+
         .adobe-picker-popover {
             position: absolute; z-index: 500; width: 280px;
             background: var(--sidebar-bg); border: 1px solid var(--sidebar-border);
@@ -438,45 +457,28 @@
         </div>
 
         <div class="sidebar-section">
-            <!-- 多樹模式 Multi Tree 置中 Checkbox -->
             <div class="multi-tree-container">
                 <input type="checkbox" id="multi-tree-toggle" onchange="toggleMultiTree(this.checked)">
                 <label for="multi-tree-toggle">啟用 Multi Tree 多樹模式</label>
             </div>
+            <div class="multi-tree-info" id="multi-tree-info">
+                🌲 多樹模式已啟用<br>
+                • Enter 鍵 = 新增獨立樹<br>
+                • 每棵樹自動分配顏色<br>
+                • 新樹自動排列唔重疊<br>
+                <span id="tree-count-display">目前：1 棵樹</span>
+            </div>
 
             <h3>快捷思考與節點指令</h3>
 
-            <button class="action-btn" onclick="addRootNode()">
-                🌳 新增獨立根節點
-            </button>
-
-            <button class="action-btn" onclick="addChildToSelected(true)">
-                ＋ 子節點（Tab）
-            </button>
-
-            <button class="action-btn" onclick="addSiblingToSelected(true)">
-                ↔ 同級節點（Enter）
-            </button>
-
-            <button class="action-btn" onclick="addStandaloneLinkBox()">
-                📦 新增獨立 Link Box
-            </button>
-
-            <button class="action-btn" onclick="startReparentSelected()">
-                ⇆ 轉父節點
-            </button>
-
-            <button class="action-btn" onclick="startUnlinkSelected()">
-                ⛓ 取消兩點連結
-            </button>
-
-            <button class="action-btn" onclick="cancelAllModes()" style="color:#d32f2f;">
-                🛑 結束 Link／取消連線模式
-            </button>
-
-            <button class="action-btn" onclick="deleteSelected()">
-                ✕ 刪除所選項目（Delete）
-            </button>
+            <button class="action-btn" onclick="addRootNode()">🌳 新增獨立根節點</button>
+            <button class="action-btn" onclick="addChildToSelected(true)">＋ 子節點（Tab）</button>
+            <button class="action-btn" onclick="addSiblingToSelected(true)">↔ 同級節點（Enter）</button>
+            <button class="action-btn" onclick="addStandaloneLinkBox()">📦 新增獨立 Link Box</button>
+            <button class="action-btn" onclick="startReparentSelected()">⇆ 轉父節點</button>
+            <button class="action-btn" onclick="startUnlinkSelected()">⛓ 取消兩點連結</button>
+            <button class="action-btn" onclick="cancelAllModes()" style="color:#d32f2f;">🛑 結束 Link／取消連線模式</button>
+            <button class="action-btn" onclick="deleteSelected()">✕ 刪除所選項目（Delete）</button>
 
             <div style="display:flex; gap:6px; margin-top:6px;">
                 <button class="action-btn" onclick="undo()">⟲ Undo</button>
@@ -484,7 +486,6 @@
             </div>
         </div>
 
-        <!-- 12 款畫布背景選擇 -->
         <div class="sidebar-section">
             <h3>畫布背景 (12 款)</h3>
             <select id="bg-selector" class="action-btn" onchange="changeCanvasBackground(this.value)">
@@ -503,7 +504,6 @@
             </select>
         </div>
 
-        <!-- 字體與排版設定 -->
         <div class="sidebar-section">
             <h3>文字與排版設定</h3>
             <div class="style-row">
@@ -584,7 +584,6 @@
         </div>
     </div>
 
-    <!-- Adobe 格式調色盤 (HEX, RGB, HSB, CMYK, LAB, RGB Code) -->
     <div class="adobe-picker-popover" id="adobe-picker">
         <div class="adobe-picker-header">
             <span>🎨 Adobe 格式調色盤</span>
@@ -598,7 +597,7 @@
         </div>
 
         <div class="picker-row">
-            <span>主色 picker:</span>
+            <span>主色:</span>
             <input type="color" id="picker-c1" value="#1565c0" oninput="onColorPickerChange()">
             <span>次色:</span>
             <input type="color" id="picker-c2" value="#1e88e5" oninput="onColorPickerChange()">
@@ -702,6 +701,38 @@
         const permissionStatus = document.getElementById("permission-status");
         const relationshipModeBanner = document.getElementById("relationship-mode-banner");
 
+        /* ========== Multi Tree 顏色池 ========== */
+        const TREE_COLORS = [
+            { c1: "#1565c0", c2: "#1e88e5" },
+            { c1: "#c62828", c2: "#e53935" },
+            { c1: "#2e7d32", c2: "#43a047" },
+            { c1: "#6a1b9a", c2: "#8e24aa" },
+            { c1: "#e65100", c2: "#f4511e" },
+            { c1: "#00838f", c2: "#00acc1" },
+            { c1: "#4527a0", c2: "#5e35b1" },
+            { c1: "#ad1457", c2: "#d81b60" },
+            { c1: "#283593", c2: "#3949ab" },
+            { c1: "#558b2f", c2: "#7cb342" },
+        ];
+
+        let treeColorIndex = 0;
+
+        function getNextTreeColor() {
+            const color = TREE_COLORS[treeColorIndex % TREE_COLORS.length];
+            treeColorIndex++;
+            return color;
+        }
+
+        function countTrees() {
+            return nodes.filter(n => n.parentId === null || n.parentId === undefined).length;
+        }
+
+        function updateTreeCountDisplay() {
+            const count = countTrees();
+            const display = document.getElementById("tree-count-display");
+            if (display) display.textContent = `目前：${count} 棵樹`;
+        }
+
         window.addEventListener("load", () => {
             const cx = 4000, cy = 4000;
             const rootId = createNode("中心主題", cx - 65, cy - 22, null, false, false);
@@ -716,11 +747,12 @@
 
             selectNode(rootId);
             drawLines();
+            updateTreeCountDisplay();
 
             refreshProjectList();
         });
 
-        /* ================= Google Drive 雲端同步 & 項目管理 ================= */
+        /* ================= Google Drive ================= */
         const GAS_URL = "https://script.google.com/macros/s/AKfycby_8wGX3bDydGURkL5LvtDy_IQpfAZpfScorO1ZDBI-7K-uvZxT4U5cGF-nW5z0PgAnWg/exec";
         const GAS_TOKEN = "mySecret2026";
 
@@ -782,7 +814,7 @@
                     if (result.projects.includes(current)) sel.value = current;
                 }
             } catch (err) {
-                alert("❌ 無法取得項目列表");
+                console.warn("無法取得項目列表", err);
             }
         }
 
@@ -795,40 +827,84 @@
             opt.textContent = name.trim();
             sel.appendChild(opt);
             sel.value = name.trim();
-            // 清空畫布開始新項目
             if (confirm("要清空畫布開始新項目嗎？")) {
                 nodes = []; crossLinks = []; standaloneBoxes = [];
                 nextId = 0; nextLinkId = 0; nextBoxId = 0;
+                treeColorIndex = 0;
                 treeCanvas.querySelectorAll(".node, .link-box").forEach(el => el.remove());
                 const rootId = createNode("新項目：" + name.trim(), 3935, 3978, null, false, false);
                 selectNode(rootId);
                 drawLines();
+                updateTreeCountDisplay();
             }
         }
 
-        /* Multi Tree 模式切換 */
+        /* ========== Multi Tree 模式 - 大幅強化 ========== */
         function toggleMultiTree(enabled) {
             multiTreeEnabled = enabled;
+            const info = document.getElementById("multi-tree-info");
+            if (enabled) {
+                info.classList.add("active");
+                updateTreeCountDisplay();
+            } else {
+                info.classList.remove("active");
+            }
         }
 
-        /* 新增獨立根節點 */
+        /* 新增獨立根節點（Multi Tree 強化版） */
         function addRootNode() {
             finishCurrentEditing();
             const snapshot = captureState();
-            const cx = 4000 + (Math.random() * 200 - 100);
-            const cy = 4000 + (Math.random() * 200 - 100);
-            const id = createNode("獨立根節點", cx, cy, null, true, false);
+
+            // 計算新樹位置：自動排喺現有樹嘅右邊，唔重疊
+            const rootNodes = nodes.filter(n => n.parentId === null || n.parentId === undefined);
+            let newX, newY;
+
+            if (multiTreeEnabled && rootNodes.length > 0) {
+                // 搵出所有 root tree 最右邊嘅位置
+                let maxRight = 0;
+                rootNodes.forEach(root => {
+                    const treeNodes = getTreeNodes(root.id);
+                    treeNodes.forEach(n => {
+                        const right = n.x + n.width;
+                        if (right > maxRight) maxRight = right;
+                    });
+                });
+                newX = maxRight + 150; // 留 150px 間距
+                newY = 4000;
+            } else {
+                newX = 4000 + (Math.random() * 200 - 100);
+                newY = 4000 + (Math.random() * 200 - 100);
+            }
+
+            // Multi Tree 模式下自動分配顏色
+            const color = multiTreeEnabled ? getNextTreeColor() : null;
+
+            const id = createNode("獨立根節點", newX, newY, null, true, false, color);
             pushHistorySnapshot(snapshot);
             selectNode(id);
+            updateTreeCountDisplay();
         }
 
-        /* 切換 12 款畫布背景 */
+        /* 取得一棵樹嘅所有 nodes */
+        function getTreeNodes(rootId) {
+            const result = [nodes.find(n => n.id === rootId)].filter(Boolean);
+            let i = 0;
+            while (i < result.length) {
+                const children = nodes.filter(n => n.parentId === result[i].id);
+                result.push(...children);
+                i++;
+            }
+            return result;
+        }
+
+        /* 切換背景 */
         function changeCanvasBackground(bgClass) {
             canvasArea.className = bgClass;
             currentCanvasBg = bgClass;
         }
 
-        /* 複製與貼上 (Ctrl+C / Ctrl+V) */
+        /* 複製貼上 */
         function copySelected() {
             if (selectedId !== null) {
                 const node = nodes.find(n => n.id === selectedId);
@@ -859,24 +935,25 @@
                 selectNode(newId);
             } else if (clipboardData.type === "box") {
                 const item = clipboardData.data;
-                const newBoxId = nextBoxId++;
+                const newBId = nextBoxId++;
                 const newBox = {
                     ...item,
-                    id: newBoxId,
+                    id: newBId,
                     x: item.x + 30,
                     y: item.y + 30,
                     text: item.text + " (副本)"
                 };
                 standaloneBoxes.push(newBox);
                 renderSingleLinkBox(newBox, true);
-                selectBox(newBoxId);
+                selectBox(newBId);
             }
 
             drawLines();
             pushHistorySnapshot(snapshot);
+            updateTreeCountDisplay();
         }
 
-        /* 獨立新增 Link Box */
+        /* 獨立 Link Box */
         function addStandaloneLinkBox() {
             finishCurrentEditing();
             const snapshot = captureState();
@@ -895,14 +972,14 @@
             pushHistorySnapshot(snapshot);
         }
 
-        /* 結束 / 取消所有模式 */
         function cancelAllModes() {
             cancelLinkMode();
             cancelRelationshipMode();
             closeAdobePicker();
+            // 關閉所有打開嘅 inplace menu
+            document.querySelectorAll(".inplace-action-menu.active").forEach(m => m.classList.remove("active"));
         }
 
-        /* 套用字體樣式 */
         function applyTextStyle(property, value) {
             const snapshot = captureState();
             let target = null;
@@ -920,12 +997,12 @@
             }
         }
 
-        /* 歷史記錄 Capture */
+        /* 歷史記錄 */
         function captureState() {
             return JSON.stringify({
                 nodes, crossLinks, standaloneBoxes,
                 nextId, nextLinkId, nextBoxId,
-                multiTreeEnabled, currentCanvasBg
+                multiTreeEnabled, currentCanvasBg, treeColorIndex
             });
         }
 
@@ -966,27 +1043,44 @@
             nextId = state.nextId || 0;
             nextLinkId = state.nextLinkId || 0;
             nextBoxId = state.nextBoxId || 0;
+            treeColorIndex = state.treeColorIndex || 0;
             multiTreeEnabled = !!state.multiTreeEnabled;
             document.getElementById("multi-tree-toggle").checked = multiTreeEnabled;
+
+            const info = document.getElementById("multi-tree-info");
+            if (multiTreeEnabled) info.classList.add("active");
+            else info.classList.remove("active");
 
             if (state.currentCanvasBg) changeCanvasBackground(state.currentCanvasBg);
 
             nodes.forEach(renderNode);
             renderLinkBoxes();
             drawLines();
+            updateTreeCountDisplay();
         }
 
-        /* Node 建置 */
-        function createNode(text, x, y, parentId, autoEdit = false, recordHistory = true) {
+        /* Node 建置（加入可選顏色參數） */
+        function createNode(text, x, y, parentId, autoEdit = false, recordHistory = true, customColor = null) {
             const snapshot = recordHistory ? captureState() : null;
             const parent = nodes.find(n => n.id === parentId);
+
+            let color1, color2;
+            if (customColor) {
+                color1 = customColor.c1;
+                color2 = customColor.c2;
+            } else if (parent) {
+                color1 = parent.color1;
+                color2 = parent.color2;
+            } else {
+                color1 = "#1565c0";
+                color2 = "#1e88e5";
+            }
 
             const node = {
                 id: nextId++,
                 text: String(text ?? "新節點"),
                 x, y, parentId, width: 130, height: 44,
-                color1: parent ? parent.color1 : "#1565c0",
-                color2: parent ? parent.color2 : "#1e88e5",
+                color1, color2,
                 colorType: parent ? parent.colorType : "gradient",
                 opacity: parent ? parent.opacity : 1, deg: parent ? parent.deg : 135,
                 fontSize: "14px", fontFamily: "sans-serif", fontWeight: "normal", textColor: "#ffffff"
@@ -1037,6 +1131,11 @@
 
             element.appendChild(createSpeechButton("node", node.id));
 
+            /* ========== BUG 1 修正：Inplace Menu 重新設計 ========== 
+               - 🗑️ = 刪除節點（紅色明確標示）
+               - ✕ = 關閉工具列（灰色，放最尾）
+               - 中間加分隔線區分功能 vs 關閉
+            */
             const menu = document.createElement("div");
             menu.className = "inplace-action-menu";
             menu.id = `menu-${node.id}`;
@@ -1049,7 +1148,9 @@
                 <button class="inplace-btn" title="取消連結" onclick="event.stopPropagation(); startUnlink(${node.id})">⛓</button>
                 <button class="inplace-btn" title="跨節點連線" onclick="event.stopPropagation(); startLink(${node.id})">🔗</button>
                 <button class="inplace-btn" title="調色盤" onclick="event.stopPropagation(); openPickerForNode(event, ${node.id})">🎨</button>
-                <button class="inplace-btn" title="刪除" onclick="event.stopPropagation(); deleteNodeById(${node.id})">✕</button>
+                <button class="inplace-btn danger" title="刪除節點" onclick="event.stopPropagation(); deleteNodeById(${node.id})">🗑️</button>
+                <div class="inplace-separator"></div>
+                <button class="inplace-btn close-menu" title="關閉工具列" onclick="event.stopPropagation(); closeInplaceMenu(${node.id})">✕</button>
             `;
             element.appendChild(menu);
 
@@ -1085,7 +1186,13 @@
             renderNodeMedia(node);
         }
 
-        /* ================= 圖片上載與影片嵌入功能 ================= */
+        /* ========== 關閉 Inplace Menu（唔刪除節點） ========== */
+        function closeInplaceMenu(nodeId) {
+            const menu = document.getElementById(`menu-${nodeId}`);
+            if (menu) menu.classList.remove("active");
+        }
+
+        /* 圖片上載與影片嵌入 */
         function uploadNodeImage(id) {
             const node = nodes.find(n => n.id === id);
             if (!node) return;
@@ -1096,14 +1203,12 @@
             input.onchange = (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
-
                 const reader = new FileReader();
                 reader.onload = (evt) => {
                     const snapshot = captureState();
-                    node.image = evt.target.result; // 保存 Base64 圖片數據
+                    node.image = evt.target.result;
                     node.width = Math.max(node.width, 220);
                     node.height = Math.max(node.height, 160);
-
                     renderNodeMedia(node);
                     pushHistorySnapshot(snapshot);
                 };
@@ -1123,9 +1228,8 @@
 
             if (url.includes("youtube.com") || url.includes("youtu.be")) {
                 let videoId = "";
-                if (url.includes("youtu.be")) {
-                    videoId = url.split("/").pop();
-                } else {
+                if (url.includes("youtu.be")) videoId = url.split("/").pop();
+                else {
                     const urlParams = new URLSearchParams(new URL(url).search);
                     videoId = urlParams.get("v");
                 }
@@ -1138,7 +1242,6 @@
 
             node.width = Math.max(node.width, 280);
             node.height = Math.max(node.height, 200);
-
             renderNodeMedia(node);
             pushHistorySnapshot(snapshot);
         }
@@ -1173,7 +1276,7 @@
             drawLines();
         }
 
-        /* Link Box 渲染與 Attached 解除 */
+        /* Link Box */
         function renderLinkBoxes() {
             treeCanvas.querySelectorAll(".link-box").forEach(el => el.remove());
             crossLinks.forEach(link => {
@@ -1195,7 +1298,6 @@
             const text = document.createElement("span");
             text.className = "link-box-text";
             text.textContent = box.text;
-
             if (box.textColor) text.style.color = box.textColor;
             content.appendChild(text);
             element.appendChild(content);
@@ -1252,7 +1354,7 @@
             return standaloneBoxes.find(b => b.id === boxId) || null;
         }
 
-        /* 雙擊多行文字編輯 */
+        /* 文字編輯 */
         function startTextEdit(type, id) {
             finishCurrentEditing();
             const item = type === "node" ? nodes.find(n => n.id === id) : findBoxById(id);
@@ -1283,6 +1385,7 @@
                 } else if (e.key === "Escape") {
                     cancelAllModes();
                 }
+                e.stopPropagation(); // 防止觸發全局快捷鍵
             });
         }
 
@@ -1299,7 +1402,7 @@
             drawLines();
         }
 
-        /* 顏色轉算 (Adobe Panel: HEX, RGB, HSB, CMYK, LAB, RGB Code) */
+        /* 顏色轉換 */
         function onColorPickerChange() {
             const hex = document.getElementById("picker-c1").value;
             updateAdobePanelFields(hex);
@@ -1313,18 +1416,15 @@
             document.getElementById("rgb-r").value = rgb.r;
             document.getElementById("rgb-g").value = rgb.g;
             document.getElementById("rgb-b").value = rgb.b;
-
             const hsb = rgbToHsb(rgb.r, rgb.g, rgb.b);
             document.getElementById("hsb-h").value = hsb.h;
             document.getElementById("hsb-s").value = hsb.s;
             document.getElementById("hsb-b").value = hsb.b;
-
             const cmyk = rgbToCmyk(rgb.r, rgb.g, rgb.b);
             document.getElementById("cmyk-c").value = cmyk.c;
             document.getElementById("cmyk-m").value = cmyk.m;
             document.getElementById("cmyk-y").value = cmyk.y;
             document.getElementById("cmyk-k").value = cmyk.k;
-
             const lab = rgbToLab(rgb.r, rgb.g, rgb.b);
             document.getElementById("lab-l").value = lab.l;
             document.getElementById("lab-a").value = lab.a;
@@ -1424,7 +1524,7 @@
             return { l: Math.round((116 * y) - 16), a: Math.round(500 * (x - y)), b: Math.round(200 * (y - z)) };
         }
 
-        /* 快捷鍵設定 (含 Ctrl+C, Ctrl+V) */
+        /* 快捷鍵 */
         function setupKeyboardShortcuts() {
             window.addEventListener("keydown", (e) => {
                 const tag = document.activeElement?.tagName?.toLowerCase();
@@ -1439,7 +1539,16 @@
                 } else if (e.key === "Tab") {
                     e.preventDefault(); if (selectedId !== null) addChildTo(selectedId, true);
                 } else if (e.key === "Enter") {
-                    e.preventDefault(); if (selectedId !== null) addSiblingTo(selectedId, true);
+                    e.preventDefault();
+                    if (selectedId !== null) {
+                        // Multi Tree 強化：喺 root node 按 Enter 永遠建新樹
+                        const selectedNode = nodes.find(n => n.id === selectedId);
+                        if (multiTreeEnabled && selectedNode && selectedNode.parentId === null) {
+                            addRootNode();
+                        } else {
+                            addSiblingTo(selectedId, true);
+                        }
+                    }
                 } else if (e.key === "Delete" || e.key === "Backspace") {
                     e.preventDefault(); deleteSelected();
                 } else if (e.key === "Escape") {
@@ -1485,7 +1594,7 @@
             });
         }
 
-        /* 其餘互動與基礎事件處理 */
+        /* 節點操作 */
         function addChildTo(parentId, autoEdit = false) {
             finishCurrentEditing();
             const parent = nodes.find(n => n.id === parentId);
@@ -1516,14 +1625,39 @@
             else if (selectedBoxId !== null) deleteBoxById(selectedBoxId);
         }
 
+        /* 刪除節點（上次已修正：唔再 restoreState） */
         function deleteNodeById(id) {
             finishCurrentEditing();
             const snapshot = captureState();
-            nodes = nodes.filter(n => n.id !== id && n.parentId !== id);
-            crossLinks = crossLinks.filter(l => l.fromId !== id && l.toId !== id);
+
+            // 遞歸收集要刪除嘅 IDs
+            const toDelete = new Set();
+            toDelete.add(id);
+            let changed = true;
+            while (changed) {
+                changed = false;
+                for (const n of nodes) {
+                    if (!toDelete.has(n.id) && toDelete.has(n.parentId)) {
+                        toDelete.add(n.id);
+                        changed = true;
+                    }
+                }
+            }
+
+            nodes = nodes.filter(n => !toDelete.has(n.id));
+            crossLinks = crossLinks.filter(l => !toDelete.has(l.fromId) && !toDelete.has(l.toId));
             selectedId = null;
-            restoreState(JSON.parse(snapshot));
+
+            // 移除 DOM
+            toDelete.forEach(nodeId => {
+                const el = document.getElementById(`node-${nodeId}`);
+                if (el) el.remove();
+            });
+
+            renderLinkBoxes();
+            drawLines();
             pushHistorySnapshot(snapshot);
+            updateTreeCountDisplay();
         }
 
         function deleteBoxById(boxId) {
@@ -1532,7 +1666,10 @@
             crossLinks.forEach(l => { l.boxes = l.boxes.filter(b => b.id !== boxId); });
             standaloneBoxes = standaloneBoxes.filter(b => b.id !== boxId);
             selectedBoxId = null;
-            renderLinkBoxes();
+
+            const el = document.getElementById(`box-${boxId}`);
+            if (el) el.remove();
+            drawLines();
             pushHistorySnapshot(snapshot);
         }
 
@@ -1548,10 +1685,11 @@
             if (linkFromId === null || targetId === linkFromId) return;
             const snapshot = captureState();
             const from = nodes.find(n => n.id === linkFromId), to = nodes.find(n => n.id === targetId);
+            if (!from || !to) { cancelLinkMode(); return; }
             const box = {
                 id: nextBoxId++, text: "跨連線",
                 x: (from.x + to.x) / 2, y: (from.y + to.y) / 2,
-                width: 110, height: 34, color1: "#ffffff", color2: "#ffffff", colorType: "solid", opacity: 0.95, deg: 135
+                width: 110, height: 34, color1: "#ffffff", color2: "#ffffff", colorType: "solid", opacity: 0.95, deg: 135, textColor: "#333333"
             };
             crossLinks.push({ id: nextLinkId++, fromId: from.id, toId: targetId, boxes: [box] });
             cancelLinkMode();
@@ -1581,6 +1719,7 @@
             cancelRelationshipMode();
             drawLines();
             pushHistorySnapshot(snapshot);
+            updateTreeCountDisplay();
         }
 
         function startUnlink(id) {
@@ -1589,15 +1728,26 @@
             showRelationshipMessage(`⛓ 取消連結：請點擊要解除連線的另一個節點；按 Esc 取消`);
         }
 
+        /* 取消連結（雙向解除） */
         function completeUnlink(targetId) {
+            if (relationshipSourceId === targetId) return;
             const snapshot = captureState();
-            crossLinks = crossLinks.filter(l => !((l.fromId === relationshipSourceId && l.toId === targetId) || (l.fromId === targetId && l.toId === relationshipSourceId)));
+
+            crossLinks = crossLinks.filter(l => !(
+                (l.fromId === relationshipSourceId && l.toId === targetId) ||
+                (l.fromId === targetId && l.toId === relationshipSourceId)
+            ));
+
             const target = nodes.find(n => n.id === targetId);
+            const source = nodes.find(n => n.id === relationshipSourceId);
             if (target && target.parentId === relationshipSourceId) target.parentId = null;
+            if (source && source.parentId === targetId) source.parentId = null;
+
             cancelRelationshipMode();
             renderLinkBoxes();
             drawLines();
             pushHistorySnapshot(snapshot);
+            updateTreeCountDisplay();
         }
 
         function cancelRelationshipMode() {
@@ -1740,6 +1890,16 @@
                     const dy = (e.clientY - gestureStartClientY) / scale;
                     if (resizeTarget.dir.includes("e")) resizeTarget.item.width = Math.max(MIN_NODE_WIDTH, resizeTarget.startW + dx);
                     if (resizeTarget.dir.includes("s")) resizeTarget.item.height = Math.max(MIN_NODE_HEIGHT, resizeTarget.startH + dy);
+                    if (resizeTarget.dir.includes("w")) {
+                        const newW = Math.max(MIN_NODE_WIDTH, resizeTarget.startW - dx);
+                        resizeTarget.item.x = resizeTarget.startX + (resizeTarget.startW - newW);
+                        resizeTarget.item.width = newW;
+                    }
+                    if (resizeTarget.dir.includes("n")) {
+                        const newH = Math.max(MIN_NODE_HEIGHT, resizeTarget.startH - dy);
+                        resizeTarget.item.y = resizeTarget.startY + (resizeTarget.startH - newH);
+                        resizeTarget.item.height = newH;
+                    }
                     setElementGeometry(resizeTarget.element, resizeTarget.item);
                     drawLines();
                 } else if (isPanning) {
@@ -1754,10 +1914,19 @@
                 dragTarget = null; resizeTarget = null; isPanning = false;
             });
 
+            /* Zoom 向住鼠標位置 */
             canvasArea.addEventListener("wheel", (e) => {
                 e.preventDefault();
+                const rect = canvasArea.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                const worldX = (mouseX - tx) / scale;
+                const worldY = (mouseY - ty) / scale;
                 const factor = e.deltaY < 0 ? 1.1 : 0.9;
-                scale = Math.max(0.2, Math.min(3, scale * factor));
+                const newScale = Math.max(0.2, Math.min(3, scale * factor));
+                tx = mouseX - worldX * newScale;
+                ty = mouseY - worldY * newScale;
+                scale = newScale;
                 updateTransform();
             }, { passive: false });
         }
@@ -1774,6 +1943,10 @@
         }
 
         function toggleInplaceMenu(id) {
+            // 先關閉其他所有 menu
+            document.querySelectorAll(".inplace-action-menu.active").forEach(m => {
+                if (m.id !== `menu-${id}`) m.classList.remove("active");
+            });
             const menu = document.getElementById(`menu-${id}`);
             menu?.classList.toggle("active");
         }
@@ -1794,7 +1967,6 @@
             if (!SpeechRecognition) { alert("瀏覽器不支援 Web Speech Recognition"); return; }
             const item = type === "node" ? nodes.find(n => n.id === id) : findBoxById(id);
             if (!item) return;
-
             const rec = new SpeechRecognition();
             rec.lang = "zh-HK";
             rec.onresult = (e) => {
@@ -1820,7 +1992,6 @@
             permissionStatus.textContent = "請按上方按鈕啟用咪高峰權限";
         }
 
-        /* 匯出／匯入保存設定 */
         function exportJSON() {
             finishCurrentEditing();
             const data = captureState();
@@ -1850,21 +2021,12 @@
             input.click();
         }
 
-        /* 輔助函數 */
         function stopSpeechRecognition(notify) {
-            if (activeRecognition) {
-                activeRecognition.stop();
-                activeRecognition = null;
-            }
+            if (activeRecognition) { activeRecognition.stop(); activeRecognition = null; }
         }
 
-        function startReparentSelected() {
-            if (selectedId !== null) startReparent(selectedId);
-        }
-
-        function startUnlinkSelected() {
-            if (selectedId !== null) startUnlink(selectedId);
-        }
+        function startReparentSelected() { if (selectedId !== null) startReparent(selectedId); }
+        function startUnlinkSelected() { if (selectedId !== null) startUnlink(selectedId); }
     </script>
 </body>
 </html>
