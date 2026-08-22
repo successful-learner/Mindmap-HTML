@@ -708,43 +708,40 @@
             drawLines();
         });
 
-        /* ================= Google Apps Script (GAS) 雲端儲存與載入 ================= */
-        function saveToDrive() {
+        /* ================= Google Drive 雲端同步（fetch 版） ================= */
+        const GAS_URL = "https://script.google.com/macros/s/你嘅部署ID/exec";
+        const GAS_TOKEN = "mySecret2026";
+
+        async function saveToDrive() {
             finishCurrentEditing();
             const data = captureState();
-            if (typeof google !== 'undefined' && google.script && google.script.run) {
-                google.script.run
-                    .withSuccessHandler(res => alert("✅ 已成功儲存至 Google Drive！"))
-                    .withFailureHandler(err => alert("❌ 儲存失敗：" + err))
-                    .saveMindMapToDrive(data);
-            } else {
-                alert("⚠️ 目前不在 Apps Script 環境中運行，預設儲存至 LocalStorage。");
-                localStorage.setItem("mindmap_backup", data);
+            try {
+                const res = await fetch(GAS_URL, {
+                    method: "POST",
+                    headers: {"Content-Type": "text/plain"},
+                    body: JSON.stringify({ token: GAS_TOKEN, action: "saveMindMap", data: data })
+                });
+                const result = await res.json();
+                if (result.ok) alert("✅ 已成功儲存至 Google Drive！");
+                else alert("❌ 儲存失敗：" + (result.msg || "未知錯誤"));
+            } catch (err) {
+                alert("❌ 網絡錯誤：" + err.message);
             }
         }
 
-        function loadFromDrive() {
+        async function loadFromDrive() {
             finishCurrentEditing();
-            if (typeof google !== 'undefined' && google.script && google.script.run) {
-                google.script.run
-                    .withSuccessHandler(data => {
-                        if (data) {
-                            restoreState(JSON.parse(data));
-                            alert("✅ 已成功從 Google Drive 載入！");
-                        } else {
-                            alert("⚠️ Google Drive 尚未有備份紀錄。");
-                        }
-                    })
-                    .withFailureHandler(err => alert("❌ 載入失敗：" + err))
-                    .loadMindMapFromDrive();
-            } else {
-                const data = localStorage.getItem("mindmap_backup");
-                if (data) {
-                    restoreState(JSON.parse(data));
-                    alert("✅ 已從 LocalStorage 載入！");
+            try {
+                const res = await fetch(GAS_URL + "?token=" + GAS_TOKEN + "&action=loadMindMap");
+                const result = await res.json();
+                if (result.ok && result.data) {
+                    restoreState(JSON.parse(result.data));
+                    alert("✅ 已成功從 Google Drive 載入！");
                 } else {
-                    alert("⚠️ 找不到本地備份。");
+                    alert("⚠️ " + (result.msg || "未有備份"));
                 }
+            } catch (err) {
+                alert("❌ 網絡錯誤：" + err.message);
             }
         }
 
@@ -1790,6 +1787,22 @@
                 reader.readAsText(file);
             };
             input.click();
+        }
+
+        /* 補回缺少的辅助函数 */
+        function stopSpeechRecognition(notify) {
+            if (activeRecognition) {
+                activeRecognition.stop();
+                activeRecognition = null;
+            }
+        }
+
+        function startReparentSelected() {
+            if (selectedId !== null) startReparent(selectedId);
+        }
+
+        function startUnlinkSelected() {
+            if (selectedId !== null) startUnlink(selectedId);
         }
     </script>
 </body>
